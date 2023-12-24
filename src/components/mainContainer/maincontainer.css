@@ -1,0 +1,7 @@
+.main-email-container {
+  height: calc(100vh - var(--navbar-height));
+  width: 100%;
+  background-color: white !important;
+  border-radius: 5px;
+  padding: 10px;
+}

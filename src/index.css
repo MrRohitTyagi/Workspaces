@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --text-clr: black;
+  --bg-color: rgb(223, 223, 223);
+  --navbar-height: 64px;
+}
+html {
+  color: var(--text-clr);
+  background-color: var(--bg-color);
+}
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.main-container {
+  display: flex;
+  flex-direction: row;
+}

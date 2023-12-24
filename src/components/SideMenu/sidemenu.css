@@ -1,0 +1,11 @@
+.side-menu-container {
+  height: calc(100vh - var(--navbar-height));
+
+  transition: all 500ms;
+  overflow-x: hidden;
+}
+.menu-item {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
