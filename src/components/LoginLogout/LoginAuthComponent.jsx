@@ -1,3 +1,4 @@
+import { useDispatch } from "react-redux";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   Avatar,
@@ -9,21 +10,22 @@ import {
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-import LoadingButton from "@mui/lab/LoadingButton";
+import { memo, useEffect } from "react";
+import { SET_USER, setUser } from "../../redux/userReducer/userReducer";
+import { confugureUser } from "../../controllers/userController";
+import { emitEvent } from "../../utils/eventemitter";
 
-const LoginLogutButton = () => {
+const LoginLogutButton = memo(() => {
   const { isAuthenticated, isLoading, loginWithPopup } = useAuth0();
 
   if (isLoading)
     return (
       <>
         <CircularProgress color="inherit" />
-        {/* <Backdrop
+        <Backdrop
           sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
           open={open}
-        >
-          <CircularProgress color="inherit" />
-        </Backdrop> */}
+        ></Backdrop>
       </>
     );
 
@@ -41,15 +43,37 @@ const LoginLogutButton = () => {
       </IconButton>
     </Tooltip>
   );
-};
+});
 
-const LoggedInUserProfile = () => {
+const LoggedInUserProfile = memo(() => {
+  const dispatch = useDispatch();
   const { user, isAuthenticated } = useAuth0();
-  console.log(user);
-  return isAuthenticated ? <Avatar src={user?.picture} /> : null;
-};
 
-const LogoutButton = () => {
+  useEffect(() => {
+    (async function fetchUser() {
+      if (user) {
+        const { response } = await confugureUser(user.name, user.email);
+
+        dispatch(
+          setUser(
+            {
+              ...user,
+              emailContent: response.emailContent,
+              id: response._id,
+            },
+            SET_USER
+          )
+        );
+        emitEvent("USER_FETCHED_SUCCESS");
+      }
+    })();
+  }, [dispatch, user]);
+
+  return isAuthenticated ? <Avatar src={user?.picture} /> : null;
+});
+
+const LogoutButton = memo(() => {
+  const dispatch = useDispatch();
   const { logout } = useAuth0();
 
   return (
@@ -58,15 +82,20 @@ const LogoutButton = () => {
         disableFocusRipple
         disableRipple
         color="inherit"
-        onClick={() =>
-          logout({ logoutParams: { returnTo: window.location.origin } })
-        }
+        onClick={() => {
+          dispatch(setUser({}, SET_USER));
+          logout({ logoutParams: { returnTo: window.location.origin } });
+        }}
       >
         <LogoutIcon />
       </IconButton>
     </Tooltip>
   );
-};
+});
+
+LogoutButton.displayName = "LogoutButton";
+LoggedInUserProfile.displayName = "LoggedInUserProfile";
+LoginLogutButton.displayName = "LoginLogutButton";
 
 export { LoggedInUserProfile };
 export { LogoutButton };

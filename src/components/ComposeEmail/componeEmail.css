@@ -1,0 +1,51 @@
+.new-email-container {
+  position: fixed;
+  bottom: 0;
+  height: 4rem;
+  border: 1px solid;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: end;
+  padding: 0px 10px;
+}
+.new-email-box {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 10px;
+  height: 3rem;
+  width: 15rem;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 5px 15px;
+}
+.new-e-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: end;
+}
+.heading-new {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #f2f6fc;
+  padding: 5px 10px;
+  align-items: center;
+}
+.form-container {
+  padding: 10px;
+}
+.form-email {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 430px;
+
+  justify-content: space-evenly;
+}

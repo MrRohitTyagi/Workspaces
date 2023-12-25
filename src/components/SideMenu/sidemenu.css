@@ -5,6 +5,7 @@
   overflow-x: hidden;
 }
 .menu-item {
+  align-items: center;
   display: flex;
   flex-direction: row;
   gap: 10px;

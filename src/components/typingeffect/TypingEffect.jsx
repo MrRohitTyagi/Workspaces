@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./typingeffect.css"; // Import your CSS file for styling
 
-const TypingEffect = ({ text, time = 100 }) => {
+const TypingEffect = ({ text, time = 100, style }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isDone, setisDone] = useState(false);
 
@@ -24,9 +24,8 @@ const TypingEffect = ({ text, time = 100 }) => {
   }, [text, time]);
 
   return (
-    <div className="typing-effect">
+    <div className="typing-effect" style={style}>
       {displayedText}
-      {!isDone && <span className="blinking-cursor">|</span>}
     </div>
   );
 };

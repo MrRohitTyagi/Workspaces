@@ -1,7 +1,7 @@
 // EventEmitter.js
 import EventEmitter from "eventemitter3";
 
-const emitter = new EventEmitter();
+export const emitter = new EventEmitter();
 
 export const emitEvent = (eventName, data) => {
   emitter.emit(eventName, data);

@@ -11,6 +11,7 @@ import LoginLogutButton, {
   LoggedInUserProfile,
 } from "../../LoginLogout/LoginAuthComponent";
 import { emitEvent } from "../../../utils/eventemitter";
+import { memo } from "react";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -52,7 +53,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const PrimarySearchAppBar = () => {
+const PrimarySearchAppBar = memo(() => {
   const handleClick = () => {
     emitEvent("EXPAND_COLLAPSE_SIDEBAR");
   };
@@ -110,5 +111,7 @@ const PrimarySearchAppBar = () => {
       </AppBar>
     </Box>
   );
-};
+});
+
+PrimarySearchAppBar.displayName = "PrimarySearchAppBar";
 export default PrimarySearchAppBar;
