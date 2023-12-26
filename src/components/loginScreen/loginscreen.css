@@ -1,0 +1,10 @@
+.login-screen {
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  position: absolute;
+}
+.main-heading {
+  font-size: 100px;
+}

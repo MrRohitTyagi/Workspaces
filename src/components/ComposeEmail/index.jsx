@@ -8,16 +8,22 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import NewEmail from "./EmailDialogue";
 import { v4 } from "uuid";
 import { useSelector } from "react-redux";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const ComposeEmail = () => {
-  const user = useSelector(({ user }) => user);
+  const { user } = useAuth0();
 
-  const [newEmailCount, setnewEmailCount] = useState([]);
+  const [newEmailCount, setNewEmailCount] = useState([]);
+  console.log(
+    `%c newEmailCount `,
+    "color: orange;border:2px dotted oranfe",
+    newEmailCount
+  );
   useEffect(() => {
     listenToEvent("ADD_NEW_EMAIL", () => {
-      setnewEmailCount((p) => {
+      setNewEmailCount((p) => {
         if (p.length === 5) return p;
-        return [...p, { id: v4() }];
+        return [...p, { id: v4(), to: "", subject: "", body: "" }];
       });
     });
 
@@ -25,14 +31,16 @@ const ComposeEmail = () => {
       emitter.off("ADD_NEW_EMAIL");
     };
   }, []);
+
   const filterEmails = useCallback((id) => {
-    setnewEmailCount((prev) => prev.filter((e) => e.id !== id));
+    setNewEmailCount((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
   return (
     <div className="new-email-container">
       {newEmailCount.map((e, i) => (
         <OneEmailBox
+          setNewEmailCount={setNewEmailCount}
           user={user}
           key={i}
           email={e}
@@ -44,19 +52,27 @@ const ComposeEmail = () => {
   );
 };
 
-const OneEmailBox = ({ email, index, filterEmails, user }) => {
-  const [isOpen, setisOpen] = useState(true);
+const OneEmailBox = ({
+  email,
+  index,
+  filterEmails,
+  user,
+  setNewEmailCount,
+}) => {
+  const [isOpen, setIsOpen] = useState(true);
   return (
     <div
       className="new-email-box"
       onClick={(e) => {
         e.stopPropagation();
-        setisOpen(true);
+        setIsOpen(true);
       }}
       style={{ backgroundColor: isOpen ? "#dfdfdf" : "white" }}
     >
       <div className="new-header">
-        <div className="txt">New Message</div>
+        <div className="txt">
+          {`${email.subject}`.slice(0, 10) || "New Message"}...
+        </div>
       </div>
       <div className="new-e-buttons">
         <IconButton
@@ -78,12 +94,13 @@ const OneEmailBox = ({ email, index, filterEmails, user }) => {
       </div>
       {isOpen && (
         <NewEmail
+          setNewEmailCount={setNewEmailCount}
           user={user}
           filterEmails={filterEmails}
           email={email}
           index={index}
           open={isOpen}
-          setOpen={setisOpen}
+          setOpen={setIsOpen}
         />
       )}
     </div>

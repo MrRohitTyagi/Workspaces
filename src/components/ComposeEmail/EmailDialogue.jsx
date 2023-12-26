@@ -8,22 +8,46 @@ import { useState } from "react";
 import { createEmail } from "../../controllers/emailController";
 import SendIcon from "@mui/icons-material/Send";
 
-export default function NewEmail({ open, setOpen, user, filterEmails, email }) {
+export default function NewEmail({
+  open,
+  setOpen,
+  user,
+  filterEmails,
+  email,
+  setNewEmailCount,
+}) {
   const [formData, setFormData] = useState({
-    to: "",
-    subject: "",
-    body: "",
+    ...email,
   });
+
   const handleClose = () => {
+    setNewEmailCount((prev) => {
+      let arr = [];
+      for (let i = 0; i < prev.length; i++) {
+        const perEmail = prev[i];
+        if (perEmail.id === email.id) {
+          arr.push({ ...perEmail, ...formData });
+        } else {
+          arr.push(perEmail);
+        }
+      }
+      return arr;
+    });
     setOpen(false);
   };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  console.log(`%c email `, "color: green;border:1px solid green", email);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     const { email: sender } = user;
+    console.log(
+      `%c user `,
+      "color: white;border:3px solid white;margin:5px",
+      user
+    );
     const { body, subject, to } = formData;
     const payload = {
       sender,
@@ -31,11 +55,6 @@ export default function NewEmail({ open, setOpen, user, filterEmails, email }) {
       subject,
       recipients: [to],
     };
-    console.log(
-      `%c payload `,
-      "color: orange;border:2px dotted oranfe",
-      payload
-    );
     await createEmail(payload);
     filterEmails(email.id);
   };
@@ -45,7 +64,7 @@ export default function NewEmail({ open, setOpen, user, filterEmails, email }) {
       <Box sx={{ width: "500px", height: "500px" }}>
         <div className="heading-new">
           <h3>New Message</h3>
-          <IconButton>
+          <IconButton onClick={handleClose}>
             <CloseIcon />
           </IconButton>
         </div>

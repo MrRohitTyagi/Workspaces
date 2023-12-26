@@ -7,11 +7,14 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import LoginLogutButton, {
-  LoggedInUserProfile,
-} from "../../LoginLogout/LoginAuthComponent";
-import { emitEvent } from "../../../utils/eventemitter";
+import LoggedInUserProfile, {
+  LogoutButton,
+  LoginButton,
+} from "../LoginLogout/LoginLogoutButtons";
+import { emitEvent } from "../../utils/eventemitter";
 import { memo } from "react";
+import { Button } from "@mui/material";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -53,7 +56,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const PrimarySearchAppBar = memo(() => {
+const TopNavbar = memo(() => {
+  const { isAuthenticated } = useAuth0();
+  const isLoggedIn = isAuthenticated;
   const handleClick = () => {
     emitEvent("EXPAND_COLLAPSE_SIDEBAR");
   };
@@ -80,38 +85,40 @@ const PrimarySearchAppBar = memo(() => {
             <MenuIcon />
           </IconButton>
           <Typography
-            variant="h6"
+            variant="h4"
             noWrap
             component="div"
-            sx={{ display: { xs: "none", sm: "block" } }}
+            sx={{ display: { xs: "none", sm: "block" }, cursor: "pointer" }}
           >
             Workspaces
           </Typography>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search>
+          {isLoggedIn && (
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search…"
+                inputProps={{ "aria-label": "search" }}
+              />
+            </Search>
+          )}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <IconButton color="inherit">
-              <LoginLogutButton />
-            </IconButton>
+            <LoginButton />
           </Box>
-          <Box>
-            <IconButton color="inherit">
-              <LoggedInUserProfile />
-            </IconButton>
-          </Box>
+          {isLoggedIn && (
+            <Box>
+              <IconButton color="inherit">
+                <LoggedInUserProfile />
+              </IconButton>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
     </Box>
   );
 });
 
-PrimarySearchAppBar.displayName = "PrimarySearchAppBar";
-export default PrimarySearchAppBar;
+TopNavbar.displayName = "TopNavbar";
+export default TopNavbar;

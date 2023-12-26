@@ -1,5 +1,5 @@
-import { Auth0Provider } from "@auth0/auth0-react";
-import TopNavBar from "./components/appBars/topnavbar";
+import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
+import TopNavBar from "./components/topNavbar";
 import SideMenu from "./components/SideMenu";
 import MainContainer from "./components/mainContainer";
 import { Provider } from "react-redux";
@@ -8,42 +8,17 @@ import { useEffect, useState } from "react";
 import Loader from "./components/Loader";
 import { emitter, listenToEvent } from "./utils/eventemitter";
 import ComposeEmail from "./components/ComposeEmail";
+import Authorize from "./components/authorizeUser";
+import { Route, Routes } from "react-router-dom";
+import LoginScreen from "./components/loginScreen";
+import TopNavbar from "./components/topNavbar";
 
 function App() {
-  const [appStatus, setAppStatus] = useState("LOADING");
-  const [key, setkey] = useState("");
-  useEffect(() => {
-    listenToEvent("USER_FETCHED_SUCCESS", () => {
-      setAppStatus("SHOW_EMAILS");
-    });
-    listenToEvent("REFRESH_MAINCONT", () => {
-      setkey(Math.random());
-    });
-
-    return () => {
-      emitter.off("USER_FETCHED_SUCCESS");
-    };
-  }, []);
-
   return (
-    <Provider store={store}>
-      <Auth0Provider
-        domain={import.meta.env.VITE_AUTH_DOMAIN}
-        clientId={import.meta.env.VITE_AUTH_CLIENT_ID}
-        authorizationParams={{ redirect_uri: window.location.origin }}
-      >
-        <TopNavBar />
-        <div className="main-container">
-          <SideMenu />
-          {appStatus === "SHOW_EMAILS" ? (
-            <MainContainer key={key} />
-          ) : appStatus === "LOADING" ? (
-            <Loader />
-          ) : 'SIGN IN TO CONTINUE'}
-        </div>
-        <ComposeEmail />
-      </Auth0Provider>
-    </Provider>
+    <Routes>
+      <Route path="/" element={<Authorize />} />
+      <Route path="/login" element={<LoginScreen />} />
+    </Routes>
   );
 }
 

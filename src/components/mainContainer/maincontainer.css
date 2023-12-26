@@ -1,7 +1,10 @@
 .main-email-container {
+  overflow-y: auto;
   height: calc(100vh - var(--navbar-height));
   width: 100%;
   background-color: white !important;
   border-radius: 5px;
-  padding: 10px;
+}
+.skeleton-row{
+  padding: 0px 10px;
 }

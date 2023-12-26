@@ -33,49 +33,31 @@ const SideMenu = memo(() => {
         <MenuItem sx={menuStyles} onClick={() => emitEvent("ADD_NEW_EMAIL")}>
           <div className="menu-item">
             <FiberNewIcon />
-            {isExpanded && (
-              <TypingEffect
-                text={"Componse"}
-                time={50}
-                style={{
-                  border: "1px solid black",
-                  borderRadius: "3px",
-                  padding: "3px 5px",
-                }}
-              ></TypingEffect>
-            )}
+            {isExpanded && <h4>Componse</h4>}
           </div>
         </MenuItem>
         <MenuItem sx={menuStyles}>
           <div className="menu-item">
             <AllInboxIcon />
-            {isExpanded && (
-              <TypingEffect text={"Inbox"} time={50}></TypingEffect>
-            )}
+            {isExpanded && <h4>Inbox</h4>}
           </div>
         </MenuItem>
         <MenuItem sx={menuStyles}>
           <div className="menu-item">
             <StarBorderIcon />
-            {isExpanded && (
-              <TypingEffect text={"Starred"} time={50}></TypingEffect>
-            )}
+            {isExpanded && <h4>Starred</h4>}
           </div>
         </MenuItem>
         <MenuItem sx={menuStyles}>
           <div className="menu-item">
             <SendIcon />
-            {isExpanded && (
-              <TypingEffect text={"Sent"} time={50}></TypingEffect>
-            )}
+            {isExpanded && <h4>Sent</h4>}
           </div>
         </MenuItem>
         <MenuItem sx={menuStyles}>
           <div className="menu-item">
             <LabelImportantIcon />
-            {isExpanded && (
-              <TypingEffect text={"Important"} time={50}></TypingEffect>
-            )}
+            {isExpanded && <h4>Important</h4>}
           </div>
         </MenuItem>
       </MenuList>
