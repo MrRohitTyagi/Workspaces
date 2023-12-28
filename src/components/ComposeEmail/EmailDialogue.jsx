@@ -43,11 +43,7 @@ export default function NewEmail({
   const onSubmit = async (e) => {
     e.preventDefault();
     const { email: sender } = user;
-    console.log(
-      `%c user `,
-      "color: white;border:3px solid white;margin:5px",
-      user
-    );
+
     const { body, subject, to } = formData;
     const payload = {
       sender,

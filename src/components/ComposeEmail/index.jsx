@@ -14,11 +14,7 @@ const ComposeEmail = () => {
   const { user } = useAuth0();
 
   const [newEmailCount, setNewEmailCount] = useState([]);
-  console.log(
-    `%c newEmailCount `,
-    "color: orange;border:2px dotted oranfe",
-    newEmailCount
-  );
+
   useEffect(() => {
     listenToEvent("ADD_NEW_EMAIL", () => {
       setNewEmailCount((p) => {

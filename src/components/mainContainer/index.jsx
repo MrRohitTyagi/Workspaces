@@ -14,6 +14,7 @@ import { Checkbox, Divider, IconButton, Skeleton } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { deleteEmail } from "../../controllers/emailController";
 const columns = [
   {
     accessorKey: "sender",
@@ -46,7 +47,7 @@ const MainContainer = () => {
         }
       }
 
-      return emails;
+      return emails.reverse();
     },
     [user.email]
   );
@@ -65,6 +66,10 @@ const MainContainer = () => {
     })();
   }, [fetchData, sortData, user]);
 
+  const filterEmailsViaId = useCallback((_id) => {
+    setEmailData((prev) => prev.filter((e) => e._id !== _id));
+  }, []);
+
   return (
     <motion.div className="main-email-container">
       {emailData === undefined ? (
@@ -73,14 +78,18 @@ const MainContainer = () => {
         <>No Data</>
       ) : (
         // <DataTable data={emailData} columns={columns} />
-        <CustomDataTable data={emailData || []} fetchData={fetchData} />
+        <CustomDataTable
+          data={emailData || []}
+          fetchData={fetchData}
+          filterEmailsViaId={filterEmailsViaId}
+          user={user}
+        />
       )}
     </motion.div>
   );
 };
 
-const CustomDataTable = ({ data = [], fetchData }) => {
-  console.log(`%c data `, "color: yellow;border:1px solid lightgreen", data);
+const CustomDataTable = ({ data = [], fetchData, user, filterEmailsViaId }) => {
   return (
     <div className="email-container">
       <div className="filters-comp">
@@ -89,15 +98,22 @@ const CustomDataTable = ({ data = [], fetchData }) => {
         </IconButton>
       </div>
       <div className="all-email-container">
-        {data.map(({ subject, id, body }) => {
+        {data.map(({ subject, _id, body }) => {
           return (
-            <div key={id} className="email-row">
+            <div key={_id} className="email-row">
               <div className="">
                 <Checkbox size="small" />
                 <IconButton sx={{ padding: "2px" }} disableRipple>
                   <StarBorderIcon />
                 </IconButton>
-                <IconButton sx={{ padding: "2px" }} disableRipple>
+                <IconButton
+                  sx={{ padding: "2px" }}
+                  disableRipple
+                  onClick={async () => {
+                    filterEmailsViaId(_id);
+                    deleteEmail(_id, user.email);
+                  }}
+                >
                   <DeleteForeverIcon color="error" />
                 </IconButton>
               </div>
@@ -127,7 +143,6 @@ const CustomDataTable = ({ data = [], fetchData }) => {
   );
 };
 const CustomDataTableSkeletonLoader = ({ data = [1, 2, 3, 4, 5, 6] }) => {
-  console.log(`%c data `, "color: yellow;border:1px solid lightgreen", data);
   return (
     <div className="email-container">
       <div className="filters-comp"></div>
