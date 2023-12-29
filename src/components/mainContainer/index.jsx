@@ -1,67 +1,80 @@
-import {
-  MaterialReactTable,
-  useMaterialReactTable,
-} from "material-react-table";
 import "./maincontainer.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import DataTable from "../DataTable";
 import { useAuth0 } from "@auth0/auth0-react";
 import { confugureUser } from "../../controllers/userController";
 import "./customDataTable.css";
-import { Checkbox, Divider, IconButton, Skeleton } from "@mui/material";
-
+import { Checkbox, IconButton, Skeleton } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { deleteEmail } from "../../controllers/emailController";
-const columns = [
-  {
-    accessorKey: "sender",
-    header: "From",
-    size: 10,
-    layoutMode: "grid-no-grow",
-  },
-  {
-    accessorKey: "subject",
-    header: "Subject",
-  },
-  {
-    accessorKey: "body",
-    header: "Body",
-    size: 100,
-    layoutMode: "grid-no-grow",
-  },
-];
-
+import { emitter, listenToEvent } from "../../utils/eventemitter";
+const messages = {
+  SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
+  SHOW_ALL_STARRED: "SHOW_ALL_STARRED",
+  SHOW_ALL_SENT: "SHOW_ALL_SENT",
+};
 const MainContainer = () => {
   const { user } = useAuth0();
   const [emailData, setEmailData] = useState(undefined);
-
-  const sortData = useCallback(
-    (allEmails) => {
-      const emails = [];
-      for (const em of allEmails) {
-        if (em.recipients.includes(user.email)) {
-          emails.push(em);
-        }
-      }
-
-      return emails.reverse();
-    },
-    [user.email]
+  const filterTrackerRef = useRef("");
+  console.log(
+    `%c emailData `,
+    "color: yellow;border:1px solid lightgreen",
+    emailData
   );
-  const fetchData = useCallback(async () => {
-    setEmailData(undefined);
-    const { response } = await confugureUser(user.name, user.email);
-    const data = sortData(response?.emailContent || []);
-    setEmailData(data);
-  }, [sortData, user.email, user.name]);
+  const sortData = useCallback(
+    (allEmails, filterKey) => {
+      const emails = [];
+
+      switch (filterKey) {
+        case messages.SHOW_ALL_INBOX:
+          for (const em of allEmails) {
+            if (em.recipients.includes(user.email)) {
+              emails.push(em);
+            }
+          }
+          return emails;
+        case messages.SHOW_ALL_SENT:
+          for (const em of allEmails) {
+            if (em.sender === user.email) {
+              emails.push(em);
+            }
+          }
+          return emails;
+
+        case messages.SHOW_ALL_STARRED:
+          for (const em of allEmails) {
+            if (em.starredBy.includes(user.email)) {
+              emails.push(em);
+            }
+          }
+          return emails;
+
+        default:
+          return emails;
+      }
+    },
+    [user]
+  );
+
+  const fetchData = useCallback(
+    async (filterType, forcerefresh = false) => {
+      if (filterType === filterTrackerRef.current && !forcerefresh) return;
+      filterTrackerRef.current = filterType;
+      setEmailData(undefined);
+      const { response } = await confugureUser(user.name, user.email);
+      const data = sortData(response?.emailContent || [], filterType);
+      setEmailData(data);
+    },
+    [sortData, user.email, user.name]
+  );
 
   useEffect(() => {
     (async function fetchUser() {
       if (user) {
-        fetchData(user);
+        fetchData(messages.SHOW_ALL_INBOX);
       }
     })();
   }, [fetchData, sortData, user]);
@@ -69,6 +82,35 @@ const MainContainer = () => {
   const filterEmailsViaId = useCallback((_id) => {
     setEmailData((prev) => prev.filter((e) => e._id !== _id));
   }, []);
+
+  const changeKey = useCallback((_id, key, value) => {
+    setEmailData((prev) =>
+      prev.map((e) => {
+        if (e._id === _id) {
+          e[key] = value;
+          return e;
+        } else return e;
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    listenToEvent(messages.SHOW_ALL_INBOX, () => {
+      fetchData(messages.SHOW_ALL_INBOX);
+    });
+    listenToEvent(messages.SHOW_ALL_STARRED, () => {
+      fetchData(messages.SHOW_ALL_STARRED);
+    });
+    listenToEvent(messages.SHOW_ALL_SENT, () => {
+      fetchData(messages.SHOW_ALL_SENT);
+    });
+
+    return () => {
+      emitter.off(messages.SHOW_ALL_INBOX, () => {});
+      emitter.off(messages.SHOW_ALL_STARRED, () => {});
+      emitter.off(messages.SHOW_ALL_SENT, () => {});
+    };
+  }, [fetchData]);
 
   return (
     <motion.div className="main-email-container">
@@ -79,31 +121,44 @@ const MainContainer = () => {
       ) : (
         // <DataTable data={emailData} columns={columns} />
         <CustomDataTable
+          changeKey={changeKey}
           data={emailData || []}
           fetchData={fetchData}
           filterEmailsViaId={filterEmailsViaId}
           user={user}
+          filterTrackerRef={filterTrackerRef}
         />
       )}
     </motion.div>
   );
 };
 
-const CustomDataTable = ({ data = [], fetchData, user, filterEmailsViaId }) => {
+const CustomDataTable = ({
+  data = [],
+  fetchData,
+  user,
+  filterEmailsViaId,
+  changeKey,
+  filterTrackerRef,
+}) => {
   return (
     <div className="email-container">
       <div className="filters-comp">
-        <IconButton onClick={fetchData}>
+        <IconButton onClick={() => fetchData(filterTrackerRef.current, true)}>
           <RefreshIcon />
         </IconButton>
       </div>
       <div className="all-email-container">
-        {data.map(({ subject, _id, body }) => {
+        {data.map(({ subject, _id, body, isStarred }) => {
           return (
             <div key={_id} className="email-row">
               <div className="">
                 <Checkbox size="small" />
-                <IconButton sx={{ padding: "2px" }} disableRipple>
+                <IconButton
+                  sx={{ padding: "2px" }}
+                  disableRipple
+                  changeKey={() => changeKey(_id, isStarred, !isStarred)}
+                >
                   <StarBorderIcon />
                 </IconButton>
                 <IconButton

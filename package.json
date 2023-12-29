@@ -1,7 +1,7 @@
 {
   "name": "vite-project",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "scripts": {
     "start": "vite --port 3000",
@@ -22,6 +22,7 @@
     "axios": "^1.6.2",
     "eventemitter3": "^5.0.1",
     "framer-motion": "^10.16.16",
+    "lodash": "^4.17.21",
     "material-react-table": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

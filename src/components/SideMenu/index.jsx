@@ -36,25 +36,28 @@ const SideMenu = memo(() => {
             {isExpanded && <h4>Componse</h4>}
           </div>
         </MenuItem>
-        <MenuItem sx={menuStyles}>
+        <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_INBOX")}>
           <div className="menu-item">
             <AllInboxIcon />
             {isExpanded && <h4>Inbox</h4>}
           </div>
         </MenuItem>
-        <MenuItem sx={menuStyles}>
+        <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_STARRED")}>
           <div className="menu-item">
             <StarBorderIcon />
             {isExpanded && <h4>Starred</h4>}
           </div>
         </MenuItem>
-        <MenuItem sx={menuStyles}>
+        <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_SENT")}>
           <div className="menu-item">
             <SendIcon />
             {isExpanded && <h4>Sent</h4>}
           </div>
         </MenuItem>
-        <MenuItem sx={menuStyles}>
+        <MenuItem
+          sx={menuStyles}
+          onClick={() => emitEvent("SHOW_ALL_IMPORTANT")}
+        >
           <div className="menu-item">
             <LabelImportantIcon />
             {isExpanded && <h4>Important</h4>}
