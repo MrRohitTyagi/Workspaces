@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import "./componeEmail.css";
 import { listenToEvent, emitter } from "../../utils/eventemitter";
 import CloseIcon from "@mui/icons-material/Close";
@@ -10,7 +10,7 @@ import { v4 } from "uuid";
 import { useSelector } from "react-redux";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const ComposeEmail = () => {
+const ComposeEmail = memo(() => {
   const { user } = useAuth0();
 
   const [newEmailCount, setNewEmailCount] = useState([]);
@@ -46,61 +46,59 @@ const ComposeEmail = () => {
       ))}
     </div>
   );
-};
+});
 
-const OneEmailBox = ({
-  email,
-  index,
-  filterEmails,
-  user,
-  setNewEmailCount,
-}) => {
-  const [isOpen, setIsOpen] = useState(true);
-  return (
-    <div
-      className="new-email-box"
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsOpen(true);
-      }}
-      style={{ backgroundColor: isOpen ? "#dfdfdf" : "white" }}
-    >
-      <div className="new-header">
-        <div className="txt">
-          {`${email.subject}`.slice(0, 10) || "New Message"}...
+const OneEmailBox = memo(
+  ({ email, index, filterEmails, user, setNewEmailCount }) => {
+    const [isOpen, setIsOpen] = useState(true);
+    return (
+      <div
+        className="new-email-box"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+        style={{ backgroundColor: isOpen ? "#dfdfdf" : "white" }}
+      >
+        <div className="new-header">
+          <div className="txt">
+            {`${email.subject}`.slice(0, 10) || "New Message"}...
+          </div>
         </div>
+        <div className="new-e-buttons">
+          <IconButton
+            sx={{ padding: "2px" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              filterEmails(email.id);
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <IconButton sx={{ padding: "1px" }}>
+            {isOpen ? (
+              <ExpandLessIcon fontSize="large" />
+            ) : (
+              <ExpandMoreIcon fontSize="large" />
+            )}
+          </IconButton>
+        </div>
+        {isOpen && (
+          <NewEmail
+            setNewEmailCount={setNewEmailCount}
+            user={user}
+            filterEmails={filterEmails}
+            email={email}
+            index={index}
+            open={isOpen}
+            setOpen={setIsOpen}
+          />
+        )}
       </div>
-      <div className="new-e-buttons">
-        <IconButton
-          sx={{ padding: "2px" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            filterEmails(email.id);
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <IconButton sx={{ padding: "1px" }}>
-          {isOpen ? (
-            <ExpandLessIcon fontSize="large" />
-          ) : (
-            <ExpandMoreIcon fontSize="large" />
-          )}
-        </IconButton>
-      </div>
-      {isOpen && (
-        <NewEmail
-          setNewEmailCount={setNewEmailCount}
-          user={user}
-          filterEmails={filterEmails}
-          email={email}
-          index={index}
-          open={isOpen}
-          setOpen={setIsOpen}
-        />
-      )}
-    </div>
-  );
-};
+    );
+  }
+);
+ComposeEmail.displayName = "ComposeEmail";
+OneEmailBox.displayName = "OneEmailBox";
 
 export default ComposeEmail;

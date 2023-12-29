@@ -1,11 +1,9 @@
-import { useDispatch } from "react-redux";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Avatar, Button, CircularProgress, Tooltip } from "@mui/material";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { memo } from "react";
-import { SET_USER, setUser } from "../../redux/userReducer/userReducer";
 import { useNavigate } from "react-router-dom";
 
 const LoginButton = () => {
@@ -42,9 +40,13 @@ const LoginButton = () => {
   );
 };
 const LogoutButton = memo(() => {
-  const dispatch = useDispatch();
-  const { logout } = useAuth0();
+  const { logout, isLoading } = useAuth0();
 
+  const handleLogout = () => {
+    window.location.href = "/login";
+    window.location.reload();
+    logout();
+  };
   return (
     <Tooltip title="Logout">
       <Button
@@ -54,23 +56,53 @@ const LogoutButton = memo(() => {
         disableFocusRipple
         disableRipple
         color="inherit"
-        onClick={() => {
-          dispatch(setUser({}, SET_USER));
-          logout({ logoutParams: { returnTo: window.location.origin } });
-        }}
+        onClick={handleLogout}
       >
-        <LogoutIcon />
-        Logout
+        {isLoading ? (
+          <>
+            <CircularProgress size="22px" />
+            Loading...
+          </>
+        ) : (
+          <>
+            <LogoutIcon /> Logout
+          </>
+        )}
       </Button>
     </Tooltip>
   );
 });
 
-const LoggedInUserProfile = memo(() => {
-  const { user } = useAuth0();
+import Popover from "@mui/material/Popover";
+import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
 
-  return <Avatar src={user?.picture} />;
-});
+export function LoggedInUserProfile() {
+  const { user } = useAuth0();
+  return (
+    <PopupState variant="popover" popupId="demo-popup-popover-profile">
+      {(popupState) => (
+        <div>
+          <Avatar src={user?.picture} {...bindTrigger(popupState)} />
+
+          <Popover
+            sx={{ mt: 2 }}
+            {...bindPopover(popupState)}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+          >
+            <LogoutButton />
+          </Popover>
+        </div>
+      )}
+    </PopupState>
+  );
+}
 
 LogoutButton.displayName = "LogoutButton";
 LoggedInUserProfile.displayName = "LoggedInUserProfile";

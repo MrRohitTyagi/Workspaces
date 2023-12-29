@@ -6,7 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import store from "./redux/store.js";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { Provider } from "react-redux";
-import Toast from "./components/toast";
+import "react-toastify/dist/ReactToastify.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
@@ -19,6 +19,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <App />
       </BrowserRouter>
     </Auth0Provider>
-    <Toast />
   </Provider>
 );

@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import "./sidemenu.css";
 import { emitEvent, listenToEvent } from "../../utils/eventemitter";
-import { MenuItem, MenuList } from "@mui/material";
+import { MenuItem, MenuList, Tooltip } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SendIcon from "@mui/icons-material/Send";
@@ -31,25 +31,34 @@ const SideMenu = memo(() => {
       <MenuList>
         <MenuItem sx={menuStyles} onClick={() => emitEvent("ADD_NEW_EMAIL")}>
           <div className="menu-item">
-            <FiberNewIcon />
+            <Tooltip title="Send new email">
+              <FiberNewIcon />
+            </Tooltip>
             {isExpanded && <h4>Componse</h4>}
           </div>
         </MenuItem>
         <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_INBOX")}>
           <div className="menu-item">
-            <AllInboxIcon />
+            <Tooltip title="Inbox">
+              <AllInboxIcon />
+            </Tooltip>
+
             {isExpanded && <h4>Inbox</h4>}
           </div>
         </MenuItem>
         <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_STARRED")}>
           <div className="menu-item">
-            <StarBorderIcon />
+            <Tooltip title="Important">
+              <StarBorderIcon />
+            </Tooltip>
             {isExpanded && <h4>Starred</h4>}
           </div>
         </MenuItem>
         <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_SENT")}>
           <div className="menu-item">
-            <SendIcon />
+            <Tooltip title="Sent">
+              <SendIcon />
+            </Tooltip>
             {isExpanded && <h4>Sent</h4>}
           </div>
         </MenuItem>
@@ -58,7 +67,9 @@ const SideMenu = memo(() => {
           onClick={() => emitEvent("SHOW_ALL_ARCHIVED")}
         >
           <div className="menu-item">
-            <ArchiveIcon />
+            <Tooltip title="Archived">
+              <ArchiveIcon />
+            </Tooltip>
             {isExpanded && <h4>Important</h4>}
           </div>
         </MenuItem>

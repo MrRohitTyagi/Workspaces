@@ -4,17 +4,15 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
 import LoggedInUserProfile, {
-  LogoutButton,
   LoginButton,
 } from "../LoginLogout/LoginLogoutButtons";
 import { emitEvent } from "../../utils/eventemitter";
-import { memo } from "react";
-import { Button } from "@mui/material";
+import { memo, useCallback } from "react";
+
 import { useAuth0 } from "@auth0/auth0-react";
+import SearchBar from "./searchBar";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -32,36 +30,13 @@ const Search = styled("div")(({ theme }) => ({
   },
 }));
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
-}));
-
 const TopNavbar = memo(() => {
   const { isAuthenticated } = useAuth0();
   const isLoggedIn = isAuthenticated;
-  const handleClick = () => {
-    emitEvent("EXPAND_COLLAPSE_SIDEBAR");
-  };
+  const handleClick = useCallback(
+    () => emitEvent("EXPAND_COLLAPSE_SIDEBAR"),
+    []
+  );
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -94,13 +69,7 @@ const TopNavbar = memo(() => {
           </Typography>
           {isLoggedIn && (
             <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-              />
+              <SearchBar />
             </Search>
           )}
           <Box sx={{ flexGrow: 1 }} />
