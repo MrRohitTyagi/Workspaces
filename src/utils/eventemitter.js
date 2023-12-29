@@ -4,6 +4,7 @@ import EventEmitter from "eventemitter3";
 export const emitter = new EventEmitter();
 
 export const emitEvent = (eventName, data) => {
+  console.log("eventName", eventName);
   emitter.emit(eventName, data);
 };
 

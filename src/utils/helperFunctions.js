@@ -9,6 +9,8 @@ export async function caller(type, extendedUrl, body) {
       return await axios.delete(baseUrl + extendedUrl, body);
     case "post":
       return await axios.post(baseUrl + extendedUrl, body);
+    case "put":
+      return await axios.put(baseUrl + extendedUrl, body);
     default:
       break;
   }

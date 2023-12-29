@@ -5,8 +5,7 @@ import { MenuItem, MenuList } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SendIcon from "@mui/icons-material/Send";
-import LabelImportantIcon from "@mui/icons-material/LabelImportant";
-import TypingEffect from "../typingeffect/TypingEffect";
+import ArchiveIcon from "@mui/icons-material/Archive";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
 const menuStyles = {
   padding: "15px",
@@ -56,10 +55,10 @@ const SideMenu = memo(() => {
         </MenuItem>
         <MenuItem
           sx={menuStyles}
-          onClick={() => emitEvent("SHOW_ALL_IMPORTANT")}
+          onClick={() => emitEvent("SHOW_ALL_ARCHIVED")}
         >
           <div className="menu-item">
-            <LabelImportantIcon />
+            <ArchiveIcon />
             {isExpanded && <h4>Important</h4>}
           </div>
         </MenuItem>
