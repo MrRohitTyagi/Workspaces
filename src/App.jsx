@@ -6,13 +6,14 @@ import { io } from "socket.io-client";
 import { useEffect } from "react";
 import PerEmailScreen from "./components/perEmailScreen";
 
-const socket = io("http://localhost:4000", {
+const socket = io(import.meta.env.VITE_BE_BASE_URL_SOCKET, {
   transports: ["websocket", "polling", "flashsocket"],
 });
 function App() {
   useEffect(() => {
     // Listen for messages from the server
     socket.on("CONNECTED", (id) => {
+      console.log("id", id);
       window.socket_id = id;
     });
     return () => {

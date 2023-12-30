@@ -32,6 +32,11 @@
   width: 140px;
 }
 .body-box {
+  height: 100%;
+  align-items: center;
+  justify-content: start;
+  display: flex;
+  width: 70%;
 }
 .divider {
   width: 1px;

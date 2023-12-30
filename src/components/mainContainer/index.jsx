@@ -20,7 +20,7 @@ import {
 import { emitter, listenToEvent } from "../../utils/eventemitter";
 import noRecorePlaceholder from "../../assets/noRecored-placeholder.png";
 import { socket } from "../../App";
-import { useNavigate } from "react-router-dom";
+import PerEmailScreen from "../perEmailScreen";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -120,7 +120,6 @@ const MainContainer = () => {
     };
   }, []);
 
-  console.log(`%c emailData `, "color: pink;border:1px solid pink", emailData);
   const filterEmailsViaId = useCallback((_id) => {
     setEmailData((prev) => prev.filter((e) => e._id !== _id));
   }, []);
@@ -190,7 +189,7 @@ const CustomDataTable = memo(
     filterTrackerRef,
     updatePerEmail,
   }) => {
-    const navigate = useNavigate();
+    const [openOneEmail, setOpenOneEmail] = useState({});
     const handleEmailDelete = async (_id, email) => {
       switch (filterTrackerRef.current) {
         case messages.SHOW_ALL_INBOX:
@@ -238,12 +237,18 @@ const CustomDataTable = memo(
       },
       [updatePerEmail, user.email]
     );
-    const handleEmailOpen = useCallback(
-      (id) => {
-        navigate(`/email/${id}`);
-      },
-      [navigate]
-    );
+    const handleEmailOpen = useCallback((e) => {
+      setOpenOneEmail(e);
+    }, []);
+
+    if (openOneEmail._id) {
+      return (
+        <PerEmailScreen
+          email={openOneEmail}
+          setOpenOneEmail={setOpenOneEmail}
+        />
+      );
+    }
 
     return (
       <div className="email-container">
@@ -272,11 +277,10 @@ const CustomDataTable = memo(
                 e || {};
               return (
                 <div
-                  onClick={() => handleEmailOpen(_id)}
                   key={_id}
                   className={isUnread ? `email-row unread` : `email-row`}
                 >
-                  <div className="" style={{ gap: "5px" }}>
+                  <div style={{ gap: "5px" }}>
                     {/* <Checkbox size="small" /> */}
 
                     {starredBy.includes(user.email) ? (
@@ -327,9 +331,7 @@ const CustomDataTable = memo(
                     <IconButton
                       sx={{ padding: "2px" }}
                       disableRipple
-                      onClick={async () => {
-                        handleEmailDelete(_id, user.email);
-                      }}
+                      onClick={async () => handleEmailDelete(_id, user.email)}
                     >
                       <Tooltip title="Delete">
                         <DeleteForeverIcon color="error" />
@@ -337,6 +339,7 @@ const CustomDataTable = memo(
                     </IconButton>
                   </div>
                   <motion.div
+                    onClick={() => handleEmailOpen(e)}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
@@ -347,6 +350,7 @@ const CustomDataTable = memo(
                   </motion.div>
                   <div className="divider" />
                   <motion.div
+                    onClick={() => handleEmailOpen(e)}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
