@@ -19,6 +19,8 @@ import {
 } from "../../controllers/emailController";
 import { emitter, listenToEvent } from "../../utils/eventemitter";
 import noRecorePlaceholder from "../../assets/noRecored-placeholder.png";
+import { socket } from "../../App";
+import { useNavigate } from "react-router-dom";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -107,6 +109,18 @@ const MainContainer = () => {
     })();
   }, [fetchData, sortData, user]);
 
+  useEffect(() => {
+    // Listen for messages from the server
+    socket.on("NEW_EMAIL_RECEIVED", (email) => {
+      setEmailData((prev) => [email, ...prev]);
+    });
+    // Clean up the socket connection on component unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  console.log(`%c emailData `, "color: pink;border:1px solid pink", emailData);
   const filterEmailsViaId = useCallback((_id) => {
     setEmailData((prev) => prev.filter((e) => e._id !== _id));
   }, []);
@@ -176,6 +190,7 @@ const CustomDataTable = memo(
     filterTrackerRef,
     updatePerEmail,
   }) => {
+    const navigate = useNavigate();
     const handleEmailDelete = async (_id, email) => {
       switch (filterTrackerRef.current) {
         case messages.SHOW_ALL_INBOX:
@@ -223,6 +238,12 @@ const CustomDataTable = memo(
       },
       [updatePerEmail, user.email]
     );
+    const handleEmailOpen = useCallback(
+      (id) => {
+        navigate(`/email/${id}`);
+      },
+      [navigate]
+    );
 
     return (
       <div className="email-container">
@@ -247,9 +268,14 @@ const CustomDataTable = memo(
             />
           ) : (
             data.map((e) => {
-              const { subject, _id, body, starredBy, archivedBy } = e || {};
+              const { subject, _id, body, starredBy, archivedBy, isUnread } =
+                e || {};
               return (
-                <div key={_id} className="email-row">
+                <div
+                  onClick={() => handleEmailOpen(_id)}
+                  key={_id}
+                  className={isUnread ? `email-row unread` : `email-row`}
+                >
                   <div className="" style={{ gap: "5px" }}>
                     {/* <Checkbox size="small" /> */}
 

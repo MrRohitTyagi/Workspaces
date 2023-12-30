@@ -5,6 +5,9 @@
   background-color: white !important;
   border-radius: 5px;
 }
-.skeleton-row{
+.skeleton-row {
   padding: 0px 10px;
+}
+.unread {
+  background-color: #f6f6f6;
 }
