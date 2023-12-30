@@ -55,7 +55,7 @@ const TopNavbar = memo(() => {
             edge="start"
             color="inherit"
             aria-label="open drawer"
-            sx={{ mr: 2 }}
+            sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
           >
             <MenuIcon />
           </IconButton>
@@ -63,7 +63,8 @@ const TopNavbar = memo(() => {
             variant="h4"
             noWrap
             component="div"
-            sx={{ display: { xs: "none", sm: "block" }, cursor: "pointer" }}
+            className="app-name"
+            sx={{ display: { sm: "block" }, cursor: "pointer" }}
           >
             Workspaces
           </Typography>
@@ -73,7 +74,7 @@ const TopNavbar = memo(() => {
             </Search>
           )}
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <Box sx={{ display: { md: "flex" } }}>
             <LoginButton />
           </Box>
           {isLoggedIn && (

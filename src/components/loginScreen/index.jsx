@@ -17,6 +17,7 @@ const LoginScreen = () => {
           WORKSPACES
         </motion.h1>
         <motion.h2
+          className="please-sign-in"
           initial={{ scale: 0, opacity: 0, filter: "blur(5px)", y: 100 }}
           animate={{ scale: 1, opacity: 1, filter: "blur(0px)", y: 0 }}
           style={{ textAlign: "center" }}

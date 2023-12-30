@@ -6,5 +6,18 @@
   position: absolute;
 }
 .main-heading {
-  font-size: 100px;
+  font-size: 5vw;
+  text-align: center;
+}
+
+@media (max-width: 1250px) {
+  .main-heading {
+    font-size: 10vw;
+  }
+  .please-sign-in {
+    font-size: 5vw;
+  }
+  .app-name {
+    font-size: 6vw !important;
+  }
 }

@@ -1,12 +1,14 @@
 import { memo, useEffect, useState } from "react";
-import "./sidemenu.css";
-import { emitEvent, emitter, listenToEvent } from "../../utils/eventemitter";
+import { motion } from "framer-motion";
 import { MenuItem, MenuList, Tooltip } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SendIcon from "@mui/icons-material/Send";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
+
+import { emitEvent, emitter, listenToEvent } from "../../utils/eventemitter";
+import "./sidemenu.css";
 
 const sideMenuConfig = [
   {
@@ -41,6 +43,11 @@ const sideMenuConfig = [
   },
 ];
 
+const varient = {
+  hidden: { x: -100 },
+  visible: { x: 0 },
+};
+
 const SideMenu = memo(() => {
   const [isActive, setIsActive] = useState(1);
   const [isExpanded, setisExpanded] = useState(false);
@@ -74,7 +81,15 @@ const SideMenu = memo(() => {
               }}
             >
               <div className="menu-item">
-                <Tooltip title={menu.tooltip}>{menu.icon}</Tooltip>
+                <Tooltip title={menu.tooltip}>
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={varient}
+                  >
+                    {menu.icon}
+                  </motion.div>
+                </Tooltip>
                 {isExpanded && <h4>{menu.label}</h4>}
               </div>
             </MenuItem>
