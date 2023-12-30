@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+@import url("https://fonts.googleapis.com/css2?family=Raleway&display=swap");
 :root {
   --text-clr: black;
   --bg-color: rgb(223, 223, 223);
@@ -12,7 +12,7 @@ html {
   background-color: var(--bg-color);
 }
 * {
-  font-family: cursive !important;
+  font-family: "Raleway", sans-serif !important;
   padding: 0;
   margin: 0;
   box-sizing: border-box;

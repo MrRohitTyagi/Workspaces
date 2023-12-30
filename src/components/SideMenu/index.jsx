@@ -1,23 +1,54 @@
 import { memo, useEffect, useState } from "react";
 import "./sidemenu.css";
-import { emitEvent, listenToEvent } from "../../utils/eventemitter";
+import { emitEvent, emitter, listenToEvent } from "../../utils/eventemitter";
 import { MenuItem, MenuList, Tooltip } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SendIcon from "@mui/icons-material/Send";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
-const menuStyles = {
-  padding: "15px",
-};
+
+const sideMenuConfig = [
+  {
+    label: "Componse",
+    event: "ADD_NEW_EMAIL",
+    tooltip: "Send new email",
+    icon: <FiberNewIcon />,
+  },
+  {
+    label: "Inbox",
+    event: "SHOW_ALL_INBOX",
+    tooltip: "Inbox",
+    icon: <AllInboxIcon />,
+  },
+  {
+    label: "Important",
+    event: "SHOW_ALL_STARRED",
+    tooltip: "Important",
+    icon: <StarBorderIcon />,
+  },
+  {
+    label: "Sent",
+    event: "SHOW_ALL_SENT",
+    tooltip: "Sent",
+    icon: <SendIcon />,
+  },
+  {
+    label: "Archived",
+    event: "SHOW_ALL_ARCHIVED",
+    tooltip: "Archived",
+    icon: <ArchiveIcon />,
+  },
+];
 
 const SideMenu = memo(() => {
+  const [isActive, setIsActive] = useState(1);
   const [isExpanded, setisExpanded] = useState(false);
   useEffect(() => {
     listenToEvent("EXPAND_COLLAPSE_SIDEBAR", () => setisExpanded((p) => !p));
 
     return () => {
-      // emitter.off("SOME_EVENT", eventListener);
+      emitter.off("EXPAND_COLLAPSE_SIDEBAR", () => {});
     };
   }, []);
 
@@ -29,50 +60,26 @@ const SideMenu = memo(() => {
       className="side-menu-container"
     >
       <MenuList>
-        <MenuItem sx={menuStyles} onClick={() => emitEvent("ADD_NEW_EMAIL")}>
-          <div className="menu-item">
-            <Tooltip title="Send new email">
-              <FiberNewIcon />
-            </Tooltip>
-            {isExpanded && <h4>Componse</h4>}
-          </div>
-        </MenuItem>
-        <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_INBOX")}>
-          <div className="menu-item">
-            <Tooltip title="Inbox">
-              <AllInboxIcon />
-            </Tooltip>
-
-            {isExpanded && <h4>Inbox</h4>}
-          </div>
-        </MenuItem>
-        <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_STARRED")}>
-          <div className="menu-item">
-            <Tooltip title="Important">
-              <StarBorderIcon />
-            </Tooltip>
-            {isExpanded && <h4>Starred</h4>}
-          </div>
-        </MenuItem>
-        <MenuItem sx={menuStyles} onClick={() => emitEvent("SHOW_ALL_SENT")}>
-          <div className="menu-item">
-            <Tooltip title="Sent">
-              <SendIcon />
-            </Tooltip>
-            {isExpanded && <h4>Sent</h4>}
-          </div>
-        </MenuItem>
-        <MenuItem
-          sx={menuStyles}
-          onClick={() => emitEvent("SHOW_ALL_ARCHIVED")}
-        >
-          <div className="menu-item">
-            <Tooltip title="Archived">
-              <ArchiveIcon />
-            </Tooltip>
-            {isExpanded && <h4>Important</h4>}
-          </div>
-        </MenuItem>
+        {sideMenuConfig.map((menu, i) => {
+          return (
+            <MenuItem
+              key={menu.label}
+              sx={{
+                padding: "15px",
+                background: isActive === i ? "#c1c1c1" : "transparent",
+              }}
+              onClick={() => {
+                emitEvent(menu.event);
+                setIsActive(i);
+              }}
+            >
+              <div className="menu-item">
+                <Tooltip title={menu.tooltip}>{menu.icon}</Tooltip>
+                {isExpanded && <h4>{menu.label}</h4>}
+              </div>
+            </MenuItem>
+          );
+        })}
       </MenuList>
     </div>
   );

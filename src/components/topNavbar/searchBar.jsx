@@ -8,6 +8,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { emitEvent } from "../../utils/eventemitter";
 
+let isLoaded = false;
+
 export default function SearchBar() {
   const [value, setvalue] = React.useState("");
 
@@ -17,10 +19,12 @@ export default function SearchBar() {
 
   React.useEffect(() => {
     // Set a timer for 500ms after the user stops typing
-    if (!value) return;
     const timerId = setTimeout(() => {
-      // Do something with the debounced value (e.g., make an API call)
-      emitEvent("GLOBAL_SEARCH_QUERY", value || "");
+      if (isLoaded) {
+        // Do something with the debounced value (e.g., make an API call)
+        emitEvent("GLOBAL_SEARCH_QUERY", value.trim() || "");
+      }
+      isLoaded = true;
     }, 500);
 
     // Clear the timer if the user continues typing within 500ms

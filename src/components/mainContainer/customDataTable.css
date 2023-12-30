@@ -21,7 +21,7 @@
   align-items: center;
 }
 .email-row:hover {
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 5px 15px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 20px;
 }
 .all-email-container {
   display: flex;
@@ -32,6 +32,7 @@
   width: 140px;
 }
 .body-box {
+  gap: 10px;
   height: 100%;
   align-items: center;
   justify-content: start;

@@ -20,7 +20,8 @@ import {
 import { emitter, listenToEvent } from "../../utils/eventemitter";
 import noRecorePlaceholder from "../../assets/noRecored-placeholder.png";
 import { socket } from "../../App";
-import PerEmailScreen from "../perEmailScreen";
+import PerEmailScreen from "../singleEmailScreen";
+import { truncateText } from "../../utils/helperFunctions";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -33,72 +34,23 @@ const MainContainer = () => {
   const { user } = useAuth0();
   const [emailData, setEmailData] = useState(undefined);
   const filterTrackerRef = useRef("");
-  const sortData = useCallback(
-    (allEmails, filterKey, globalQuery = "") => {
-      const emails = [];
-
-      switch (filterKey) {
-        case messages.SHOW_ALL_INBOX:
-          for (const em of allEmails) {
-            const isArchived = em.archivedBy.includes(user.email);
-            if (em.recipients.includes(user.email) && !isArchived) {
-              emails.push(em);
-            }
-          }
-          return emails;
-        case messages.SHOW_ALL_SENT:
-          for (const em of allEmails) {
-            const isArchived = em.archivedBy.includes(user.email);
-            if (em.sender === user.email && !isArchived) {
-              emails.push(em);
-            }
-          }
-          return emails;
-
-        case messages.SHOW_ALL_STARRED:
-          for (const em of allEmails) {
-            const isArchived = em.archivedBy.includes(user.email);
-            if (em.starredBy.includes(user.email) && !isArchived) {
-              emails.push(em);
-            }
-          }
-          return emails;
-        case messages.SHOW_ALL_ARCHIVED:
-          for (const em of allEmails) {
-            if (em.archivedBy.includes(user.email)) {
-              emails.push(em);
-            }
-          }
-          return emails;
-        case messages.GLOBAL_SEARCH_QUERY:
-          for (const em of allEmails) {
-            if (em.sender.includes(globalQuery)) {
-              emails.push(em);
-            }
-          }
-          return emails;
-
-        default:
-          return emails;
-      }
-    },
-    [user]
-  );
 
   const fetchData = useCallback(
     async (filterType, forcerefresh = false, globalQuery) => {
       if (filterType === filterTrackerRef.current && !forcerefresh) return;
       filterTrackerRef.current = filterType;
       setEmailData(undefined);
-      const { response } = await confugureUser(user.name, user.email);
-      const data = sortData(
-        response?.emailContent || [],
-        filterType,
-        globalQuery
+      const { response } = await confugureUser(
+        {
+          email: user.email,
+          name: user.name,
+          ...(globalQuery ? { globalQuery } : {}),
+        },
+        filterType
       );
-      setEmailData(data);
+      setEmailData(response?.emailContent);
     },
-    [sortData, user.email, user.name]
+    [user.email, user.name]
   );
 
   useEffect(() => {
@@ -107,7 +59,7 @@ const MainContainer = () => {
         fetchData(messages.SHOW_ALL_INBOX);
       }
     })();
-  }, [fetchData, sortData, user]);
+  }, [fetchData, user]);
 
   useEffect(() => {
     // Listen for messages from the server
@@ -273,8 +225,15 @@ const CustomDataTable = memo(
             />
           ) : (
             data.map((e) => {
-              const { subject, _id, body, starredBy, archivedBy, isUnread } =
-                e || {};
+              const {
+                subject,
+                _id,
+                body,
+                starredBy,
+                archivedBy,
+                isUnread,
+                sender,
+              } = e || {};
               return (
                 <div
                   key={_id}
@@ -345,8 +304,7 @@ const CustomDataTable = memo(
                     transition={{ duration: 0.5 }}
                     className="subject-box"
                   >
-                    {subject?.slice(0, 15)}
-                    {subject?.length > 15 ? "..." : ""}
+                    {truncateText(sender, 15)}
                   </motion.div>
                   <div className="divider" />
                   <motion.div
@@ -356,7 +314,10 @@ const CustomDataTable = memo(
                     transition={{ duration: 0.5 }}
                     className="body-box"
                   >
-                    {body}
+                    <div style={{ fontWeight: "bold" }}>
+                      {truncateText(subject, 25)}
+                    </div>
+                    -<div>{truncateText(body, 100)}</div>
                   </motion.div>
                 </div>
               );

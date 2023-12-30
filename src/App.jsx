@@ -4,10 +4,9 @@ import LoginScreen from "./components/loginScreen";
 import { ToastContainer } from "react-toastify";
 import { io } from "socket.io-client";
 import { useEffect } from "react";
-import PerEmailScreen from "./components/perEmailScreen";
+import PerEmailScreen from "./components/singleEmailScreen";
 
-
-const socket = io("https://workspaces-backend.vercel.app", {
+const socket = io(import.meta.env.VITE_BE_BASE_URL, {
   transports: ["websocket", "polling", "flashsocket"],
 });
 
@@ -37,7 +36,7 @@ function App() {
         newestOnTop
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
+        pauseOnFocusLoss={false}
         draggable
         theme="light"
       />
