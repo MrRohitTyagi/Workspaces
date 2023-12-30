@@ -47,7 +47,7 @@ export default function SearchBar() {
         onChange={(e) => setvalue(e.target.value)}
         sx={{ ml: 1, flex: 1 }}
         placeholder="Search Google Maps"
-        inputProps={{ "aria-label": "search google maps" }}
+        inputProps={{ "aria-label": "search by sender" }}
       />
       <IconButton
         type="button"

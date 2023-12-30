@@ -1,5 +1,6 @@
 import axios from "axios";
-const baseUrl = import.meta.env.VITE_BE_BASE_URL;
+// const baseUrl = import.meta.env.VITE_BE_BASE_URL;
+const baseUrl = "https://workspaces-backend.vercel.app/api/v1/";
 
 export async function caller(type, extendedUrl, body) {
   switch (type) {
