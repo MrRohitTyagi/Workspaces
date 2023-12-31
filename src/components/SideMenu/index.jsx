@@ -64,6 +64,7 @@ const SideMenu = memo(() => {
   return (
     <div
       style={{
+        zIndex: 100,
         width: isExpanded ? "12rem" : "4rem",
       }}
       className="side-menu-container"

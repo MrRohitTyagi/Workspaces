@@ -48,3 +48,19 @@
 
   justify-content: space-evenly;
 }
+.new-email-form-box {
+  width: 500px;
+  height: 500px;
+  max-width: 600px;
+}
+@media (max-width: 1000px) {
+  .new-email-container {
+    bottom: var(--navbar-height);
+  }
+  .refresh-button {
+    display: none;
+  }
+  .new-email-form-box {
+    width: 80vw;
+  }
+}

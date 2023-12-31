@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth0 } from "@auth0/auth0-react";
+import PullToRefresh from "react-simple-pull-to-refresh";
 
 import { IconButton, Skeleton, Tooltip } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -56,6 +57,7 @@ const MainContainer = () => {
         filterType
       );
       setEmailData(response?.emailContent);
+      return response;
     },
     [user]
   );
@@ -208,152 +210,163 @@ const CustomDataTable = memo(
       },
       [navigate]
     );
+    const handleRefresh = (e) => fetchData(filterTrackerRef.current, true);
 
     return (
-      <div className="email-container">
-        <div className="filters-comp">
-          <IconButton onClick={() => fetchData(filterTrackerRef.current, true)}>
-            <Tooltip title="Refresh">
-              <RefreshIcon />
-            </Tooltip>
-          </IconButton>
-        </div>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="email-container">
+          <div className="filters-comp refresh-button">
+            <IconButton
+              onClick={() => fetchData(filterTrackerRef.current, true)}
+            >
+              <Tooltip title="Refresh">
+                <RefreshIcon />
+              </Tooltip>
+            </IconButton>
+          </div>
 
-        <div className="all-email-container">
-          {data.length === 0 ? (
-            <motion.img
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              src={noRecorePlaceholder}
-              alt=""
-              height="50%"
-              width="50%"
-              style={{ alignSelf: "center" }}
-            />
-          ) : (
-            data.map((e) => {
-              const {
-                subject,
-                _id,
-                body,
-                starredBy,
-                archivedBy,
-                isUnread,
-                sender,
-              } = e || {};
-              return (
-                <div
-                  key={_id}
-                  className={isUnread ? `email-row unread` : `email-row`}
-                >
-                  <div className="action-items-cont">
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={varient}
+          <div className="all-email-container">
+            {data.length === 0 ? (
+              <motion.img
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                src={noRecorePlaceholder}
+                alt=""
+                height="50%"
+                width="50%"
+                style={{ alignSelf: "center" }}
+              />
+            ) : (
+              <ul className="reset-all">
+                {data.map((e) => {
+                  const {
+                    subject,
+                    _id,
+                    body,
+                    starredBy,
+                    archivedBy,
+                    isUnread,
+                    sender,
+                  } = e || {};
+                  return (
+                    <li
+                      key={_id}
+                      className={
+                        isUnread
+                          ? `email-row unread reset-all`
+                          : `reset-all email-row`
+                      }
                     >
-                      {starredBy.includes(user.email) ? (
-                        <IconButton
-                          sx={{ padding: "2px" }}
-                          disableRipple
-                          onClick={() => handleStarEmail(e, true)}
+                      <div className="action-items-cont">
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={varient}
                         >
-                          <Tooltip title="Mark As Unmportant">
-                            <StarIcon color="warning" />
-                          </Tooltip>
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          sx={{ padding: "2px" }}
-                          disableRipple
-                          onClick={() => handleStarEmail(e, false)}
+                          {starredBy.includes(user.email) ? (
+                            <IconButton
+                              sx={{ padding: "2px" }}
+                              disableRipple
+                              onClick={() => handleStarEmail(e, true)}
+                            >
+                              <Tooltip title="Mark As Unmportant">
+                                <StarIcon color="warning" />
+                              </Tooltip>
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              sx={{ padding: "2px" }}
+                              disableRipple
+                              onClick={() => handleStarEmail(e, false)}
+                            >
+                              <Tooltip title="Mark As Important">
+                                <StarBorderIcon />
+                              </Tooltip>
+                            </IconButton>
+                          )}
+                        </motion.div>
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={varient}
                         >
-                          <Tooltip title="Mark As Important">
-                            <StarBorderIcon />
-                          </Tooltip>
-                        </IconButton>
-                      )}
-                    </motion.div>
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={varient}
-                    >
-                      {archivedBy.includes(user.email) ? (
-                        <IconButton
-                          sx={{ padding: "2px" }}
-                          disableRipple
-                          onClick={() => handleArchiveEmail(e, true)}
+                          {archivedBy.includes(user.email) ? (
+                            <IconButton
+                              sx={{ padding: "2px" }}
+                              disableRipple
+                              onClick={() => handleArchiveEmail(e, true)}
+                            >
+                              <Tooltip title="Unarchive">
+                                <ArchiveIcon color="warning" />
+                              </Tooltip>
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              sx={{ padding: "2px" }}
+                              disableRipple
+                              onClick={() => handleArchiveEmail(e, false)}
+                            >
+                              <Tooltip title="Archive">
+                                <ArchiveIcon />
+                              </Tooltip>
+                            </IconButton>
+                          )}
+                        </motion.div>
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={varient}
                         >
-                          <Tooltip title="Unarchive">
-                            <ArchiveIcon color="warning" />
-                          </Tooltip>
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          sx={{ padding: "2px" }}
-                          disableRipple
-                          onClick={() => handleArchiveEmail(e, false)}
-                        >
-                          <Tooltip title="Archive">
-                            <ArchiveIcon />
-                          </Tooltip>
-                        </IconButton>
-                      )}
-                    </motion.div>
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      variants={varient}
-                    >
-                      <IconButton
-                        sx={{ padding: "2px" }}
-                        disableRipple
-                        onClick={async () => handleEmailDelete(_id)}
+                          <IconButton
+                            sx={{ padding: "2px" }}
+                            disableRipple
+                            onClick={async () => handleEmailDelete(_id)}
+                          >
+                            <Tooltip title="Delete">
+                              <DeleteForeverIcon color="error" />
+                            </Tooltip>
+                          </IconButton>
+                        </motion.div>
+                      </div>
+
+                      <motion.div
+                        onClick={() => handleEmailOpen(e)}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="sender-box"
                       >
-                        <Tooltip title="Delete">
-                          <DeleteForeverIcon color="error" />
-                        </Tooltip>
-                      </IconButton>
-                    </motion.div>
-                  </div>
-
-                  <motion.div
-                    onClick={() => handleEmailOpen(e)}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="sender-box"
-                  >
-                    {truncateText(sender, 15)}
-                  </motion.div>
-                  <div className="divider" />
-                  <motion.div
-                    onClick={() => handleEmailOpen(e)}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="body-box"
-                  >
-                    <div
-                      className="subject-box"
-                      style={{ textWrap: "nowrap", fontWeight: "bold" }}
-                    >
-                      {truncateText(subject, 25)}
-                    </div>
-                    <div className="dash">-</div>
-                    <div style={{ textWrap: "nowrap" }}>
-                      {/* {truncateText(body, window.innerWidth / 10)} */}
-                      {body}
-                    </div>
-                  </motion.div>
-                </div>
-              );
-            })
-          )}
+                        {truncateText(sender, 15)}
+                      </motion.div>
+                      <div className="divider" />
+                      <motion.div
+                        onClick={() => handleEmailOpen(e)}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="body-box"
+                      >
+                        <div
+                          className="subject-box"
+                          style={{ textWrap: "nowrap", fontWeight: "bold" }}
+                        >
+                          {truncateText(subject, 25)}
+                        </div>
+                        <div className="dash">-</div>
+                        <div style={{ textWrap: "nowrap" }}>
+                          {/* {truncateText(body, window.innerWidth / 10)} */}
+                          {body}
+                        </div>
+                      </motion.div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </div>
-      </div>
+      </PullToRefresh>
     );
   }
 );
