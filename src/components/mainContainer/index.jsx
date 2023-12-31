@@ -20,11 +20,11 @@ import {
 import { emitter, listenToEvent } from "../../utils/eventemitter";
 import noRecorePlaceholder from "../../assets/noRecored-placeholder.png";
 import { socket } from "../../App";
-import PerEmailScreen from "../singleEmailScreen";
 import { truncateText } from "../../utils/helperFunctions";
 
 import "./customDataTable.css";
 import "./maincontainer.css";
+import { useNavigate } from "react-router-dom";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -57,7 +57,7 @@ const MainContainer = () => {
       );
       setEmailData(response?.emailContent);
     },
-    [user.email, user.name]
+    [user]
   );
 
   useEffect(() => {
@@ -148,7 +148,8 @@ const CustomDataTable = memo(
     filterTrackerRef,
     updatePerEmail,
   }) => {
-    const [openOneEmail, setOpenOneEmail] = useState({});
+    const navigate = useNavigate();
+    // const [openOneEmail, setOpenOneEmail] = useState({});
 
     const handleEmailDelete = useCallback(
       async (_id) => {
@@ -200,22 +201,26 @@ const CustomDataTable = memo(
       },
       [updatePerEmail, user.email]
     );
-    const handleEmailOpen = useCallback((e) => {
-      setOpenOneEmail(e);
-    }, []);
 
-    if (openOneEmail._id) {
-      return (
-        <PerEmailScreen
-          handleStarEmail={handleStarEmail}
-          handleArchiveEmail={handleArchiveEmail}
-          user={user}
-          handleEmailDelete={handleEmailDelete}
-          email={openOneEmail}
-          setOpenOneEmail={setOpenOneEmail}
-        />
-      );
-    }
+    const handleEmailOpen = useCallback(
+      (e) => {
+        navigate(`/email/${e._id}`);
+      },
+      [navigate]
+    );
+
+    // if (openOneEmail._id) {
+    //   return (
+    //     <PerEmailScreen
+    //       handleStarEmail={handleStarEmail}
+    //       handleArchiveEmail={handleArchiveEmail}
+    //       user={user}
+    //       handleEmailDelete={handleEmailDelete}
+    //       email={openOneEmail}
+    //       setOpenOneEmail={setOpenOneEmail}
+    //     />
+    //   );
+    // }
 
     return (
       <div className="email-container">

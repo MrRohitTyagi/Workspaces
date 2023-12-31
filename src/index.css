@@ -20,8 +20,12 @@ html {
 .main-container {
   display: flex;
   flex-direction: row;
+  background-color: white;
 }
 svg {
   width: 21px !important;
   height: 21px !important;
+}
+*::-webkit-scrollbar {
+  width: 5px;
 }

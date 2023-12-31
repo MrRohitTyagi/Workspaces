@@ -16,3 +16,7 @@ export const updateEmail = async (payload) => {
   const { data } = await caller("put", `email/update-email`, payload);
   return data;
 };
+export const getEmail = async (id) => {
+  const { data } = await caller("get", `email/get-email/${id}`);
+  return data;
+};

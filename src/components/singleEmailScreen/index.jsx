@@ -10,28 +10,85 @@ import StarIcon from "@mui/icons-material/Star";
 
 import { capitalizeFirstLetter } from "../../utils/helperFunctions";
 import "./singleEmail.css";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useParams } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import {
+  deleteEmail,
+  getEmail,
+  updateEmail,
+} from "../../controllers/emailController";
+import { toast } from "react-toastify";
 
 const varient = {
   hidden: { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1 },
 };
 
-const PerEmailScreen = ({
-  user,
-  email,
-  setOpenOneEmail,
-  handleEmailDelete,
-  handleArchiveEmail,
-  handleStarEmail,
-}) => {
-  const { subject, _id, body, starredBy, archivedBy, isUnread, sender } =
-    email || {};
+const PerEmailScreen = () => {
+  const [email, setEmail] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth0();
+  const { id } = useParams();
+
+  const { subject, _id, body, starredBy, archivedBy, sender } = email || {};
+
+  const handleArchiveEmail = useCallback(
+    async (email, isArchived) => {
+      let archivedBy = email.archivedBy || [];
+
+      if (isArchived) {
+        archivedBy = archivedBy.filter((s) => s !== user.email);
+      } else {
+        archivedBy.push(user.email);
+      }
+      setEmail((prev) => ({ ...prev, archivedBy }));
+      await updateEmail({ ...email, archivedBy, updateingKey: "archivedBy" });
+      toast.success(isArchived ? "Email UnArchived!" : "Email Archived!");
+    },
+    [user]
+  );
+
+  const handleStarEmail = useCallback(
+    async (email, isStarred) => {
+      let starredBy = email.starredBy || [];
+      if (isStarred) {
+        starredBy = starredBy.filter((s) => s !== user.email);
+      } else {
+        starredBy.push(user.email);
+      }
+      setEmail((prev) => ({ ...prev, starredBy }));
+      await updateEmail({ ...email, starredBy, updateingKey: "starredBy" });
+      toast.success(isStarred ? "Email Unstarred!" : "Email Starred!");
+    },
+    [user]
+  );
+
+  const handleEmailDelete = useCallback(
+    async (_id) => {
+      await deleteEmail(_id, user.email);
+      toast.success("Email Deleted!");
+      window.history.back();
+    },
+    [user]
+  );
+
+  useEffect(() => {
+    (async function fetchEmaill() {
+      setIsLoading(true);
+      const { response } = await getEmail(id);
+      setEmail(response);
+      setIsLoading(false);
+    })();
+  }, [id]);
+
+  if (isLoading) return <div className="single-emailcontainer">Loading...</div>;
 
   return (
-    <>
+    <div className="single-email-container">
       <div className="filters-comp">
         <motion.div initial="hidden" animate="visible" variants={varient}>
-          <IconButton onClick={() => setOpenOneEmail({})}>
+          <IconButton onClick={() => window.history.back()}>
             <Tooltip title="Refresh">
               <ArrowBackIcon />
             </Tooltip>
@@ -91,7 +148,7 @@ const PerEmailScreen = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

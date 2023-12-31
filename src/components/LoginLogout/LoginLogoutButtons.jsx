@@ -3,23 +3,25 @@ import { Avatar, Button, CircularProgress, Tooltip } from "@mui/material";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginButton = () => {
-  const navigate = useNavigate();
-  const { isLoading, loginWithPopup, isAuthenticated } = useAuth0();
+  const { isLoading, loginWithPopup, isAuthenticated, handleRedirectCallback } =
+    useAuth0();
 
   if (isAuthenticated) {
-    navigate("/");
-    return;
+    return null;
   }
+  const handleLogin = () => {
+    loginWithPopup();
+  };
   return (
     <Tooltip title="Login">
       <Button
         size="small"
         variant="outlined"
-        onClick={() => loginWithPopup()}
+        onClick={handleLogin}
         disableFocusRipple
         disableRipple
         color="inherit"
@@ -42,10 +44,10 @@ const LoginButton = () => {
 const LogoutButton = memo(() => {
   const { logout, isLoading } = useAuth0();
 
-  const handleLogout = () => {
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    await logout();
     window.location.reload();
-    logout();
+    window.location.href = "/login";
   };
   return (
     <Tooltip title="Logout">
@@ -77,7 +79,9 @@ import Popover from "@mui/material/Popover";
 import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
 
 export function LoggedInUserProfile() {
-  const { user } = useAuth0();
+  const { user, isAuthenticated } = useAuth0();
+  const navigate = useNavigate();
+
   return (
     <PopupState variant="popover" popupId="demo-popup-popover-profile">
       {(popupState) => (

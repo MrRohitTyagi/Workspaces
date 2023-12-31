@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { MenuItem, MenuList, Tooltip } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -49,6 +50,7 @@ const varient = {
 };
 
 const SideMenu = memo(() => {
+  const navigate = useNavigate();
   const [isActive, setIsActive] = useState(1);
   const [isExpanded, setisExpanded] = useState(false);
   useEffect(() => {
@@ -76,6 +78,7 @@ const SideMenu = memo(() => {
                 background: isActive === i ? "#c1c1c1" : "transparent",
               }}
               onClick={() => {
+                // navigate(`/`);
                 emitEvent(menu.event);
                 setIsActive(i);
               }}

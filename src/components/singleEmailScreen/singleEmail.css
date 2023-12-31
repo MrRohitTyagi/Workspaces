@@ -13,12 +13,6 @@
   display: flex;
   flex-direction: row;
 }
-.br {
-  border: 1px solid red;
-}
-.bb {
-  border: 1px solid blue;
-}
-.bg {
-  border: 1px solid green;
+.single-email-container {
+  width: 100%;
 }
