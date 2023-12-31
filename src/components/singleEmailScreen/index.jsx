@@ -9,6 +9,7 @@ import ArchiveIcon from "@mui/icons-material/Archive";
 import StarIcon from "@mui/icons-material/Star";
 
 import { capitalizeFirstLetter } from "../../utils/helperFunctions";
+import Loader from "../Loader";
 import "./singleEmail.css";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useParams } from "react-router-dom";
@@ -82,7 +83,12 @@ const PerEmailScreen = () => {
     })();
   }, [id]);
 
-  if (isLoading) return <div className="single-emailcontainer">Loading...</div>;
+  if (isLoading)
+    return (
+      <div className="single-emailcontainer">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="single-email-container">
