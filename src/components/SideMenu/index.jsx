@@ -68,7 +68,7 @@ const SideMenu = memo(() => {
       }}
       className="side-menu-container"
     >
-      <MenuList>
+      <MenuList className="side-menu-icon-container">
         {sideMenuConfig.map((menu, i) => {
           return (
             <MenuItem

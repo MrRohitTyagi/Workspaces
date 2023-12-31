@@ -15,4 +15,11 @@
 }
 .single-email-container {
   width: 100%;
+  overflow-x: auto;
+}
+@media (max-width: 1250px) {
+  .single-email-container {
+    width: 100%;
+    height: calc(100vh - var(--navbar-height));
+  }
 }

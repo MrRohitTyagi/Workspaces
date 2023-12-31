@@ -4,9 +4,23 @@
   transition: all 500ms;
   overflow-x: hidden;
 }
+
 .menu-item {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 10px;
+}
+@media (max-width: 1250px) {
+  .side-menu-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    height: 4rem;
+    width: 100% !important;
+  }
+  .side-menu-icon-container {
+    display: flex;
+    justify-content: space-around;
+  }
 }

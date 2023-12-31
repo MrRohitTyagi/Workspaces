@@ -209,19 +209,6 @@ const CustomDataTable = memo(
       [navigate]
     );
 
-    // if (openOneEmail._id) {
-    //   return (
-    //     <PerEmailScreen
-    //       handleStarEmail={handleStarEmail}
-    //       handleArchiveEmail={handleArchiveEmail}
-    //       user={user}
-    //       handleEmailDelete={handleEmailDelete}
-    //       email={openOneEmail}
-    //       setOpenOneEmail={setOpenOneEmail}
-    //     />
-    //   );
-    // }
-
     return (
       <div className="email-container">
         <div className="filters-comp">
@@ -261,7 +248,6 @@ const CustomDataTable = memo(
                   className={isUnread ? `email-row unread` : `email-row`}
                 >
                   <div className="action-items-cont">
-                    {/* <Checkbox size="small" /> */}
                     <motion.div
                       initial="hidden"
                       animate="visible"
@@ -289,8 +275,6 @@ const CustomDataTable = memo(
                         </IconButton>
                       )}
                     </motion.div>
-
-                    {/* //ARCHIVED  */}
                     <motion.div
                       initial="hidden"
                       animate="visible"
@@ -334,12 +318,13 @@ const CustomDataTable = memo(
                       </IconButton>
                     </motion.div>
                   </div>
+
                   <motion.div
                     onClick={() => handleEmailOpen(e)}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="subject-box"
+                    className="sender-box"
                   >
                     {truncateText(sender, 15)}
                   </motion.div>
@@ -351,12 +336,16 @@ const CustomDataTable = memo(
                     transition={{ duration: 0.5 }}
                     className="body-box"
                   >
-                    <div style={{ textWrap: "nowrap", fontWeight: "bold" }}>
+                    <div
+                      className="subject-box"
+                      style={{ textWrap: "nowrap", fontWeight: "bold" }}
+                    >
                       {truncateText(subject, 25)}
                     </div>
-                    -
+                    <div className="dash">-</div>
                     <div style={{ textWrap: "nowrap" }}>
-                      {truncateText(body, 100)}
+                      {/* {truncateText(body, window.innerWidth / 10)} */}
+                      {body}
                     </div>
                   </motion.div>
                 </div>

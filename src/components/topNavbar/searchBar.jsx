@@ -38,13 +38,10 @@ export default function SearchBar() {
         p: "2px 4px",
         display: "flex",
         alignItems: "center",
-        width: 400,
+       
         background: "transparent",
       }}
     >
-      {/* <IconButton sx={{ p: "10px" }} aria-label="menu">
-        <MenuIcon />
-      </IconButton> */}
       <InputBase
         onKeyDown={handleSubmit}
         value={value}

@@ -64,7 +64,7 @@ const TopNavbar = memo(() => {
             noWrap
             component="div"
             className="app-name"
-            sx={{ display: { sm: "block" }, cursor: "pointer" }}
+            sx={{ display: { sm: "block", xs: "none" }, cursor: "pointer" }}
           >
             Workspaces
           </Typography>
