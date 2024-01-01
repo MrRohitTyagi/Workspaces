@@ -72,11 +72,8 @@ export default function RightDrawer() {
   }, [toggleDrawer]);
 
   return (
-    <React.Fragment key={"right"}>
-      <Button onClick={toggleDrawer}>{"right"}</Button>
-      <Drawer anchor={"right"} open={state} onClose={toggleDrawer}>
-        {list}
-      </Drawer>
-    </React.Fragment>
+    <Drawer anchor={"right"} open={state} onClose={toggleDrawer}>
+      {list}
+    </Drawer>
   );
 }
