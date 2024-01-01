@@ -13,11 +13,11 @@ import useAuth from "../../utils/useAuth";
 const ComposeEmail = () => {
   const { user } = useAuth();
 
-  const [newEmailCount, setNewEmailCount] = useState([]);
+  const [newEmailsTOSend, setNewEmailsToSend] = useState([]);
 
   useEffect(() => {
     listenToEvent("ADD_NEW_EMAIL", () => {
-      setNewEmailCount((p) => {
+      setNewEmailsToSend((p) => {
         if (p.length === 5) return p;
         return [
           ...p,
@@ -32,19 +32,19 @@ const ComposeEmail = () => {
   }, []);
 
   const filterEmails = useCallback((id) => {
-    setNewEmailCount((prev) => prev.filter((e) => e.id !== id));
+    setNewEmailsToSend((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
   console.log(
-    `%c newEmailCount `,
+    `%c newEmailsTOSend `,
     "color: #dada00;border:1px solid lightgreen",
-    newEmailCount
+    newEmailsTOSend
   );
   return (
     <div className="new-email-container">
-      {newEmailCount.map((e, i) => (
+      {newEmailsTOSend.map((e, i) => (
         <OneEmailBox
-          setNewEmailCount={setNewEmailCount}
+          setNewEmailsToSend={setNewEmailsToSend}
           user={user}
           key={i + e.id + e.isOpen}
           email={e}
@@ -61,11 +61,11 @@ const OneEmailBox = ({
   index,
   filterEmails,
   user,
-  setNewEmailCount,
+  setNewEmailsToSend,
 }) => {
   const handleEmailOpen = useCallback(
     (id) => {
-      setNewEmailCount((prev) => {
+      setNewEmailsToSend((prev) => {
         let arr = [];
         for (let i = 0; i < prev.length; i++) {
           const perEmail = prev[i];
@@ -78,7 +78,7 @@ const OneEmailBox = ({
         return [...arr];
       });
     },
-    [setNewEmailCount]
+    [setNewEmailsToSend]
   );
 
   const isOpen = email.isOpen;
@@ -115,7 +115,7 @@ const OneEmailBox = ({
       </div>
       {isOpen && (
         <NewEmail
-          setNewEmailCount={setNewEmailCount}
+          setNewEmailsToSend={setNewEmailsToSend}
           user={user}
           filterEmails={filterEmails}
           email={email}

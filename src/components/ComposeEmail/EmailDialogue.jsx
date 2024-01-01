@@ -16,7 +16,7 @@ const EmailDialogue = ({
   open,
   user,
   email,
-  setNewEmailCount,
+  setNewEmailsToSend,
   filterEmails,
 }) => {
   const [formData, setFormData] = useState({
@@ -24,7 +24,7 @@ const EmailDialogue = ({
   });
 
   const handleClose = useCallback(() => {
-    setNewEmailCount((prev) => {
+    setNewEmailsToSend((prev) => {
       let arr = [];
       for (let i = 0; i < prev.length; i++) {
         const perEmail = prev[i];
@@ -43,7 +43,7 @@ const EmailDialogue = ({
       console.log("arr", arr);
       return [...arr];
     });
-  }, [email.id, formData, setNewEmailCount]);
+  }, [email.id, formData, setNewEmailsToSend]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
