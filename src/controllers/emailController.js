@@ -20,3 +20,7 @@ export const getEmail = async (id) => {
   const { data } = await caller("get", `email/get-email/${id}`);
   return data;
 };
+export const searchEmail = async (query) => {
+  const { data } = await caller("get", `email/search?search=${query}`);
+  return data;
+};

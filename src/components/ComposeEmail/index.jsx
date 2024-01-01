@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { memo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./componeEmail.css";
 import { listenToEvent, emitter } from "../../utils/eventemitter";
 import CloseIcon from "@mui/icons-material/Close";
@@ -21,7 +21,7 @@ const ComposeEmail = () => {
         if (p.length === 5) return p;
         return [
           ...p,
-          { id: v4(), to: "", subject: "", body: "", isOpen: true, ...data },
+          { id: v4(), to: [], subject: "", body: "", isOpen: true, ...data },
         ];
       });
     });

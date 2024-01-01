@@ -41,6 +41,7 @@
   padding: 10px;
 }
 .form-email {
+  gap: 6px;
   width: 100%;
   display: flex;
   flex-direction: column;

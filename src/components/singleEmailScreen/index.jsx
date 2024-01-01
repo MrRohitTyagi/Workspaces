@@ -25,11 +25,12 @@ import useAuth from "../../utils/useAuth";
 import { getUser } from "../../controllers/userController";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { emitter } from "../../utils/eventemitter";
-import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
+import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 const varient = {
   hidden: { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1 },
 };
+let done = false;
 
 const PerEmailScreen = () => {
   const [email, setEmail] = useState({});
@@ -90,14 +91,14 @@ const PerEmailScreen = () => {
   }, [id]);
 
   useEffect(() => {
-    if (!email._id) return;
+    if (!email._id || done) return;
 
     (async function () {
       const { response } = await getUser({
         type: "GET-BY-EMAIL",
         email: email.sender,
       });
-
+      done = true;
       setAvatarImage(response.picture);
     })();
   }, [email]);
@@ -159,7 +160,7 @@ const PerEmailScreen = () => {
         </motion.div>
       </div>
       <div className="single-emailcontainer">
-        <h3>{capitalizeFirstLetter(subject)}</h3>
+        <h3 style={{ marginLeft: "10px" }}>{capitalizeFirstLetter(subject)}</h3>
 
         <div className="fdhjsbfdsafd">
           <div className="account-icon">
@@ -180,8 +181,12 @@ const PerEmailScreen = () => {
               <BodyRenderer str={body} />
               <div className="fordard-reply-box">
                 <Button
-                size="small"
-                  onClick={() => emitter.emit("ADD_NEW_EMAIL", { to: sender })}
+                  size="small"
+                  onClick={() =>
+                    emitter.emit("ADD_NEW_EMAIL", {
+                      to: [{ label: sender, value: sender }],
+                    })
+                  }
                   sx={{ alignSelf: "start" }}
                   variant="outlined"
                   startIcon={<ReplyIcon />}
@@ -189,7 +194,7 @@ const PerEmailScreen = () => {
                   Reply
                 </Button>
                 <Button
-                size="small"
+                  size="small"
                   onClick={() =>
                     emitter.emit("ADD_NEW_EMAIL", {
                       body: body,

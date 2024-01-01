@@ -1,17 +1,17 @@
 /* eslint-disable react/prop-types */
-import { useCallback, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import Textarea from "@mui/joy/Textarea";
 
 import Dialog from "@mui/material/Dialog";
-import { Button, IconButton, Input, TextField } from "@mui/material";
+import { Button, IconButton, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 
-import { createEmail } from "../../controllers/emailController";
+import { createEmail, searchEmail } from "../../controllers/emailController";
 import "./componeEmail.css";
-import { styled, alpha } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 
 const StyledTextArea = styled(Textarea)`
   > textarea {
@@ -34,12 +34,10 @@ const EmailDialogue = ({
       let arr = [];
       for (let i = 0; i < prev.length; i++) {
         const perEmail = prev[i];
-        if (perEmail.id === email.id) {
-        } else {
+        if (perEmail.id !== email.id) {
           arr.push(perEmail);
         }
       }
-      console.log("arr", arr);
       return [...arr];
     });
   }, [email.id, setNewEmailsToSend]);
@@ -52,11 +50,12 @@ const EmailDialogue = ({
     const { email: sender } = user;
 
     const { body, subject, to, id } = formData;
+
     const payload = {
       sender,
       body,
       subject,
-      recipients: [to],
+      recipients: to.map((e) => e.value),
       archivedBy: [],
       starredBy: [],
     };
@@ -66,6 +65,12 @@ const EmailDialogue = ({
     toast.success(`Email Sent!`);
   };
 
+  const handleRecipientsOnchange = useCallback((val) => {
+    setFormData((prev) => {
+      return { ...prev, to: val };
+    });
+  }, []);
+  console.log("formData", formData);
   return (
     <Dialog open={open} onClose={handleClose}>
       <div className="new-email-form-box">
@@ -78,17 +83,9 @@ const EmailDialogue = ({
         <div className="form-container">
           <form onSubmit={onSubmit}>
             <div className="form-email">
-              <TextField
-                size="small"
-                value={formData.to}
-                onChange={handleChange}
-                name="to"
-                sx={{
-                  width: "100%",
-                  border: "none",
-                }}
-                placeholder="To"
-                id="to"
+              <CustomSelect
+                to={formData.to || []}
+                handleRecipientsOnchange={handleRecipientsOnchange}
               />
               <TextField
                 size="small"
@@ -135,5 +132,55 @@ const EmailDialogue = ({
     </Dialog>
   );
 };
+
+import AsyncSelect from "react-select/async";
+
+import { debounce } from "lodash";
+
+const CustomSelect = memo(({ handleRecipientsOnchange, to = [] }) => {
+  const [selectedOptions, setSelectedOptions] = useState(to);
+
+  const debouncedLoadOptions = debounce(async (inputValue, callback) => {
+    try {
+      const { response = [] } = await searchEmail(inputValue);
+
+      const options = response.map((r) => ({
+        label: r.email,
+        value: r.email,
+      }));
+
+      callback(options);
+    } catch (error) {
+      console.error("Error fetching options:", error);
+      callback([]);
+    }
+  }, 500);
+
+  const loadOptions = (inputValue, callback) => {
+    debouncedLoadOptions(inputValue, callback);
+  };
+  const handleChange = useCallback(
+    (selectedValues) => {
+      setSelectedOptions(selectedValues);
+
+      handleRecipientsOnchange(selectedValues);
+    },
+    [handleRecipientsOnchange]
+  );
+
+  return (
+    <AsyncSelect
+      isMulti
+      labelKey="email"
+      value={selectedOptions}
+      loadOptions={loadOptions}
+      onChange={handleChange}
+      isClearable
+      placeholder="Type to search and select"
+    />
+  );
+});
+
+CustomSelect.displayName = "CustomSelect";
 
 export default EmailDialogue;
