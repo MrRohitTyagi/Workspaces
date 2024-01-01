@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, memo, useEffect, useState } from "react";
 import { isEmpty } from "lodash";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -10,8 +10,10 @@ import Loader from "../Loader";
 const socket = io(import.meta.env.VITE_BE_BASE_URL, {
   transports: ["websocket", "polling", "flashsocket"],
 });
+
 const AuthProvider = createContext();
-function Authorize({ children }) {
+
+const Authorize = memo(({ children }) => {
   const navigate = useNavigate();
 
   const [authObj, setauthObj] = useState({
@@ -50,7 +52,7 @@ function Authorize({ children }) {
         setauthObj({ isLoading: false, isAuthenticated: true, user: response });
       }
     })();
-  }, [navigate]);
+  }, []);
 
   return (
     <AuthProvider.Provider
@@ -63,7 +65,7 @@ function Authorize({ children }) {
       {authObj.isLoading ? <Loader /> : children}
     </AuthProvider.Provider>
   );
-}
-
+});
+Authorize.displayName = "Authorize";
 export default Authorize;
 export { AuthProvider, socket };

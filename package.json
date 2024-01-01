@@ -1,7 +1,7 @@
 {
   "name": "vite-project",
   "private": true,
-  "version": "1.0.21",
+  "version": "1.0.22",
   "type": "module",
   "scripts": {
     "start": "vite --port 3000",
@@ -23,6 +23,7 @@
     "eventemitter3": "^5.0.1",
     "framer-motion": "^10.16.16",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "material-react-table": "^2.1.0",
     "material-ui-popup-state": "^5.0.10",

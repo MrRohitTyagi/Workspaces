@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,9 +7,13 @@ import { toast } from "react-toastify";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import "./loginscreen.css"; // Assuming you have a separate CSS file (App.css) for styling
-import { IconButton, InputAdornment } from "@mui/material";
+import { Divider, IconButton, InputAdornment } from "@mui/material";
 import { createUser, getUser } from "../../controllers/userController";
 import { setCookie } from "../../utils/cookieHandler";
+
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+
 const varients = {
   hidden: { y: -50, opacity: 0 },
   visible: { y: 0, opacity: 1 },
@@ -59,33 +63,55 @@ function App() {
     return isValid;
   }, [formData.email, formData.password, formData.username, isSigninForm]);
 
+  const createOrGetuser = useCallback(
+    async (submitPayload, type, isGoogleLogin = false) => {
+      let user;
+      if (isSigninForm || isGoogleLogin) {
+        const { response } = await getUser({ ...submitPayload, type: type });
+        user = response;
+      } else {
+        const { response } = await createUser({ ...submitPayload, type: type });
+        user = response;
+      }
+      return user;
+    },
+    [isSigninForm]
+  );
+
   const handleSubmit = useCallback(
-    async (event) => {
-      event.preventDefault();
-
-      if (validateForm()) {
-        // Handle form submission logic here
-        let user;
-        if (isSigninForm) {
-          const { response } = await getUser({ ...formData, type: "SIGN-IN" });
-          user = response;
-        } else {
-          const { response } = await createUser({
-            ...formData,
-            type: "SIGN-UP",
-          });
-          user = response;
-        }
-
-        setCookie(user._id);
-        toast.success(
-          isSigninForm ? "Sign - Up Successful" : "Sign - In Successful"
+    async (event, payload, isGoogleLogin) => {
+      if (event) event.preventDefault();
+      const submitPayload = payload || formData;
+      console.log(
+        `%c submitPayload `,
+        "color: green;border:1px solid green",
+        submitPayload
+      );
+      if (isGoogleLogin) {
+        const user = await createOrGetuser(
+          submitPayload,
+          "GOOGLE_LOGIN",
+          isGoogleLogin
         );
-        // window.location.reload();
+        setCookie(user._id);
+        toast.success("Sign - In Successful");
         window.location.href = "/";
+      } else {
+        if (validateForm()) {
+          const user = await createOrGetuser(
+            submitPayload,
+            isSigninForm ? "SIGN-IN" : "SIGN-UP"
+          );
+          setCookie(user._id);
+          toast.success(
+            isSigninForm ? "Sign - Up Successful" : "Sign - In Successful"
+          );
+
+          window.location.href = "/";
+        }
       }
     },
-    [formData, isSigninForm, validateForm]
+    [createOrGetuser, formData, isSigninForm, validateForm]
   );
 
   const handleChange = (e) => {
@@ -99,12 +125,16 @@ function App() {
       [e.target.name]: "",
     });
   };
-
+  const formref = useRef();
   return (
     <AnimatePresence>
       <div className="login-form-container">
         <div className="form-container-login">
-          <form onSubmit={handleSubmit} className="login-actual-form">
+          <form
+            ref={formref}
+            onSubmit={handleSubmit}
+            className="login-actual-form"
+          >
             <motion.h2 animate={{ y: 0 }} initial={{ y: -50 }} className="tac">
               {isSigninForm ? "Sign - In" : "Sign - Up"}
             </motion.h2>
@@ -189,12 +219,13 @@ function App() {
               transition="transition"
             >
               <Button
+                size="small"
                 type="submit"
                 variant="contained"
                 color="primary"
                 fullWidth
               >
-                Submit
+                Continue
               </Button>
             </motion.div>
             <motion.div
@@ -208,6 +239,34 @@ function App() {
                 {isSigninForm ? "Sign - Up" : "Sign - In"}
               </h6>
             </motion.div>
+            <div className="or-cont">
+              <Divider orientation="horizontal" sx={{ flexGrow: 1 }} />
+              <h4>OR</h4>
+              <Divider orientation="horizontal" sx={{ flexGrow: 1 }} />
+            </div>
+            <div className="google-button-login">
+              <GoogleLogin
+                cancel_on_tap_outside
+                onSuccess={(credentialResponse) => {
+                  const res = jwtDecode(credentialResponse.credential);
+                  const payload = {
+                    username: res.name,
+                    email: res.email,
+                    picture: res.picture,
+                    password: res.sub,
+                  };
+                  console.log(
+                    `%c payload `,
+                    "color: yellow;border:1px solid lightgreen",
+                    { payload, res }
+                  );
+                  handleSubmit(undefined, payload, true);
+                }}
+                onError={() => {
+                  console.log("Login Failed");
+                }}
+              />
+            </div>
           </form>
         </div>
       </div>
