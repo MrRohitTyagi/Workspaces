@@ -25,7 +25,22 @@ function App() {
         <div className="main-container">
           {isAuthenticated && <SideMenu />}
           <Routes>
-            <Route path="/" element={<MainContainer />} />
+            <Route
+              path="/inbox"
+              element={<MainContainer key={`inbox-${pathname}`} />}
+            />
+            <Route
+              path="/star"
+              element={<MainContainer key={`star-${pathname}`} />}
+            />
+            <Route
+              path="/sent"
+              element={<MainContainer key={`sent-${pathname}`} />}
+            />
+            <Route
+              path="/archived"
+              element={<MainContainer key={`archived-${pathname}`} />}
+            />
             <Route path="/email/:id" element={<PerEmailScreen />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/email/:id" element={<PerEmailScreen />} />

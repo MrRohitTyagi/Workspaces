@@ -91,7 +91,7 @@ function App() {
         );
         setCookie(user._id);
         toast.success("Sign - In Successful");
-        window.location.href = "/";
+        window.location.href = "/inbox";
       } else {
         if (validateForm()) {
           const user = await createOrGetuser(
@@ -103,7 +103,7 @@ function App() {
             isSigninForm ? "Sign - Up Successful" : "Sign - In Successful"
           );
 
-          window.location.href = "/";
+          window.location.href = "/inbox";
         }
       }
     },

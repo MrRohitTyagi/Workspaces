@@ -70,7 +70,7 @@ const EmailDialogue = ({
       return { ...prev, to: val };
     });
   }, []);
-  console.log("formData", formData);
+  
   return (
     <Dialog open={open} onClose={handleClose}>
       <div className="new-email-form-box">

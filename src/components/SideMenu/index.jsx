@@ -23,24 +23,28 @@ const sideMenuConfig = [
     event: "SHOW_ALL_INBOX",
     tooltip: "Inbox",
     icon: <AllInboxIcon />,
+    navUrl: "/inbox",
   },
   {
     label: "Important",
     event: "SHOW_ALL_STARRED",
     tooltip: "Important",
     icon: <StarBorderIcon />,
+    navUrl: "/star",
   },
   {
     label: "Sent",
     event: "SHOW_ALL_SENT",
     tooltip: "Sent",
     icon: <SendIcon />,
+    navUrl: "/sent",
   },
   {
     label: "Archived",
     event: "SHOW_ALL_ARCHIVED",
     tooltip: "Archived",
     icon: <ArchiveIcon />,
+    navUrl: "/archived",
   },
 ];
 
@@ -79,10 +83,9 @@ const SideMenu = memo(() => {
                 background: isActive === i ? "#c1c1c1" : "transparent",
               }}
               onClick={() => {
-                // navigate(`/`);
-                emitEvent(menu.event);
-                if (i === 0) return;
-                setIsActive(i);
+                if (i === 0) emitEvent(menu.event);
+                else navigate(menu.navUrl);
+                if (i !== 0) setIsActive(i);
               }}
             >
               <div className="menu-item">

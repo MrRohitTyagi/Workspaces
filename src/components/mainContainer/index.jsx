@@ -25,7 +25,7 @@ import { truncateText } from "../../utils/helperFunctions";
 
 import "./customDataTable.css";
 import "./maincontainer.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../utils/useAuth";
 import { socket } from "../authorizeUser";
 import Loader from "../Loader";
@@ -37,18 +37,27 @@ const messages = {
   SHOW_ALL_ARCHIVED: "SHOW_ALL_ARCHIVED",
   GLOBAL_SEARCH_QUERY: "GLOBAL_SEARCH_QUERY",
 };
+const filterObjs = {
+  "/inbox": "SHOW_ALL_INBOX",
+  "/star": "SHOW_ALL_STARRED",
+  "/sent": "SHOW_ALL_SENT",
+  "/archived": "SHOW_ALL_ARCHIVED",
+  GLOBAL_SEARCH_QUERY: "GLOBAL_SEARCH_QUERY",
+};
+
 const varient = {
   hidden: { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1 },
 };
 const MainContainer = () => {
+  const { pathname } = useLocation();
+
   const { user } = useAuth();
   const [emailData, setEmailData] = useState(undefined);
-  const filterTrackerRef = useRef("");
+  const filterTrackerRef = useRef(filterObjs[pathname]);
 
   const fetchData = useCallback(
     async (filterType, forcerefresh = false, globalQuery) => {
-      if (filterType === filterTrackerRef.current && !forcerefresh) return;
       filterTrackerRef.current = filterType;
       setEmailData(undefined);
       const { response } = await confugureUser(
@@ -68,7 +77,7 @@ const MainContainer = () => {
   useEffect(() => {
     (async function fetchUser() {
       if (user) {
-        fetchData(messages.SHOW_ALL_INBOX);
+        fetchData(filterTrackerRef.current);
       }
     })();
   }, [fetchData, user]);
