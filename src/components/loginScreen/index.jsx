@@ -24,8 +24,8 @@ function App() {
   const [visible, setVisible] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
-    email: "t@t.com",
-    password: "123456A",
+    email: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({});
