@@ -47,3 +47,9 @@
   align-items: center;
   gap: 10px;
 }
+.sign-in-loader {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
