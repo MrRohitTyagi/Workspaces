@@ -7,7 +7,12 @@ import { toast } from "react-toastify";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import "./loginscreen.css"; // Assuming you have a separate CSS file (App.css) for styling
-import { Divider, IconButton, InputAdornment } from "@mui/material";
+import {
+  CircularProgress,
+  Divider,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import { createUser, getUser } from "../../controllers/userController";
 import { setCookie } from "../../utils/cookieHandler";
 
@@ -27,6 +32,7 @@ function App() {
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const [errors, setErrors] = useState({});
 
@@ -80,6 +86,7 @@ function App() {
 
   const handleSubmit = useCallback(
     async (event, payload, isGoogleLogin) => {
+      setIsLoading(true);
       if (event) event.preventDefault();
       const submitPayload = payload || formData;
 
@@ -106,6 +113,7 @@ function App() {
           window.location.href = "/inbox";
         }
       }
+      setIsLoading(false);
     },
     [createOrGetuser, formData, isSigninForm, validateForm]
   );
@@ -221,7 +229,14 @@ function App() {
                 color="primary"
                 fullWidth
               >
-                Continue
+                {isLoading ? (
+                  <div className="sign-in-loader">
+                    <CircularProgress sx={{ color: "white" }} size={"small"} />
+                    Please Wait.
+                  </div>
+                ) : (
+                  "Continue"
+                )}
               </Button>
             </motion.div>
             <motion.div
