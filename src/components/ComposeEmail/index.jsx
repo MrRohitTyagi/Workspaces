@@ -16,12 +16,12 @@ const ComposeEmail = () => {
   const [newEmailsTOSend, setNewEmailsToSend] = useState([]);
 
   useEffect(() => {
-    listenToEvent("ADD_NEW_EMAIL", () => {
+    listenToEvent("ADD_NEW_EMAIL", (data) => {
       setNewEmailsToSend((p) => {
         if (p.length === 5) return p;
         return [
           ...p,
-          { id: v4(), to: "", subject: "", body: "", isOpen: true },
+          { id: v4(), to: "", subject: "", body: "", isOpen: true, ...data },
         ];
       });
     });
@@ -35,11 +35,6 @@ const ComposeEmail = () => {
     setNewEmailsToSend((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
-  console.log(
-    `%c newEmailsTOSend `,
-    "color: #dada00;border:1px solid lightgreen",
-    newEmailsTOSend
-  );
   return (
     <div className="new-email-container">
       {newEmailsTOSend.map((e, i) => (

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
+import { startCase } from "lodash";
 
-import { IconButton, Tooltip } from "@mui/material";
+import { Avatar, Button, IconButton, Skeleton, Tooltip } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -21,7 +22,10 @@ import {
 } from "../../controllers/emailController";
 import { toast } from "react-toastify";
 import useAuth from "../../utils/useAuth";
-
+import { getUser } from "../../controllers/userController";
+import ReplyIcon from "@mui/icons-material/Reply";
+import { emitter } from "../../utils/eventemitter";
+import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
 const varient = {
   hidden: { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1 },
@@ -29,8 +33,9 @@ const varient = {
 
 const PerEmailScreen = () => {
   const [email, setEmail] = useState({});
+  const [avatarImage, setAvatarImage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const { user }  =useAuth();
+  const { user } = useAuth();
   const { id } = useParams();
 
   const { subject, _id, body, starredBy, archivedBy, sender } = email || {};
@@ -83,6 +88,19 @@ const PerEmailScreen = () => {
       setIsLoading(false);
     })();
   }, [id]);
+
+  useEffect(() => {
+    if (!email._id) return;
+
+    (async function () {
+      const { response } = await getUser({
+        type: "GET-BY-EMAIL",
+        email: email.sender,
+      });
+
+      setAvatarImage(response.picture);
+    })();
+  }, [email]);
 
   if (isLoading)
     return (
@@ -145,12 +163,46 @@ const PerEmailScreen = () => {
 
         <div className="fdhjsbfdsafd">
           <div className="account-icon">
-            <AccountCircleIcon />
+            {avatarImage ? (
+              <Avatar src={avatarImage} alt={<AccountCircleIcon />} />
+            ) : (
+              <Skeleton
+                animation="wave"
+                variant="circular"
+                width={40}
+                height={40}
+              />
+            )}
           </div>
           <div className="single-email-from-cont">
-            <h5>{sender}</h5>
+            <h5> {capitalizeFirstLetter(sender)}</h5>
             <div className="single-email-body">
               <BodyRenderer str={body} />
+              <div className="fordard-reply-box">
+                <Button
+                size="small"
+                  onClick={() => emitter.emit("ADD_NEW_EMAIL", { to: sender })}
+                  sx={{ alignSelf: "start" }}
+                  variant="outlined"
+                  startIcon={<ReplyIcon />}
+                >
+                  Reply
+                </Button>
+                <Button
+                size="small"
+                  onClick={() =>
+                    emitter.emit("ADD_NEW_EMAIL", {
+                      body: body,
+                      subject: subject,
+                    })
+                  }
+                  sx={{ alignSelf: "start" }}
+                  variant="outlined"
+                  startIcon={<ArrowOutwardIcon />}
+                >
+                  Forward
+                </Button>
+              </div>
             </div>
           </div>
         </div>

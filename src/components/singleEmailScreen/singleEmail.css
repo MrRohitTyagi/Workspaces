@@ -17,6 +17,16 @@
   width: 100%;
   overflow-x: auto;
 }
+.single-email-body {
+  gap: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.fordard-reply-box{
+  gap: 5px;
+  display: flex;
+  flex-direction: row;
+}
 @media (max-width: 1250px) {
   .single-email-container {
     width: 100%;

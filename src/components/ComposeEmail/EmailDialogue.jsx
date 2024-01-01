@@ -4,14 +4,20 @@ import { toast } from "react-toastify";
 import Textarea from "@mui/joy/Textarea";
 
 import Dialog from "@mui/material/Dialog";
-import { Button, IconButton, Input } from "@mui/material";
+import { Button, IconButton, Input, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 
 import { createEmail } from "../../controllers/emailController";
 import "./componeEmail.css";
+import { styled, alpha } from "@mui/material/styles";
 
+const StyledTextArea = styled(Textarea)`
+  > textarea {
+    overflow: auto !important;
+  }
+`;
 const EmailDialogue = ({
   open,
   user,
@@ -29,13 +35,6 @@ const EmailDialogue = ({
       for (let i = 0; i < prev.length; i++) {
         const perEmail = prev[i];
         if (perEmail.id === email.id) {
-          console.log("aya");
-          arr.push({
-            ...perEmail,
-            ...formData,
-            isOpen: false,
-            [Date.now()]: Date.now(),
-          });
         } else {
           arr.push(perEmail);
         }
@@ -43,7 +42,7 @@ const EmailDialogue = ({
       console.log("arr", arr);
       return [...arr];
     });
-  }, [email.id, formData, setNewEmailsToSend]);
+  }, [email.id, setNewEmailsToSend]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -79,7 +78,8 @@ const EmailDialogue = ({
         <div className="form-container">
           <form onSubmit={onSubmit}>
             <div className="form-email">
-              <Input
+              <TextField
+                size="small"
                 value={formData.to}
                 onChange={handleChange}
                 name="to"
@@ -90,7 +90,8 @@ const EmailDialogue = ({
                 placeholder="To"
                 id="to"
               />
-              <Input
+              <TextField
+                size="small"
                 value={formData.subject}
                 onChange={handleChange}
                 sx={{ width: "100%", borderBottom: "1px solid rgba()" }}
@@ -98,14 +99,14 @@ const EmailDialogue = ({
                 id="subject"
                 name="subject"
               />
-              <Textarea
+              <StyledTextArea
                 onFocus={(e) => (e.target.style.outline = "none")}
                 value={formData.body}
                 onChange={handleChange}
                 minRows={2}
                 name="body"
                 sx={{
-                  padding: "0px",
+                  padding: "15px",
                   width: "100%",
                   height: "300px",
                   border: "none",
