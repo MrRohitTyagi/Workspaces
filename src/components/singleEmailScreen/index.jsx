@@ -11,7 +11,7 @@ import StarIcon from "@mui/icons-material/Star";
 import { capitalizeFirstLetter } from "../../utils/helperFunctions";
 import Loader from "../Loader";
 import "./singleEmail.css";
-import { useAuth0 } from "@auth0/auth0-react";
+
 import { useParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -20,6 +20,7 @@ import {
   updateEmail,
 } from "../../controllers/emailController";
 import { toast } from "react-toastify";
+import useAuth from "../../utils/useAuth";
 
 const varient = {
   hidden: { scale: 0, opacity: 0 },
@@ -29,7 +30,7 @@ const varient = {
 const PerEmailScreen = () => {
   const [email, setEmail] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth0();
+  const { user }  =useAuth();
   const { id } = useParams();
 
   const { subject, _id, body, starredBy, archivedBy, sender } = email || {};

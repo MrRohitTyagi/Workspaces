@@ -2,7 +2,7 @@
 import { toast } from "react-toastify";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth0 } from "@auth0/auth0-react";
+
 import PullToRefresh from "react-simple-pull-to-refresh";
 
 import { IconButton, Skeleton, Tooltip } from "@mui/material";
@@ -20,12 +20,15 @@ import {
 } from "../../controllers/emailController";
 import { emitter, listenToEvent } from "../../utils/eventemitter";
 import noRecorePlaceholder from "../../assets/noRecored-placeholder.png";
-import { socket } from "../../App";
+
 import { truncateText } from "../../utils/helperFunctions";
 
 import "./customDataTable.css";
 import "./maincontainer.css";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../utils/useAuth";
+import { socket } from "../authorizeUser";
+import Loader from "../Loader";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -39,7 +42,7 @@ const varient = {
   visible: { scale: 1, opacity: 1 },
 };
 const MainContainer = () => {
-  const { user } = useAuth0();
+  const { user } = useAuth();
   const [emailData, setEmailData] = useState(undefined);
   const filterTrackerRef = useRef("");
 
@@ -125,7 +128,8 @@ const MainContainer = () => {
   return (
     <motion.div className="main-email-container">
       {emailData === undefined ? (
-        <CustomDataTableSkeletonLoader />
+        // <CustomDataTableSkeletonLoader />
+        <Loader />
       ) : (
         // <DataTable data={emailData} columns={columns} />
         <CustomDataTable
@@ -354,8 +358,7 @@ const CustomDataTable = memo(
                           {truncateText(subject, 25)}
                         </div>
                         <div className="dash">-</div>
-                        <div style={{ textWrap: "nowrap" }}>
-                          {/* {truncateText(body, window.innerWidth / 10)} */}
+                        <div style={{ textWrap: "nowrap", opacity: "60%" }}>
                           {body}
                         </div>
                       </motion.div>
@@ -372,20 +375,20 @@ const CustomDataTable = memo(
 );
 CustomDataTable.displayName = "CustomDataTable";
 
-const CustomDataTableSkeletonLoader = ({ data = [1, 2, 3, 4, 5, 6] }) => {
-  return (
-    <div className="email-container">
-      <div className="filters-comp"></div>
-      <div className="all-email-container">
-        {data.map((_, i) => {
-          return (
-            <div key={i} className="email-row skeleton-row">
-              <Skeleton animation="wave" height={"100%"} width={"100%"} />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+// const CustomDataTableSkeletonLoader = ({ data = [1, 2, 3, 4, 5, 6] }) => {
+//   return (
+//     <div className="email-container">
+//       <div className="filters-comp"></div>
+//       <div className="all-email-container">
+//         {data.map((_, i) => {
+//           return (
+//             <div key={i} className="email-row skeleton-row">
+//               <Skeleton animation="wave" height={"100%"} width={"100%"} />
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   );
+// };
 export default MainContainer;

@@ -52,6 +52,10 @@
   flex-direction: row;
   gap: 5px;
 }
+.subject-box {
+  font-weight: lighter;
+  opacity: 70%;
+}
 @media (max-width: 1250px) {
   .divider {
     display: none;

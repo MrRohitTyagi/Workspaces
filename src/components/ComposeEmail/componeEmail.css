@@ -45,13 +45,17 @@
   display: flex;
   flex-direction: column;
   height: 430px;
-
   justify-content: space-evenly;
 }
 .new-email-form-box {
   width: 500px;
-  height: 500px;
+  height: max-content;
   max-width: 600px;
+}
+.new-email-submit-button {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
 }
 @media (max-width: 1000px) {
   .new-email-container {

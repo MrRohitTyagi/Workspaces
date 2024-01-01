@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @import url("https://fonts.googleapis.com/css2?family=Raleway&display=swap");
 :root {
   --text-clr: black;
@@ -28,4 +29,12 @@ svg {
 }
 *::-webkit-scrollbar {
   width: 5px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: rgba(0, 0, 0, 0.7);
 }

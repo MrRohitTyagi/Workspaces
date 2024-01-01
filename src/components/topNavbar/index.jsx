@@ -5,14 +5,13 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
-import LoggedInUserProfile, {
-  LoginButton,
-} from "../LoginLogout/LoginLogoutButtons";
+
 import { emitEvent } from "../../utils/eventemitter";
 import { memo, useCallback } from "react";
 
-import { useAuth0 } from "@auth0/auth0-react";
 import SearchBar from "./searchBar";
+import useAuth from "../../utils/useAuth";
+import LoggedInUserProfile from "../userProfile";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -31,7 +30,7 @@ const Search = styled("div")(({ theme }) => ({
 }));
 
 const TopNavbar = memo(() => {
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated } = useAuth();
   const isLoggedIn = isAuthenticated;
   const handleClick = useCallback(
     () => emitEvent("EXPAND_COLLAPSE_SIDEBAR"),
@@ -74,9 +73,7 @@ const TopNavbar = memo(() => {
             </Search>
           )}
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { md: "flex" } }}>
-            <LoginButton />
-          </Box>
+
           {isLoggedIn && (
             <Box>
               <IconButton color="inherit">

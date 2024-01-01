@@ -7,10 +7,11 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import NewEmail from "./EmailDialogue";
 import { v4 } from "uuid";
-import { useAuth0 } from "@auth0/auth0-react";
+import useAuth from "../../utils/useAuth";
+
 
 const ComposeEmail = () => {
-  const { user } = useAuth0();
+  const { user }  =useAuth();
 
   const [newEmailCount, setNewEmailCount] = useState([]);
 

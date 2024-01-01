@@ -1,13 +1,15 @@
-import "./componeEmail.css";
+import { useCallback, useState } from "react";
+import { toast } from "react-toastify";
 import Textarea from "@mui/joy/Textarea";
 
 import Dialog from "@mui/material/Dialog";
-import { Box, Button, IconButton, Input } from "@mui/material";
+import { Button, IconButton, Input } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { memo, useCallback, useState } from "react";
-import { createEmail } from "../../controllers/emailController";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
-import { toast } from "react-toastify";
+
+import { createEmail } from "../../controllers/emailController";
+import "./componeEmail.css";
 
 const EmailDialogue = ({
   open,
@@ -38,10 +40,9 @@ const EmailDialogue = ({
         });
       }
 
-      console.log("aya");
       closeLayer();
     },
-    [closeLayer]
+    [closeLayer, email.id, formData, setNewEmailCount]
   );
 
   const handleChange = (e) => {
@@ -70,7 +71,7 @@ const EmailDialogue = ({
     <Dialog open={open} onClose={() => handleClose(false)}>
       <div className="new-email-form-box">
         <div className="heading-new">
-          <h3>New Message</h3>
+          <h4>New Message</h4>
           <Button onClick={() => handleClose(false)}>
             <CloseIcon />
           </Button>
@@ -82,14 +83,17 @@ const EmailDialogue = ({
                 value={formData.to}
                 onChange={handleChange}
                 name="to"
-                sx={{ width: "100%" }}
+                sx={{
+                  width: "100%",
+                  border: "none",
+                }}
                 placeholder="To"
                 id="to"
               />
               <Input
                 value={formData.subject}
                 onChange={handleChange}
-                sx={{ width: "100%" }}
+                sx={{ width: "100%", borderBottom: "1px solid rgba()" }}
                 placeholder="Subject"
                 id="subject"
                 name="subject"
@@ -99,13 +103,28 @@ const EmailDialogue = ({
                 onChange={handleChange}
                 minRows={2}
                 name="body"
-                sx={{ width: "100%", height: "300px" }}
+                sx={{
+                  width: "100%",
+                  height: "300px",
+                  border: "none",
+                  boxShadow: "none",
+                }}
                 placeholder="Body"
                 id="body"
               />
-              <Button type="submit" variant="contained" endIcon={<SendIcon />}>
-                Send
-              </Button>
+              <div className="new-email-submit-button">
+                <Button
+                  sx={{ alignSelf: "start" }}
+                  type="submit"
+                  variant="contained"
+                  endIcon={<SendIcon />}
+                >
+                  Send
+                </Button>
+                <IconButton size="small" disabled>
+                  <AttachFileIcon />
+                </IconButton>
+              </div>
             </div>
           </form>
         </div>

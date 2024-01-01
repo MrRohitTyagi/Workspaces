@@ -1,23 +1,36 @@
-.login-screen {
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  position: absolute;
+.form-container-login {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px !important;
+  width: 80vw;
 }
-.main-heading {
-  font-size: 5vw;
+
+.login-form-container {
+  height: calc(100vh - var(--navbar-height));
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.1);
+}
+.tac {
   text-align: center;
 }
-
-@media (max-width: 1250px) {
-  .main-heading {
-    font-size: 10vw;
-  }
-  .please-sign-in {
-    font-size: 5vw;
-  }
-  .app-name {
-    font-size: 6vw !important;
-  }
+.login-actual-form {
+  padding: 10px 0px;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.already-have-acc {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+}
+.already-have-acc h6:last-child {
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
 }

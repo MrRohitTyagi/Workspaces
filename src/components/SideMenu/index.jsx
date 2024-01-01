@@ -81,6 +81,7 @@ const SideMenu = memo(() => {
               onClick={() => {
                 // navigate(`/`);
                 emitEvent(menu.event);
+                if (i === 0) return;
                 setIsActive(i);
               }}
             >
