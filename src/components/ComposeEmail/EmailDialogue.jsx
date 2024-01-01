@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import Textarea from "@mui/joy/Textarea";
@@ -13,7 +14,6 @@ import "./componeEmail.css";
 
 const EmailDialogue = ({
   open,
-  closeLayer,
   user,
   email,
   setNewEmailCount,
@@ -23,27 +23,27 @@ const EmailDialogue = ({
     ...email,
   });
 
-  const handleClose = useCallback(
-    (onlyClose = true) => {
-      if (!onlyClose) {
-        setNewEmailCount((prev) => {
-          let arr = [];
-          for (let i = 0; i < prev.length; i++) {
-            const perEmail = prev[i];
-            if (perEmail.id === email.id) {
-              arr.push({ ...perEmail, ...formData });
-            } else {
-              arr.push(perEmail);
-            }
-          }
-          return arr;
-        });
+  const handleClose = useCallback(() => {
+    setNewEmailCount((prev) => {
+      let arr = [];
+      for (let i = 0; i < prev.length; i++) {
+        const perEmail = prev[i];
+        if (perEmail.id === email.id) {
+          console.log("aya");
+          arr.push({
+            ...perEmail,
+            ...formData,
+            isOpen: false,
+            [Date.now()]: Date.now(),
+          });
+        } else {
+          arr.push(perEmail);
+        }
       }
-
-      closeLayer();
-    },
-    [closeLayer, email.id, formData, setNewEmailCount]
-  );
+      console.log("arr", arr);
+      return [...arr];
+    });
+  }, [email.id, formData, setNewEmailCount]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -68,11 +68,11 @@ const EmailDialogue = ({
   };
 
   return (
-    <Dialog open={open} onClose={() => handleClose(false)}>
+    <Dialog open={open} onClose={handleClose}>
       <div className="new-email-form-box">
         <div className="heading-new">
           <h4>New Message</h4>
-          <Button onClick={() => handleClose(false)}>
+          <Button onClick={handleClose}>
             <CloseIcon />
           </Button>
         </div>
@@ -99,11 +99,13 @@ const EmailDialogue = ({
                 name="subject"
               />
               <Textarea
+                onFocus={(e) => (e.target.style.outline = "none")}
                 value={formData.body}
                 onChange={handleChange}
                 minRows={2}
                 name="body"
                 sx={{
+                  padding: "0px",
                   width: "100%",
                   height: "300px",
                   border: "none",

@@ -82,11 +82,7 @@ function App() {
     async (event, payload, isGoogleLogin) => {
       if (event) event.preventDefault();
       const submitPayload = payload || formData;
-      console.log(
-        `%c submitPayload `,
-        "color: green;border:1px solid green",
-        submitPayload
-      );
+
       if (isGoogleLogin) {
         const user = await createOrGetuser(
           submitPayload,
@@ -255,11 +251,7 @@ function App() {
                     picture: res.picture,
                     password: res.sub,
                   };
-                  console.log(
-                    `%c payload `,
-                    "color: yellow;border:1px solid lightgreen",
-                    { payload, res }
-                  );
+
                   handleSubmit(undefined, payload, true);
                 }}
                 onError={() => {
