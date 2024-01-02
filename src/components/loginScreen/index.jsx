@@ -8,6 +8,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import "./loginscreen.css"; // Assuming you have a separate CSS file (App.css) for styling
 import {
+  Avatar,
   CircularProgress,
   Divider,
   IconButton,
@@ -15,7 +16,7 @@ import {
 } from "@mui/material";
 import { createUser, getUser } from "../../controllers/userController";
 import { setCookie } from "../../utils/cookieHandler";
-
+import SendIcon from "@mui/icons-material/Send";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
@@ -24,7 +25,7 @@ const varients = {
   visible: { y: 0, opacity: 1 },
   transition: { duration: 1 },
 };
-function App() {
+function LoginScreen() {
   const [isSigninForm, setIsSigninForm] = useState(false);
   const [visible, setVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,7 +34,7 @@ function App() {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
+  const [picture, setPicture] = useState(null);
   const [errors, setErrors] = useState({});
 
   const validateForm = useCallback(() => {
@@ -86,36 +87,44 @@ function App() {
 
   const handleSubmit = useCallback(
     async (event, payload, isGoogleLogin) => {
-      setIsLoading(true);
-      if (event) event.preventDefault();
-      const submitPayload = payload || formData;
+      try {
+        setIsLoading(true);
+        if (event) event.preventDefault();
+        const submitPayload = payload || formData;
 
-      if (isGoogleLogin) {
-        const user = await createOrGetuser(
-          submitPayload,
-          "GOOGLE_LOGIN",
-          isGoogleLogin
-        );
-        setCookie(user._id);
-        toast.success("Sign - In Successful");
-        window.location.href = "/inbox";
-      } else {
-        if (validateForm()) {
+        if (isGoogleLogin) {
           const user = await createOrGetuser(
             submitPayload,
-            isSigninForm ? "SIGN-IN" : "SIGN-UP"
+            "GOOGLE_LOGIN",
+            isGoogleLogin
           );
           setCookie(user._id);
-          toast.success(
-            isSigninForm ? "Sign - Up Successful" : "Sign - In Successful"
-          );
-
+          toast.success("Sign - In Successful");
           window.location.href = "/inbox";
+        } else {
+          if (validateForm()) {
+            if (picture) {
+              const url = await uploadImage(picture);
+              submitPayload.picture = url;
+            }
+            const user = await createOrGetuser(
+              submitPayload,
+              isSigninForm ? "SIGN-IN" : "SIGN-UP"
+            );
+            setCookie(user._id);
+            toast.success(
+              isSigninForm ? "Sign - Up Successful" : "Sign - In Successful"
+            );
+
+            window.location.href = "/inbox";
+          }
         }
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     },
-    [createOrGetuser, formData, isSigninForm, validateForm]
+    [createOrGetuser, formData, isSigninForm, picture, validateForm]
   );
 
   const handleChange = (e) => {
@@ -149,11 +158,12 @@ function App() {
               animate="visible"
               initial="hidden"
               transition="transition"
+              className="name-pic-buttons-cont"
             >
               {!isSigninForm && (
                 <TextField
                   size="large"
-                  label="Username"
+                  label="Name"
                   error={errors.username}
                   helperText={errors.username}
                   type="text"
@@ -163,6 +173,16 @@ function App() {
                   onChange={handleChange}
                   fullWidth
                   variant="standard"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment>
+                        <InputFileUpload
+                          picture={picture}
+                          setPicture={setPicture}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               )}
             </motion.div>
@@ -232,7 +252,7 @@ function App() {
                 {isLoading ? (
                   <div className="sign-in-loader">
                     <CircularProgress sx={{ color: "white" }} size={"small"} />
-                    Please Wait.
+                    Please Wait
                   </div>
                 ) : (
                   "Continue"
@@ -269,8 +289,9 @@ function App() {
 
                   handleSubmit(undefined, payload, true);
                 }}
-                onError={() => {
-                  console.log("Login Failed");
+                onError={(error) => {
+                  toast.error("Login Failed");
+                  console.log("error", error);
                 }}
               />
             </div>
@@ -280,5 +301,47 @@ function App() {
     </AnimatePresence>
   );
 }
+import { styled } from "@mui/material/styles";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { uploadImage } from "../../utils/imageupload";
 
-export default App;
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
+function InputFileUpload({ picture, setPicture }) {
+  return (
+    <IconButton
+      component="label"
+      variant="contained"
+      size="small"
+      color="success"
+      fullWidth
+    >
+      {picture ? (
+        <Avatar src={URL.createObjectURL(picture)} className="mb1rem" />
+      ) : (
+        <>
+          <h6>Picture ‎ </h6>
+          <CloudUploadIcon />
+        </>
+      )}
+      <VisuallyHiddenInput
+        type="file"
+        onChange={(e) => {
+          setPicture(e?.target?.files?.[0]);
+          console.log("e", e?.target?.files?.[0]);
+        }}
+      />
+    </IconButton>
+  );
+}
+export default LoginScreen;

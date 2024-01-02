@@ -53,3 +53,11 @@
   align-items: center;
   justify-content: center;
 }
+.name-pic-buttons-cont {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+.mb1rem {
+  margin-bottom: 1rem;
+}
