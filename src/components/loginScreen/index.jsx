@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import { createUser, getUser } from "../../controllers/userController";
 import { setCookie } from "../../utils/cookieHandler";
-import SendIcon from "@mui/icons-material/Send";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
@@ -111,6 +110,11 @@ function LoginScreen() {
               submitPayload,
               isSigninForm ? "SIGN-IN" : "SIGN-UP"
             );
+            console.log("user", user);
+            if (!user) {
+              toast.error("Invalid email or password");
+              return;
+            }
             setCookie(user._id);
             toast.success(
               isSigninForm ? "Sign - Up Successful" : "Sign - In Successful"
@@ -121,6 +125,8 @@ function LoginScreen() {
         }
         setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
+      } finally {
         setIsLoading(false);
       }
     },
