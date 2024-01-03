@@ -58,6 +58,54 @@
   flex-direction: row;
   gap: 5px;
 }
+.image-upload-per-email {
+  height: 50px !important;
+  max-width: 80px !important;
+  border: 1px solid;
+  border-radius: 5px;
+  width: fit-content;
+}
+.attachments-cont {
+  overflow: auto;
+  max-height: 130px;
+  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+.image-container {
+  position: relative;
+  &:hover {
+    .close-button {
+      display: flex;
+    }
+  }
+}
+.close-button {
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+  z-index: 8;
+  display: none;
+  position: absolute;
+  top: 35%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  background-color: black;
+  border-radius: 20%;
+  border: 1px solid white;
+}
+.close-svg {
+  color: white;
+}
+.error-async {
+  border: 1px solid red;
+  border-radius: 5px;
+}
+.error-line {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-left: 13px;
+}
 @media (max-width: 1000px) {
   .new-email-container {
     bottom: var(--navbar-height);

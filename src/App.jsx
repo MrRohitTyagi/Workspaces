@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import LoginScreen from "./components/loginScreen";
 import { ToastContainer } from "react-toastify";
 
@@ -11,6 +11,8 @@ import MainContainer from "./components/mainContainer";
 import ComposeEmail from "./components/ComposeEmail";
 import useAuth from "./utils/useAuth";
 import RightDrawer from "./components/coreComponents/RightDrawer";
+import { useEffect } from "react";
+import UserSettings from "./components/userSettings";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -44,6 +46,8 @@ function App() {
             <Route path="/email/:id" element={<PerEmailScreen />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/email/:id" element={<PerEmailScreen />} />
+            <Route path="/settings" element={<UserSettings />} />
+            <Route path="/*" element={<Redirect />} />
           </Routes>
         </div>
       )}
@@ -64,5 +68,12 @@ function App() {
     </div>
   );
 }
+const Redirect = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/inbox");
+  });
+  return <></>;
+};
 
 export default App;

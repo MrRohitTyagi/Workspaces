@@ -85,6 +85,7 @@ const MainContainer = () => {
   useEffect(() => {
     // Listen for messages from the server
     socket.on("NEW_EMAIL_RECEIVED", (email) => {
+      emitter.emit("INCREASE_NEW_EMAIL_COUNT");
       setEmailData((prev) => [email, ...prev]);
     });
     // Clean up the socket connection on component unmount

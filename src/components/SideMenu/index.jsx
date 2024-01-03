@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { MenuItem, MenuList, Tooltip } from "@mui/material";
+import { Badge, MenuItem, MenuList, Tooltip } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SendIcon from "@mui/icons-material/Send";
@@ -11,7 +11,7 @@ import FiberNewIcon from "@mui/icons-material/FiberNew";
 import { emitEvent, emitter, listenToEvent } from "../../utils/eventemitter";
 import "./sidemenu.css";
 
-const sideMenuConfig = [
+const sideMenuConfig = (emailcount) => [
   {
     label: "Componse",
     event: "ADD_NEW_EMAIL",
@@ -22,7 +22,11 @@ const sideMenuConfig = [
     label: "Inbox",
     event: "SHOW_ALL_INBOX",
     tooltip: "Inbox",
-    icon: <AllInboxIcon />,
+    icon: (
+      <Badge badgeContent={emailcount} color="primary">
+        <AllInboxIcon />
+      </Badge>
+    ),
     navUrl: "/inbox",
   },
   {
@@ -55,13 +59,19 @@ const varient = {
 
 const SideMenu = memo(() => {
   const navigate = useNavigate();
-  const [isActive, setIsActive] = useState(1);
+  const [activeIndex, setActiveIndex] = useState(1);
   const [isExpanded, setisExpanded] = useState(false);
+  const [emailcount, setEmailcount] = useState(0);
+
   useEffect(() => {
     listenToEvent("EXPAND_COLLAPSE_SIDEBAR", () => setisExpanded((p) => !p));
+    listenToEvent("INCREASE_NEW_EMAIL_COUNT", () =>
+      setEmailcount((p) => p + 1)
+    );
 
     return () => {
       emitter.off("EXPAND_COLLAPSE_SIDEBAR", () => {});
+      emitter.off("INCREASE_NEW_EMAIL_COUNT", () => {});
     };
   }, []);
 
@@ -74,18 +84,18 @@ const SideMenu = memo(() => {
       className="side-menu-container"
     >
       <MenuList className="side-menu-icon-container">
-        {sideMenuConfig.map((menu, i) => {
+        {sideMenuConfig(emailcount).map((menu, i) => {
           return (
             <MenuItem
               key={menu.label}
               sx={{
                 padding: "15px",
-                background: isActive === i ? "#c1c1c1" : "transparent",
+                background: activeIndex === i ? "#c1c1c1" : "transparent",
               }}
               onClick={() => {
                 if (i === 0) emitEvent(menu.event);
                 else navigate(menu.navUrl);
-                if (i !== 0) setIsActive(i);
+                if (i !== 0) setActiveIndex(i);
               }}
             >
               <div className="menu-item">

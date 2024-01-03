@@ -12,10 +12,11 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { emitter, listenToEvent } from "../../../utils/eventemitter";
 import { deleteCookie } from "../../../utils/cookieHandler";
+import { useNavigate } from "react-router-dom";
 
 export default function RightDrawer() {
   const [state, setState] = React.useState(false);
-
+  const navigate = useNavigate();
   React.useEffect(() => {
     listenToEvent("OPEN_DRAWER", () => setState(true));
     return () => emitter.off("OPEN_DRAWER", () => {});
@@ -47,7 +48,7 @@ export default function RightDrawer() {
         onKeyDown={toggleDrawer}
       >
         <List>
-          <ListItem disablePadding disabled>
+          <ListItem disablePadding onClick={() => navigate("/settings")}>
             <ListItemButton>
               <ListItemIcon>
                 <SettingsIcon />
