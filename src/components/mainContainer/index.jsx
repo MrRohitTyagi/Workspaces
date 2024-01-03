@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 import PullToRefresh from "react-simple-pull-to-refresh";
 
-import { IconButton, Skeleton, Tooltip } from "@mui/material";
+import { CircularProgress, IconButton, Skeleton, Tooltip } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
@@ -29,6 +29,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../utils/useAuth";
 import { socket } from "../authorizeUser";
 import Loader from "../Loader";
+import { isEmpty } from "lodash";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -166,9 +167,34 @@ const CustomDataTable = memo(
   }) => {
     const navigate = useNavigate();
     // const [openOneEmail, setOpenOneEmail] = useState({});
+    const [actionItemClick, setactionItemClick] = useState({});
 
+    const handleStartloading = useCallback((_id, key) => {
+      setactionItemClick((p) => {
+        let obj = { ...p };
+        obj[_id] = { ...(obj[_id] || {}), [key]: true };
+        return obj;
+      });
+    }, []);
+
+    const handleCloseloading = useCallback((_id, key) => {
+      try {
+        setactionItemClick((p) => {
+          let obj = { ...p };
+          delete obj[_id][key];
+          if (isEmpty(obj[_id])) {
+            delete obj[_id];
+          }
+          return obj;
+        });
+      } catch (error) {
+        console.log("error", error);
+      }
+    }, []);
     const handleEmailDelete = useCallback(
       async (_id) => {
+        handleStartloading(_id, "delete");
+
         switch (filterTrackerRef.current) {
           case messages.SHOW_ALL_INBOX:
             await deleteEmail(_id, user.email);
@@ -182,13 +208,22 @@ const CustomDataTable = memo(
         }
         toast.success("Email Deleted!");
 
+        handleCloseloading(_id, "delete");
         filterEmailsViaId(_id);
       },
-      [filterEmailsViaId, filterTrackerRef, user]
+      [
+        filterEmailsViaId,
+        filterTrackerRef,
+        handleCloseloading,
+        handleStartloading,
+        user.email,
+      ]
     );
 
     const handleStarEmail = useCallback(
       async (email, isStarred) => {
+        handleStartloading(email._id, "star");
+
         let starredBy = email.starredBy || [];
         if (isStarred) {
           starredBy = starredBy.filter((s) => s !== user.email);
@@ -198,12 +233,15 @@ const CustomDataTable = memo(
         await updateEmail({ ...email, starredBy, updateingKey: "starredBy" });
         updatePerEmail("starredBy", starredBy, email._id);
         toast.success(isStarred ? "Email Unstarred!" : "Email Starred!");
+        handleCloseloading(email._id, "star");
       },
-      [updatePerEmail, user.email]
+      [handleCloseloading, handleStartloading, updatePerEmail, user.email]
     );
 
     const handleArchiveEmail = useCallback(
       async (email, isArchived) => {
+        // setactionItemClick((p) => ({ ...p, archive: email._id }));
+        handleStartloading(email._id, "archive");
         let archivedBy = email.archivedBy || [];
 
         if (isArchived) {
@@ -214,8 +252,10 @@ const CustomDataTable = memo(
         await updateEmail({ ...email, archivedBy, updateingKey: "archivedBy" });
         updatePerEmail("archivedBy", archivedBy, email._id);
         toast.success(isArchived ? "Email UnArchived!" : "Email Archived!");
+
+        handleCloseloading(email._id, "archive");
       },
-      [updatePerEmail, user.email]
+      [handleCloseloading, handleStartloading, updatePerEmail, user.email]
     );
 
     const handleEmailOpen = useCallback(
@@ -224,7 +264,7 @@ const CustomDataTable = memo(
       },
       [navigate]
     );
-    const handleRefresh = (e) => fetchData(filterTrackerRef.current, true);
+    const handleRefresh = () => fetchData(filterTrackerRef.current, true);
 
     return (
       <PullToRefresh onRefresh={handleRefresh}>
@@ -253,7 +293,7 @@ const CustomDataTable = memo(
               />
             ) : (
               <ul className="reset-all">
-                {data.map((e) => {
+                {data?.map((e) => {
                   const {
                     subject,
                     _id,
@@ -273,75 +313,107 @@ const CustomDataTable = memo(
                       }
                     >
                       <div className="action-items-cont">
-                        <motion.div
-                          initial="hidden"
-                          animate="visible"
-                          variants={varient}
-                        >
-                          {starredBy.includes(user.email) ? (
-                            <IconButton
-                              sx={{ padding: "2px" }}
-                              disableRipple
-                              onClick={() => handleStarEmail(e, true)}
-                            >
-                              <Tooltip title="Mark As Unmportant">
-                                <StarIcon color="warning" />
-                              </Tooltip>
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              sx={{ padding: "2px" }}
-                              disableRipple
-                              onClick={() => handleStarEmail(e, false)}
-                            >
-                              <Tooltip title="Mark As Important">
-                                <StarBorderIcon />
-                              </Tooltip>
-                            </IconButton>
-                          )}
-                        </motion.div>
-                        <motion.div
-                          initial="hidden"
-                          animate="visible"
-                          variants={varient}
-                        >
-                          {archivedBy.includes(user.email) ? (
-                            <IconButton
-                              sx={{ padding: "2px" }}
-                              disableRipple
-                              onClick={() => handleArchiveEmail(e, true)}
-                            >
-                              <Tooltip title="Unarchive">
-                                <ArchiveIcon color="warning" />
-                              </Tooltip>
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              sx={{ padding: "2px" }}
-                              disableRipple
-                              onClick={() => handleArchiveEmail(e, false)}
-                            >
-                              <Tooltip title="Archive">
-                                <ArchiveIcon />
-                              </Tooltip>
-                            </IconButton>
-                          )}
-                        </motion.div>
-                        <motion.div
-                          initial="hidden"
-                          animate="visible"
-                          variants={varient}
-                        >
+                        {actionItemClick?.[_id]?.star ? (
                           <IconButton
+                            size="small"
                             sx={{ padding: "2px" }}
                             disableRipple
-                            onClick={async () => handleEmailDelete(_id)}
                           >
-                            <Tooltip title="Delete">
-                              <DeleteForeverIcon color="error" />
-                            </Tooltip>
+                            <CircularProgress size={"small"} />
                           </IconButton>
-                        </motion.div>
+                        ) : (
+                          <motion.div
+                            initial="hidden"
+                            animate="visible"
+                            variants={varient}
+                          >
+                            {starredBy.includes(user.email) ? (
+                              <IconButton
+                                sx={{ padding: "2px" }}
+                                disableRipple
+                                onClick={() => handleStarEmail(e, true)}
+                              >
+                                <Tooltip title="Mark As Unmportant">
+                                  <StarIcon color="warning" />
+                                </Tooltip>
+                              </IconButton>
+                            ) : (
+                              <IconButton
+                                sx={{ padding: "2px" }}
+                                disableRipple
+                                onClick={() => handleStarEmail(e, false)}
+                              >
+                                <Tooltip title="Mark As Important">
+                                  <StarBorderIcon />
+                                </Tooltip>
+                              </IconButton>
+                            )}
+                          </motion.div>
+                        )}
+
+                        {actionItemClick?.[_id]?.archive ? (
+                          <IconButton
+                            size="small"
+                            sx={{ padding: "2px" }}
+                            disableRipple
+                          >
+                            <CircularProgress size={"small"} />
+                          </IconButton>
+                        ) : (
+                          <motion.div
+                            initial="hidden"
+                            animate="visible"
+                            variants={varient}
+                          >
+                            {archivedBy.includes(user.email) ? (
+                              <IconButton
+                                sx={{ padding: "2px" }}
+                                disableRipple
+                                onClick={() => handleArchiveEmail(e, true)}
+                              >
+                                <Tooltip title="Unarchive">
+                                  <ArchiveIcon color="warning" />
+                                </Tooltip>
+                              </IconButton>
+                            ) : (
+                              <IconButton
+                                sx={{ padding: "2px" }}
+                                disableRipple
+                                onClick={() => handleArchiveEmail(e, false)}
+                              >
+                                <Tooltip title="Archive">
+                                  <ArchiveIcon />
+                                </Tooltip>
+                              </IconButton>
+                            )}
+                          </motion.div>
+                        )}
+
+                        {actionItemClick?.[_id]?.delete ? (
+                          <IconButton
+                            size="small"
+                            sx={{ padding: "2px" }}
+                            disableRipple
+                          >
+                            <CircularProgress size={"small"} />
+                          </IconButton>
+                        ) : (
+                          <motion.div
+                            initial="hidden"
+                            animate="visible"
+                            variants={varient}
+                          >
+                            <IconButton
+                              sx={{ padding: "2px" }}
+                              disableRipple
+                              onClick={async () => handleEmailDelete(_id)}
+                            >
+                              <Tooltip title="Delete">
+                                <DeleteForeverIcon color="error" />
+                              </Tooltip>
+                            </IconButton>
+                          </motion.div>
+                        )}
                       </div>
 
                       <motion.div
