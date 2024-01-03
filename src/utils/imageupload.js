@@ -25,21 +25,37 @@ function encodeImageFileAsURLForMultiupload(element) {
 }
 
 async function multiupload(files) {
-  if (files === "") return;
   if (files.length > 4) {
     toast.error("Cannot upload more than 4 images");
     return;
   }
-  let imageArray = [];
 
-  for (let i = 0; i < files.length; i++) {
-    const image = files[i];
-    let profileData = encodeImageFileAsURLForMultiupload(image);
-    if (profileData) {
-      let url = await uploadImage(profileData);
-      imageArray.push(url);
+  const alreadyUrls = [];
+  const uploadPromises = files.map(async (image) => {
+    if (typeof image === "string") {
+      alreadyUrls.push(image);
+      return null;
     }
-  }
-  return imageArray;
+    const imageData = encodeImageFileAsURLForMultiupload(image);
+    if (imageData) {
+      return uploadImageforMultiselect(imageData);
+    }
+    return null;
+  });
+
+  const uploadedImages = await Promise.all(uploadPromises);
+
+  const res = uploadedImages.filter((url) => url !== null);
+  return [...res, ...alreadyUrls];
+}
+
+async function uploadImageforMultiselect(Imgdata) {
+  let imageData = await axios.post(
+    `https://api.cloudinary.com/v1_1/${
+      import.meta.env.VITE_CLOUDNERY_CLOUDNAME
+    }/upload`,
+    Imgdata
+  );
+  return imageData.data.url;
 }
 export { multiupload, encodeImageFileAsURL, uploadImage };

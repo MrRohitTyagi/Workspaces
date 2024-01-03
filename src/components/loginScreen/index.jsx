@@ -110,7 +110,7 @@ function LoginScreen() {
               submitPayload,
               isSigninForm ? "SIGN-IN" : "SIGN-UP"
             );
-            console.log("user", user);
+           
             if (!user) {
               toast.error("Invalid email or password");
               return;
@@ -344,7 +344,6 @@ function InputFileUpload({ picture, setPicture }) {
         type="file"
         onChange={(e) => {
           setPicture(e?.target?.files?.[0]);
-          console.log("e", e?.target?.files?.[0]);
         }}
       />
     </IconButton>

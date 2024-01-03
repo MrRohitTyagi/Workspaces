@@ -22,10 +22,35 @@
   display: flex;
   flex-direction: column;
 }
-.fordard-reply-box{
+.fordard-reply-box {
   gap: 5px;
   display: flex;
   flex-direction: row;
+}
+.single-email-image-upload-per-email {
+  height: 70px !important;
+  width: 100px !important;
+  border: 1px solid;
+  border-radius: 5px;
+  width: fit-content;
+}
+.attachments-cont {
+  overflow: auto;
+  max-height: 130px;
+  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+.all-unset {
+  all: unset !important;
+  cursor: pointer;
+}
+.fullScreen-dialogue-container {
+  [role="dialog"] {
+    width: 80vw !important;
+    max-width: 80vw !important;
+  }
 }
 @media (max-width: 1250px) {
   .single-email-container {

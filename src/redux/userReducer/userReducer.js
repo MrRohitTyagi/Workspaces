@@ -22,7 +22,6 @@ const userReducer = (state = initialState, action) => {
       };
     case DELETE_EMAIL: {
       const emailIdToDelete = action.payload;
-      console.log(state);
       let tempstate = { ...state };
       tempstate.user.emailContent = state.user.emailContent.filter(
         (e) => e._id !== emailIdToDelete

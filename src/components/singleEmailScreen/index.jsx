@@ -39,7 +39,8 @@ const PerEmailScreen = () => {
   const { user } = useAuth();
   const { id } = useParams();
 
-  const { subject, _id, body, starredBy, archivedBy, sender } = email || {};
+  const { subject, _id, body, starredBy, archivedBy, sender, attachments } =
+    email || {};
 
   const handleArchiveEmail = useCallback(
     async (email, isArchived) => {
@@ -101,6 +102,9 @@ const PerEmailScreen = () => {
       done = true;
       setAvatarImage(response.picture);
     })();
+    return () => {
+      done = false;
+    };
   }, [email]);
 
   if (isLoading)
@@ -179,6 +183,7 @@ const PerEmailScreen = () => {
             <h5> {capitalizeFirstLetter(sender)}</h5>
             <div className="single-email-body">
               <BodyRenderer str={body} />
+              <StandardImageList attachments={email.attachments} />
               <div className="fordard-reply-box">
                 <Button
                   size="small"
@@ -197,6 +202,7 @@ const PerEmailScreen = () => {
                   size="small"
                   onClick={() =>
                     emitter.emit("ADD_NEW_EMAIL", {
+                      attachments: attachments,
                       body: body,
                       subject: subject,
                     })
@@ -230,5 +236,115 @@ const BodyRenderer = ({ str }) => {
     </>
   );
 };
+
+function StandardImageList({ attachments = [] }) {
+  return (
+    <div
+      className="attachments-cont"
+      style={{ minHeight: attachments.length > 0 ? "70px" : "0px" }}
+    >
+      {attachments.map((item, i) => (
+        <ResponsiveDialog key={i + "fgvhjdgfu"} imageUrl={item}>
+          <img
+            key={i + "fgvhjsdgfu"}
+            className="single-email-image-upload-per-email"
+            height={"70px"}
+            width={"70px"}
+            src={item}
+            alt={"img"}
+            loading="lazy"
+          />
+        </ResponsiveDialog>
+      ))}
+    </div>
+  );
+}
+
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+function ResponsiveDialog({ children, imageUrl }) {
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleDownload = async () => {
+    try {
+      // Fetch the image as a blob
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+
+      // Create a blob URL
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Create an anchor element
+      const downloadLink = document.createElement("a");
+
+      // Set the download link's href to the blob URL
+      downloadLink.href = blobUrl;
+      const ext = imageUrl.split(".").at(-1);
+      // Set the download attribute with a desired filename
+      console.log("ext", ext);
+      downloadLink.download = `downloaded_image.${ext}`;
+
+      // Append the download link to the body
+      document.body.appendChild(downloadLink);
+
+      // Programmatically click the download link
+      downloadLink.click();
+
+      // Remove the download link from the body
+      document.body.removeChild(downloadLink);
+
+      // Revoke the blob URL to free up resources
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        className="all-unset"
+        variant="outlined"
+        onClick={handleClickOpen}
+      >
+        {children}
+      </Button>
+      <Dialog
+        className="fullScreen-dialogue-container"
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogContent>
+          <img
+            src={imageUrl}
+            alt="image"
+            height={"100%"}
+            width={"100%"}
+            style={{ objectFit: "contain" }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDownload} autoFocus variant="outlined">
+            <CloudDownloadIcon color="primary" />
+          </Button>
+          <Button onClick={handleClose} autoFocus variant="contained">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
 
 export default PerEmailScreen;
