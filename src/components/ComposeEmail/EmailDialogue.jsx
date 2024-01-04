@@ -79,9 +79,9 @@ const EmailDialogue = ({
   };
   const onSubmit = async (e) => {
     try {
+      e.preventDefault();
       if (!isEmpty(errors)) return;
       setIsSubmitting(true);
-      e.preventDefault();
       const { email: sender } = user;
 
       const { body, subject, to, id } = formData;
