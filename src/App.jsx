@@ -17,11 +17,10 @@ import { listenToEvent } from "./utils/eventemitter";
 
 const ThemeTypeContext = createContext();
 function App() {
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
-
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const [isDarkTheme, setIsDarkTheme] = useState(user.isDarkTheme);
   const pathname = useLocation();
-  console.log(`%c theme `, "color: green;border:1px solid green", isDarkTheme);
+
   useEffect(() => {
     listenToEvent("SWITCH_THEME", () => setIsDarkTheme((p) => !p));
   }, []);

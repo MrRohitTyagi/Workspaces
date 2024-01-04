@@ -2,6 +2,11 @@
   height: calc(100vh - var(--navbar-height));
   transition: all 500ms;
   overflow-x: hidden;
+  background: #dfdfdf;
+  z-index: 100;
+}
+.side-menu-container-dark {
+  background: var(--dark-theme-color) !important;
 }
 
 .menu-item {

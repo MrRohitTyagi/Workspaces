@@ -53,6 +53,18 @@
   height: max-content;
   max-width: 600px;
 }
+.new-email-form-box-dark-theme {
+  background-color: var(--dark-theme-color) !important;
+  color: white !important;
+}
+.async-select-dark {
+  background-color: var(--dark-theme-color) !important;
+  color: white !important;
+}
+.text-field-placeholder::placeholder {
+  color: white !important;
+}
+
 .new-email-submit-button {
   display: flex;
   flex-direction: row;

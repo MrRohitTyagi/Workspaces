@@ -7,7 +7,7 @@ import TuneIcon from "@mui/icons-material/Tune";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { emitEvent } from "../../utils/eventemitter";
-
+import "./topNavbar.css";
 let isLoaded = false;
 
 export default function SearchBar() {
@@ -31,15 +31,13 @@ export default function SearchBar() {
     return () => clearTimeout(timerId);
   }, [value]);
 
+  const { isDarkTheme } = React.useContext(ThemeTypeContext) || {};
   return (
     <Paper
-      component="form"
+      className={isDarkTheme ? "search-bar-dark" : "search-bar"}
       sx={{
-        p: "2px 4px",
         display: "flex",
         alignItems: "center",
-
-        background: "transparent",
       }}
     >
       <InputBase
@@ -67,7 +65,7 @@ export default function SearchBar() {
         <SearchIcon />
       </IconButton>
       <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-      <IconButton color="primary" sx={{ p: "10px" }} aria-label="directions">
+      <IconButton color="primary" aria-label="directions">
         <PopoverPopupState />
       </IconButton>
     </Paper>
@@ -77,6 +75,7 @@ export default function SearchBar() {
 import Typography from "@mui/material/Typography";
 import Popover from "@mui/material/Popover";
 import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
+import { ThemeTypeContext } from "../../App";
 
 export function PopoverPopupState() {
   React.useEffect(() => {

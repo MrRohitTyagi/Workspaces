@@ -1,7 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
-import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
 import ListItem from "@mui/material/ListItem";
@@ -14,9 +13,13 @@ import { emitter, listenToEvent } from "../../../utils/eventemitter";
 import { deleteCookie } from "../../../utils/cookieHandler";
 import { useNavigate } from "react-router-dom";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
+import { updateUser } from "../../../controllers/userController";
+import useAuth from "../../../utils/useAuth";
 
 export default function RightDrawer() {
   const [state, setState] = React.useState(false);
+  const { user } = useAuth();
+  console.log(`%c user `, "color: green;border:1px solid green", user);
   const navigate = useNavigate();
   React.useEffect(() => {
     listenToEvent("OPEN_DRAWER", () => setState(true));
@@ -39,9 +42,11 @@ export default function RightDrawer() {
     window.location.href = "/login";
     window.location.reload();
   };
+
   const handleThemeSwitch = React.useCallback(() => {
     emitter.emit("SWITCH_THEME");
-  }, []);
+    updateUser({ key: "isDarkTheme", value: !user.isDarkTheme, id: user._id });
+  }, [user]);
 
   const list = React.useMemo(() => {
     return (
@@ -72,7 +77,7 @@ export default function RightDrawer() {
               <ListItemIcon>
                 <ColorLensIcon />
               </ListItemIcon>
-              <ListItemText primary={"Switch Mode"} />
+              <ListItemText primary={"Switch Theme"} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding onClick={handleLogout}>
@@ -86,7 +91,7 @@ export default function RightDrawer() {
         </List>
       </Box>
     );
-  }, [navigate, toggleDrawer]);
+  }, [handleThemeSwitch, navigate, toggleDrawer]);
 
   return (
     <Drawer anchor={"right"} open={state} onClose={toggleDrawer}>

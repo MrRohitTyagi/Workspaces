@@ -13,3 +13,7 @@ export const createUser = async (userData) => {
   const { data } = await caller("post", "user/create", userData);
   return data;
 };
+export const updateUser = async (payload) => {
+  const { data } = await caller("put", "user/update", payload);
+  return data;
+};

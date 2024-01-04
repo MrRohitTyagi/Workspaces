@@ -1,0 +1,12 @@
+.search-bar-dark {
+  background-color: #a1a1a1 !important;
+}
+.search-bar {
+  background-color: transparent !important;
+  width: 100%;
+}
+@media (max-width: 1250px) {
+  .search-bar {
+    width: 100%;
+  }
+}

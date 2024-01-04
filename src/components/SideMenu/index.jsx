@@ -80,11 +80,11 @@ const SideMenu = memo(() => {
   return (
     <div
       style={{
-        background: isDarkTheme ? "black" : "#dfdfdf",
-        zIndex: 100,
         width: isExpanded ? "12rem" : "4rem",
       }}
-      className="side-menu-container"
+      className={`side-menu-container ${
+        isDarkTheme ? "side-menu-container-dark" : ""
+      }`}
     >
       <MenuList className="side-menu-icon-container">
         {sideMenuConfig(emailcount, isDarkTheme).map((menu, i) => {

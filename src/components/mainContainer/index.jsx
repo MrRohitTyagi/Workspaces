@@ -1,11 +1,18 @@
 /* eslint-disable react/prop-types */
 import { toast } from "react-toastify";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { motion } from "framer-motion";
 
 import PullToRefresh from "react-simple-pull-to-refresh";
 
-import { CircularProgress, IconButton, Skeleton, Tooltip } from "@mui/material";
+import { CircularProgress, IconButton, Tooltip } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
@@ -30,6 +37,7 @@ import useAuth from "../../utils/useAuth";
 import { socket } from "../authorizeUser";
 import Loader from "../Loader";
 import { isEmpty } from "lodash";
+import { ThemeTypeContext } from "../../App";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -52,7 +60,7 @@ const varient = {
 };
 const MainContainer = () => {
   const { pathname } = useLocation();
-
+  const { isDarkTheme } = useContext(ThemeTypeContext);
   const { user } = useAuth();
   const [emailData, setEmailData] = useState(undefined);
   const filterTrackerRef = useRef(filterObjs[pathname]);
@@ -137,7 +145,11 @@ const MainContainer = () => {
   }, []);
 
   return (
-    <motion.div className="main-email-container">
+    <motion.div
+      className={`main-email-container ${
+        isDarkTheme ? "main-email-container-dark" : ""
+      }`}
+    >
       {emailData === undefined ? (
         // <CustomDataTableSkeletonLoader />
         <Loader />
@@ -266,6 +278,8 @@ const CustomDataTable = memo(
     );
     const handleRefresh = () => fetchData(filterTrackerRef.current, true);
 
+    const { isDarkTheme } = useContext(ThemeTypeContext);
+
     return (
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="email-container">
@@ -274,7 +288,7 @@ const CustomDataTable = memo(
               onClick={() => fetchData(filterTrackerRef.current, true)}
             >
               <Tooltip title="Refresh">
-                <RefreshIcon />
+                <RefreshIcon className={`${isDarkTheme ? "l-t-svg" : ""}`} />
               </Tooltip>
             </IconButton>
           </div>
@@ -334,7 +348,12 @@ const CustomDataTable = memo(
                                 onClick={() => handleStarEmail(e, true)}
                               >
                                 <Tooltip title="Mark As Unmportant">
-                                  <StarIcon color="warning" />
+                                  <StarIcon
+                                    color="warning"
+                                    className={`${
+                                      isDarkTheme ? "l-t-svg" : ""
+                                    }`}
+                                  />
                                 </Tooltip>
                               </IconButton>
                             ) : (
@@ -344,7 +363,11 @@ const CustomDataTable = memo(
                                 onClick={() => handleStarEmail(e, false)}
                               >
                                 <Tooltip title="Mark As Important">
-                                  <StarBorderIcon />
+                                  <StarBorderIcon
+                                    className={`${
+                                      isDarkTheme ? "l-t-svg" : ""
+                                    }`}
+                                  />
                                 </Tooltip>
                               </IconButton>
                             )}
@@ -357,7 +380,10 @@ const CustomDataTable = memo(
                             sx={{ padding: "2px" }}
                             disableRipple
                           >
-                            <CircularProgress size={"small"} />
+                            <CircularProgress
+                              size={"small"}
+                              className={`${isDarkTheme ? "l-t-svg" : ""}`}
+                            />
                           </IconButton>
                         ) : (
                           <motion.div
@@ -372,7 +398,12 @@ const CustomDataTable = memo(
                                 onClick={() => handleArchiveEmail(e, true)}
                               >
                                 <Tooltip title="Unarchive">
-                                  <ArchiveIcon color="warning" />
+                                  <ArchiveIcon
+                                    color="warning"
+                                    className={`${
+                                      isDarkTheme ? "l-t-svg" : ""
+                                    }`}
+                                  />
                                 </Tooltip>
                               </IconButton>
                             ) : (
@@ -382,7 +413,11 @@ const CustomDataTable = memo(
                                 onClick={() => handleArchiveEmail(e, false)}
                               >
                                 <Tooltip title="Archive">
-                                  <ArchiveIcon />
+                                  <ArchiveIcon
+                                    className={`${
+                                      isDarkTheme ? "l-t-svg" : ""
+                                    }`}
+                                  />
                                 </Tooltip>
                               </IconButton>
                             )}
@@ -395,7 +430,10 @@ const CustomDataTable = memo(
                             sx={{ padding: "2px" }}
                             disableRipple
                           >
-                            <CircularProgress size={"small"} />
+                            <CircularProgress
+                              size={"small"}
+                              className={`${isDarkTheme ? "l-t-svg" : ""}`}
+                            />
                           </IconButton>
                         ) : (
                           <motion.div
@@ -409,7 +447,10 @@ const CustomDataTable = memo(
                               onClick={async () => handleEmailDelete(_id)}
                             >
                               <Tooltip title="Delete">
-                                <DeleteForeverIcon color="error" />
+                                <DeleteForeverIcon
+                                  color="error"
+                                  className={`${isDarkTheme ? "l-t-svg" : ""}`}
+                                />
                               </Tooltip>
                             </IconButton>
                           </motion.div>
