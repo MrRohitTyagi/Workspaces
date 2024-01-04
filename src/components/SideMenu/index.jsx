@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Badge, MenuItem, MenuList, Tooltip } from "@mui/material";
@@ -10,13 +10,14 @@ import FiberNewIcon from "@mui/icons-material/FiberNew";
 
 import { emitEvent, emitter, listenToEvent } from "../../utils/eventemitter";
 import "./sidemenu.css";
+import { ThemeTypeContext } from "../../App";
 
-const sideMenuConfig = (emailcount) => [
+const sideMenuConfig = (emailcount, isDarkTheme) => [
   {
     label: "Componse",
     event: "ADD_NEW_EMAIL",
     tooltip: "Send new email",
-    icon: <FiberNewIcon />,
+    icon: <FiberNewIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,
   },
   {
     label: "Inbox",
@@ -24,7 +25,7 @@ const sideMenuConfig = (emailcount) => [
     tooltip: "Inbox",
     icon: (
       <Badge badgeContent={emailcount} color="primary">
-        <AllInboxIcon />
+        <AllInboxIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />
       </Badge>
     ),
     navUrl: "/inbox",
@@ -33,21 +34,21 @@ const sideMenuConfig = (emailcount) => [
     label: "Important",
     event: "SHOW_ALL_STARRED",
     tooltip: "Important",
-    icon: <StarBorderIcon />,
+    icon: <StarBorderIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,
     navUrl: "/star",
   },
   {
     label: "Sent",
     event: "SHOW_ALL_SENT",
     tooltip: "Sent",
-    icon: <SendIcon />,
+    icon: <SendIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,
     navUrl: "/sent",
   },
   {
     label: "Archived",
     event: "SHOW_ALL_ARCHIVED",
     tooltip: "Archived",
-    icon: <ArchiveIcon />,
+    icon: <ArchiveIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,
     navUrl: "/archived",
   },
 ];
@@ -58,6 +59,7 @@ const varient = {
 };
 
 const SideMenu = memo(() => {
+  const { isDarkTheme } = useContext(ThemeTypeContext);
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(1);
   const [isExpanded, setisExpanded] = useState(false);
@@ -78,19 +80,28 @@ const SideMenu = memo(() => {
   return (
     <div
       style={{
+        background: isDarkTheme ? "black" : "#dfdfdf",
         zIndex: 100,
         width: isExpanded ? "12rem" : "4rem",
       }}
       className="side-menu-container"
     >
       <MenuList className="side-menu-icon-container">
-        {sideMenuConfig(emailcount).map((menu, i) => {
+        {sideMenuConfig(emailcount, isDarkTheme).map((menu, i) => {
           return (
             <MenuItem
               key={menu.label}
               sx={{
+                ":hover": {
+                  background: "initial",
+                },
                 padding: "15px",
-                background: activeIndex === i ? "#c1c1c1" : "transparent",
+                background:
+                  activeIndex === i
+                    ? isDarkTheme
+                      ? "#313131"
+                      : "#c1c1c1"
+                    : "transparent",
               }}
               onClick={() => {
                 if (i === 0) emitEvent(menu.event);
@@ -108,7 +119,11 @@ const SideMenu = memo(() => {
                     {menu.icon}
                   </motion.div>
                 </Tooltip>
-                {isExpanded && <h4>{menu.label}</h4>}
+                {isExpanded && (
+                  <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>
+                    {menu.label}
+                  </h4>
+                )}
               </div>
             </MenuItem>
           );

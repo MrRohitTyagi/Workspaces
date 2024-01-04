@@ -38,7 +38,7 @@ export default function SearchBar() {
         p: "2px 4px",
         display: "flex",
         alignItems: "center",
-       
+
         background: "transparent",
       }}
     >
@@ -80,7 +80,7 @@ import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
 
 export function PopoverPopupState() {
   React.useEffect(() => {
-    let ele = document.querySelector(".xxxxxxx");
+    let ele = document.querySelector(".search-bar-selector");
     if (ele) ele.parentElement.style.padding = 0;
   }, []);
 
@@ -91,9 +91,8 @@ export function PopoverPopupState() {
       style={{ padding: 0 }}
     >
       {(popupState) => (
-        <div className="xxxxxxx">
+        <div className="">
           <IconButton
-            className="xxxxxxx"
             disableRipple
             size="small"
             variant="contained"

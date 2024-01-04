@@ -1,6 +1,13 @@
 .user-settings-container {
-  padding: 10px;
+  padding: 0px 10px;
+  width: 100%;
+  /* justify-content: center;
+  display: flex; */
 }
 .settings-heading {
   margin: 10px 0px;
+}
+.profile-settings-container {
+}
+.theme-settings-container {
 }

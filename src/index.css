@@ -38,3 +38,30 @@ h5,
 h6 {
   color: rgba(0, 0, 0, 0.7);
 }
+
+.l-t-svg {
+  color: #dfdfdf;
+}
+.d-t-svg {
+  color: #212121;
+}
+
+.l-t {
+  background-color: #dfdfdf;
+}
+.d-t {
+  background-color: black;
+}
+.d-t-l {
+  background-color: #242424;
+}
+.main-container-t-w {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: white !important;
+  }
+}

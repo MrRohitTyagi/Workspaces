@@ -13,6 +13,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { emitter, listenToEvent } from "../../../utils/eventemitter";
 import { deleteCookie } from "../../../utils/cookieHandler";
 import { useNavigate } from "react-router-dom";
+import ColorLensIcon from "@mui/icons-material/ColorLens";
 
 export default function RightDrawer() {
   const [state, setState] = React.useState(false);
@@ -38,6 +39,9 @@ export default function RightDrawer() {
     window.location.href = "/login";
     window.location.reload();
   };
+  const handleThemeSwitch = React.useCallback(() => {
+    emitter.emit("SWITCH_THEME");
+  }, []);
 
   const list = React.useMemo(() => {
     return (
@@ -48,7 +52,11 @@ export default function RightDrawer() {
         onKeyDown={toggleDrawer}
       >
         <List>
-          <ListItem disablePadding onClick={() => navigate("/settings")}>
+          <ListItem
+            disablePadding
+            onClick={() => navigate("/settings")}
+            disabled
+          >
             <ListItemButton>
               <ListItemIcon>
                 <SettingsIcon />
@@ -59,6 +67,14 @@ export default function RightDrawer() {
         </List>
         <Divider />
         <List>
+          <ListItem disablePadding onClick={handleThemeSwitch}>
+            <ListItemButton>
+              <ListItemIcon>
+                <ColorLensIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Switch Mode"} />
+            </ListItemButton>
+          </ListItem>
           <ListItem disablePadding onClick={handleLogout}>
             <ListItemButton>
               <ListItemIcon>
@@ -70,7 +86,7 @@ export default function RightDrawer() {
         </List>
       </Box>
     );
-  }, [toggleDrawer]);
+  }, [navigate, toggleDrawer]);
 
   return (
     <Drawer anchor={"right"} open={state} onClose={toggleDrawer}>

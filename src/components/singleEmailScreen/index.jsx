@@ -14,7 +14,7 @@ import Loader from "../Loader";
 import "./singleEmail.css";
 
 import { useParams } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   deleteEmail,
   getEmail,
@@ -33,6 +33,8 @@ const varient = {
 let done = false;
 
 const PerEmailScreen = () => {
+  const { isDarkTheme } = useContext(ThemeTypeContext);
+
   const [email, setEmail] = useState({});
   const [avatarImage, setAvatarImage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -120,7 +122,9 @@ const PerEmailScreen = () => {
         <motion.div initial="hidden" animate="visible" variants={varient}>
           <IconButton onClick={() => window.history.back()}>
             <Tooltip title="Refresh">
-              <ArrowBackIcon />
+              <ArrowBackIcon
+                className={`${isDarkTheme ? "l-t-svg" : "d-t-svg"}`}
+              />
             </Tooltip>
           </IconButton>
         </motion.div>
@@ -141,7 +145,9 @@ const PerEmailScreen = () => {
           ) : (
             <IconButton onClick={() => handleStarEmail(email, false)}>
               <Tooltip title="Mark As Important">
-                <StarBorderIcon />
+                <StarBorderIcon
+                  className={`${isDarkTheme ? "l-t-svg" : "d-t-svg"}`}
+                />
               </Tooltip>
             </IconButton>
           )}
@@ -157,7 +163,9 @@ const PerEmailScreen = () => {
           ) : (
             <IconButton onClick={() => handleArchiveEmail(email, false)}>
               <Tooltip title="Archive">
-                <ArchiveIcon />
+                <ArchiveIcon
+                  className={`${isDarkTheme ? "l-t-svg" : "d-t-svg"}`}
+                />
               </Tooltip>
             </IconButton>
           )}
@@ -181,7 +189,11 @@ const PerEmailScreen = () => {
           </div>
           <div className="single-email-from-cont">
             <h5> {capitalizeFirstLetter(sender)}</h5>
-            <div className="single-email-body">
+            <div
+              className={`single-email-body ${
+                isDarkTheme ? "l-t-svg" : "d-t-svg"
+              }`}
+            >
               <BodyRenderer str={body} />
               <StandardImageList attachments={email.attachments} />
               <div className="fordard-reply-box">
@@ -264,6 +276,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import { ThemeTypeContext } from "../../App";
 function ResponsiveDialog({ children, imageUrl }) {
   const [open, setOpen] = useState(false);
 

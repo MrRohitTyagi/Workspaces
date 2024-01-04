@@ -7,11 +7,12 @@ import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 
 import { emitEvent } from "../../utils/eventemitter";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useContext } from "react";
 
 import SearchBar from "./searchBar";
 import useAuth from "../../utils/useAuth";
 import LoggedInUserProfile from "../userProfile";
+import { ThemeTypeContext } from "../../App";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -32,13 +33,14 @@ const Search = styled("div")(({ theme }) => ({
 const TopNavbar = memo(() => {
   const { isAuthenticated } = useAuth();
   const isLoggedIn = isAuthenticated;
+  const { isDarkTheme } = useContext(ThemeTypeContext);
   const handleClick = useCallback(
     () => emitEvent("EXPAND_COLLAPSE_SIDEBAR"),
     []
   );
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1 }} className={isDarkTheme ? "d-t" : "l-t"}>
       <AppBar
         position="static"
         sx={{
@@ -56,13 +58,13 @@ const TopNavbar = memo(() => {
             aria-label="open drawer"
             sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
           >
-            <MenuIcon />
+            <MenuIcon className={`${isDarkTheme ? "l-t-svg" : "d-t-svg"}`} />
           </IconButton>
           <Typography
             variant="h4"
             noWrap
             component="div"
-            className="app-name"
+            className={`app-name ${isDarkTheme ? "l-t-svg" : "d-t-svg"}`}
             sx={{ display: { sm: "block", xs: "none" }, cursor: "pointer" }}
           >
             Workspaces
