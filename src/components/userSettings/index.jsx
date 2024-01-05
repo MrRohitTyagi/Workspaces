@@ -1,10 +1,12 @@
+/* eslint-disable react/prop-types */
 import * as React from "react";
+
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
+
 import "./userSettings.css";
 
 export default function UserSettings() {

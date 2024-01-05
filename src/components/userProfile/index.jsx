@@ -1,6 +1,7 @@
-import { emitter } from "../../utils/eventemitter";
-import useAuth from "../../utils/useAuth";
 import { Avatar, IconButton } from "@mui/material";
+
+import { emitter } from "@/utils/eventemitter";
+import useAuth from "@/utils/useAuth";
 
 function LoggedInUserProfile() {
   const { user } = useAuth();

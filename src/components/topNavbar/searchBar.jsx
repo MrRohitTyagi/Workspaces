@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import Paper from "@mui/material/Paper";
 import InputBase from "@mui/material/InputBase";
 import Divider from "@mui/material/Divider";
@@ -6,8 +7,11 @@ import IconButton from "@mui/material/IconButton";
 import TuneIcon from "@mui/icons-material/Tune";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { emitEvent } from "../../utils/eventemitter";
+
+import { emitEvent } from "@/utils/eventemitter";
+
 import "./topNavbar.css";
+
 let isLoaded = false;
 
 export default function SearchBar() {
@@ -75,7 +79,7 @@ export default function SearchBar() {
 import Typography from "@mui/material/Typography";
 import Popover from "@mui/material/Popover";
 import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
-import { ThemeTypeContext } from "../../App";
+import { ThemeTypeContext } from "@/App";
 
 export function PopoverPopupState() {
   React.useEffect(() => {

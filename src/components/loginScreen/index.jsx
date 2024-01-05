@@ -1,12 +1,13 @@
 import { useCallback, useRef, useState } from "react";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
 
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import "./loginscreen.css"; // Assuming you have a separate CSS file (App.css) for styling
 import {
   Avatar,
   CircularProgress,
@@ -14,10 +15,11 @@ import {
   IconButton,
   InputAdornment,
 } from "@mui/material";
-import { createUser, getUser } from "../../controllers/userController";
-import { setCookie } from "../../utils/cookieHandler";
-import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
+
+import { createUser, getUser } from "@/controllers/userController";
+import { setCookie } from "@/utils/cookieHandler";
+
+import "./loginscreen.css";
 
 const varients = {
   hidden: { y: -50, opacity: 0 },
@@ -110,7 +112,7 @@ function LoginScreen() {
               submitPayload,
               isSigninForm ? "SIGN-IN" : "SIGN-UP"
             );
-           
+
             if (!user) {
               toast.error("Invalid email or password");
               return;
@@ -309,7 +311,8 @@ function LoginScreen() {
 }
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { uploadImage } from "../../utils/imageupload";
+import { uploadImage } from "@/utils/imageupload";
+import PropTypes from "prop-types";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -349,4 +352,9 @@ function InputFileUpload({ picture, setPicture }) {
     </IconButton>
   );
 }
+InputFileUpload.propTypes = {
+  picture: PropTypes.any,
+  setPicture: PropTypes.func,
+};
+
 export default LoginScreen;

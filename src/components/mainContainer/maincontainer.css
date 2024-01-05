@@ -12,6 +12,6 @@
   background-color: #f6f6f6;
 }
 .main-email-container-dark {
-  background-color: #2f2f2f !important;
+  background-color: var(--dark-theme-color-little-light) !important;
   color: white;
 }

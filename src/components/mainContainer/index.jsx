@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 import {
   memo,
@@ -9,8 +9,9 @@ import {
   useState,
 } from "react";
 import { motion } from "framer-motion";
-
+import PropTypes from "prop-types";
 import PullToRefresh from "react-simple-pull-to-refresh";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { CircularProgress, IconButton, Tooltip } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -19,25 +20,26 @@ import StarIcon from "@mui/icons-material/Star";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
-import { confugureUser } from "../../controllers/userController";
 import {
   deleteEmail,
   deleteEmailSent,
   updateEmail,
-} from "../../controllers/emailController";
-import { emitter, listenToEvent } from "../../utils/eventemitter";
-import noRecorePlaceholder from "../../assets/noRecored-placeholder.png";
+} from "@/controllers/emailController";
 
-import { truncateText } from "../../utils/helperFunctions";
+import noRecorePlaceholder from "@/assets/noRecored-placeholder.png";
+
+import { truncateText } from "@/utils/helperFunctions";
+import useAuth from "@/utils/useAuth";
+import { emitter, listenToEvent } from "@/utils/eventemitter";
 
 import "./customDataTable.css";
 import "./maincontainer.css";
-import { useLocation, useNavigate } from "react-router-dom";
-import useAuth from "../../utils/useAuth";
-import { socket } from "../authorizeUser";
-import Loader from "../Loader";
-import { isEmpty } from "lodash";
-import { ThemeTypeContext } from "../../App";
+
+import { socket } from "@/components/authorizeUser";
+import Loader from "@/components/Loader";
+import { ThemeTypeContext } from "@/App";
+
+import { confugureUser } from "@/controllers/userController";
 
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
@@ -66,7 +68,7 @@ const MainContainer = () => {
   const filterTrackerRef = useRef(filterObjs[pathname]);
 
   const fetchData = useCallback(
-    async (filterType, forcerefresh = false, globalQuery) => {
+    async (filterType, globalQuery) => {
       filterTrackerRef.current = filterType;
       setEmailData(undefined);
       const { response } = await confugureUser(
@@ -121,7 +123,7 @@ const MainContainer = () => {
       fetchData(messages.SHOW_ALL_ARCHIVED);
     });
     listenToEvent(messages.GLOBAL_SEARCH_QUERY, (txt) => {
-      fetchData(messages.GLOBAL_SEARCH_QUERY, true, txt);
+      fetchData(messages.GLOBAL_SEARCH_QUERY, txt);
     });
 
     return () => {
@@ -276,7 +278,7 @@ const CustomDataTable = memo(
       },
       [navigate]
     );
-    const handleRefresh = () => fetchData(filterTrackerRef.current, true);
+    const handleRefresh = () => fetchData(filterTrackerRef.current);
 
     const { isDarkTheme } = useContext(ThemeTypeContext);
 
@@ -284,9 +286,7 @@ const CustomDataTable = memo(
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="email-container">
           <div className="filters-comp refresh-button">
-            <IconButton
-              onClick={() => fetchData(filterTrackerRef.current, true)}
-            >
+            <IconButton onClick={() => fetchData(filterTrackerRef.current)}>
               <Tooltip title="Refresh">
                 <RefreshIcon className={`${isDarkTheme ? "l-t-svg" : ""}`} />
               </Tooltip>
@@ -498,20 +498,13 @@ const CustomDataTable = memo(
 );
 CustomDataTable.displayName = "CustomDataTable";
 
-// const CustomDataTableSkeletonLoader = ({ data = [1, 2, 3, 4, 5, 6] }) => {
-//   return (
-//     <div className="email-container">
-//       <div className="filters-comp"></div>
-//       <div className="all-email-container">
-//         {data.map((_, i) => {
-//           return (
-//             <div key={i} className="email-row skeleton-row">
-//               <Skeleton animation="wave" height={"100%"} width={"100%"} />
-//             </div>
-//           );
-//         })}
-//       </div>
-//     </div>
-//   );
-// };
+CustomDataTable.propTypes = {
+  data: PropTypes.any,
+  fetchData: PropTypes.func,
+  user: PropTypes.object,
+  filterEmailsViaId: PropTypes.func,
+  filterTrackerRef: PropTypes.object,
+  updatePerEmail: PropTypes.func,
+};
+
 export default MainContainer;

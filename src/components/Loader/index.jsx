@@ -1,6 +1,8 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
+
+import { ThemeTypeContext } from "@/App";
 import "./loader.css";
-import { ThemeTypeContext } from "../../App";
+
 const Loader = () => {
   const { isDarkTheme } = useContext(ThemeTypeContext) || {};
   return (

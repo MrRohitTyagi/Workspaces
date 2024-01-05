@@ -1,5 +1,8 @@
+/* eslint-disable react/prop-types */
 import { motion } from "framer-motion";
-import { startCase } from "lodash";
+import { useParams } from "react-router-dom";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 import { Avatar, Button, IconButton, Skeleton, Tooltip } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -8,24 +11,24 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import StarIcon from "@mui/icons-material/Star";
+import ReplyIcon from "@mui/icons-material/Reply";
+import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 
-import { capitalizeFirstLetter } from "../../utils/helperFunctions";
-import Loader from "../Loader";
+import Loader from "@/components/Loader";
+
 import "./singleEmail.css";
 
-import { useParams } from "react-router-dom";
-import { useCallback, useContext, useEffect, useState } from "react";
 import {
   deleteEmail,
   getEmail,
   updateEmail,
-} from "../../controllers/emailController";
-import { toast } from "react-toastify";
-import useAuth from "../../utils/useAuth";
-import { getUser } from "../../controllers/userController";
-import ReplyIcon from "@mui/icons-material/Reply";
-import { emitter } from "../../utils/eventemitter";
-import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+} from "@/controllers/emailController";
+import { getUser } from "@/controllers/userController";
+
+import { capitalizeFirstLetter } from "@/utils/helperFunctions";
+import useAuth from "@/utils/useAuth";
+import { emitter } from "@/utils/eventemitter";
+
 const varient = {
   hidden: { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1 },
@@ -276,7 +279,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { ThemeTypeContext } from "../../App";
+import { ThemeTypeContext } from "@/App";
 function ResponsiveDialog({ children, imageUrl }) {
   const [open, setOpen] = useState(false);
 

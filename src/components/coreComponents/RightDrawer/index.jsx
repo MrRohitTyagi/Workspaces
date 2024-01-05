@@ -1,4 +1,6 @@
+import { useNavigate } from "react-router-dom";
 import * as React from "react";
+
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
@@ -9,18 +11,18 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import { emitter, listenToEvent } from "../../../utils/eventemitter";
-import { deleteCookie } from "../../../utils/cookieHandler";
-import { useNavigate } from "react-router-dom";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
-import { updateUser } from "../../../controllers/userController";
-import useAuth from "../../../utils/useAuth";
+
+import { emitter, listenToEvent } from "@/utils/eventemitter";
+import { updateUser } from "@/controllers/userController";
+import { deleteCookie } from "@/utils/cookieHandler";
+import useAuth from "@/utils/useAuth";
 
 export default function RightDrawer() {
   const [state, setState] = React.useState(false);
   const { user } = useAuth();
-  console.log(`%c user `, "color: green;border:1px solid green", user);
   const navigate = useNavigate();
+
   React.useEffect(() => {
     listenToEvent("OPEN_DRAWER", () => setState(true));
     return () => emitter.off("OPEN_DRAWER", () => {});

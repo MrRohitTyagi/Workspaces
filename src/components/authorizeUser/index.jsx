@@ -2,10 +2,11 @@ import { createContext, memo, useEffect, useState } from "react";
 import { isEmpty } from "lodash";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import PropTypes from "prop-types";
 
-import { getCookie } from "../../utils/cookieHandler";
-import { getUser } from "../../controllers/userController";
-import Loader from "../Loader";
+import { getCookie } from "@/utils/cookieHandler";
+import { getUser } from "@/controllers/userController";
+import Loader from "@/components/Loader/index.jsx";
 
 const socket = io(import.meta.env.VITE_BE_BASE_URL, {
   transports: ["websocket", "polling", "flashsocket"],
@@ -66,6 +67,9 @@ const Authorize = memo(({ children }) => {
     </AuthProvider.Provider>
   );
 });
+Authorize.propTypes = {
+  children: PropTypes.node,
+};
 Authorize.displayName = "Authorize";
 export default Authorize;
 export { AuthProvider, socket };

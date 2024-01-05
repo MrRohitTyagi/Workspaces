@@ -1,16 +1,19 @@
 import { memo, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Badge, MenuItem, MenuList, Tooltip } from "@mui/material";
+
+import { Badge, Divider, MenuItem, MenuList, Tooltip } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SendIcon from "@mui/icons-material/Send";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 
-import { emitEvent, emitter, listenToEvent } from "../../utils/eventemitter";
+import { emitEvent, emitter, listenToEvent } from "@/utils/eventemitter";
+
+import { ThemeTypeContext } from "@/App";
 import "./sidemenu.css";
-import { ThemeTypeContext } from "../../App";
 
 const sideMenuConfig = (emailcount, isDarkTheme) => [
   {
@@ -128,6 +131,39 @@ const SideMenu = memo(() => {
             </MenuItem>
           );
         })}
+        <Divider orientation="horizontal" sx={{ borderBottomWidth: "thick" }} />
+        <MenuItem
+          key={"chat"}
+          sx={{
+            ":hover": {
+              background: "initial",
+            },
+            padding: "15px",
+            background:
+              activeIndex === 5
+                ? isDarkTheme
+                  ? "#313131"
+                  : "#c1c1c1"
+                : "transparent",
+          }}
+          onClick={() => {
+            setActiveIndex(5);
+            navigate("/chats");
+          }}
+        >
+          <div className="menu-item">
+            <Tooltip title={"Chats"}>
+              <motion.div initial="hidden" animate="visible" variants={varient}>
+                <ChatBubbleIcon
+                  className={isDarkTheme ? "l-t-svg" : "d-t-svg"}
+                />
+              </motion.div>
+            </Tooltip>
+            {isExpanded && (
+              <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>{"Chats"}</h4>
+            )}
+          </div>
+        </MenuItem>
       </MenuList>
     </div>
   );

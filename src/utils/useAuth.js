@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { AuthProvider } from "../components/authorizeUser";
+import { AuthProvider } from "@/components/authorizeUser";
 
 const useAuth = () => {
   const { isLoading, isAuthenticated, ...rest } = useContext(AuthProvider);

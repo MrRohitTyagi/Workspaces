@@ -1,19 +1,20 @@
+import { createContext, useEffect, useState } from "react";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import LoginScreen from "./components/loginScreen";
 import { ToastContainer } from "react-toastify";
 
-import PerEmailScreen from "./components/singleEmailScreen";
-import TopNavbar from "./components/topNavbar";
+import PerEmailScreen from "@/components/singleEmailScreen";
+import TopNavbar from "@/components/topNavbar";
+import Loader from "@/components/Loader";
+import SideMenu from "@/components/SideMenu";
+import ComposeEmail from "@/components/ComposeEmail";
+import MainContainer from "@/components/mainContainer";
+import LoginScreen from "@/components/loginScreen";
+import RightDrawer from "@/components/coreComponents/RightDrawer";
+import UserSettings from "@/components/userSettings";
+import ChatIndex from "@/components/chat/index.jsx";
 
-import Loader from "./components/Loader";
-import SideMenu from "./components/SideMenu";
-import MainContainer from "./components/mainContainer";
-import ComposeEmail from "./components/ComposeEmail";
-import useAuth from "./utils/useAuth";
-import RightDrawer from "./components/coreComponents/RightDrawer";
-import { createContext, useEffect, useState } from "react";
-import UserSettings from "./components/userSettings";
-import { listenToEvent } from "./utils/eventemitter";
+import useAuth from "@/utils/useAuth";
+import { listenToEvent } from "@/utils/eventemitter";
 
 const ThemeTypeContext = createContext();
 function App() {
@@ -59,6 +60,7 @@ function App() {
               <Route path="/email/:id" element={<PerEmailScreen />} />
               {/* <Route path="/email/:id" element={<PerEmailScreen />} /> */}
               <Route path="/settings" element={<UserSettings />} />
+              <Route path="/chats" element={<ChatIndex />} />
               <Route path="/*" element={<Redirect />} />
             </Routes>
           </div>

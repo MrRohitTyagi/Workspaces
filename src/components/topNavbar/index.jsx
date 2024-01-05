@@ -1,3 +1,5 @@
+import { memo, useCallback, useContext } from "react";
+
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -6,13 +8,12 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 
-import { emitEvent } from "../../utils/eventemitter";
-import { memo, useCallback, useContext } from "react";
+import { emitEvent } from "@/utils/eventemitter";
 
 import SearchBar from "./searchBar";
-import useAuth from "../../utils/useAuth";
-import LoggedInUserProfile from "../userProfile";
-import { ThemeTypeContext } from "../../App";
+import useAuth from "@/utils/useAuth";
+import LoggedInUserProfile from "@/components/userProfile";
+import { ThemeTypeContext } from "@/App";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",

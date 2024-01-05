@@ -1,18 +1,19 @@
-/* eslint-disable react/prop-types */
+import * as Yup from "yup";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import Textarea from "@mui/joy/Textarea";
+import PropTypes from "prop-types";
 
+import Textarea from "@mui/joy/Textarea";
 import Dialog from "@mui/material/Dialog";
+import { styled } from "@mui/material/styles";
 import { Button, CircularProgress, IconButton, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 
-import { createEmail, searchEmail } from "../../controllers/emailController";
+import { createEmail, searchEmail } from "@/controllers/emailController";
+
 import "./componeEmail.css";
-import { styled } from "@mui/material/styles";
-import * as Yup from "yup";
 
 const StyledTextArea = styled(Textarea)`
   > textarea {
@@ -289,7 +290,7 @@ function InputFileUpload({ setAttachments, isSubmitting }) {
 import AsyncSelect from "react-select/async";
 
 import { debounce, isEmpty } from "lodash";
-import { multiupload } from "../../utils/imageupload";
+import { multiupload } from "@/utils/imageupload";
 
 const CustomSelect = memo(
   ({
@@ -351,6 +352,26 @@ const CustomSelect = memo(
     );
   }
 );
+
+EmailDialogue.propTypes = {
+  open: PropTypes.bool,
+  user: PropTypes.object,
+  email: PropTypes.string,
+  setNewEmailsToSend: PropTypes.func,
+  filterEmails: PropTypes.func,
+};
+InputFileUpload.propTypes = {
+  setAttachments: PropTypes.func,
+  isSubmitting: PropTypes.bool,
+};
+CustomSelect.propTypes = {
+  handleRecipientsOnchange: PropTypes.func,
+  to: PropTypes.array,
+  setTouched: PropTypes.func,
+  touched: PropTypes.object,
+  errors: PropTypes.object,
+  disabled: PropTypes.bool,
+};
 
 CustomSelect.displayName = "CustomSelect";
 

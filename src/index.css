@@ -7,7 +7,8 @@
   --text-clr: black;
   --bg-color: rgb(223, 223, 223);
   --navbar-height: 64px;
-  --dark-theme-color: #1f1f1f;
+  --dark-theme-color: #17191a;
+  --dark-theme-color-little-light: #232628;
 }
 html {
   color: var(--text-clr);

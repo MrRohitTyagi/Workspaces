@@ -1,14 +1,16 @@
-/* eslint-disable react/prop-types */
 import { useCallback, useEffect, useState } from "react";
-import "./componeEmail.css";
-import { listenToEvent, emitter } from "../../utils/eventemitter";
+import { v4 } from "uuid";
+import PropTypes from "prop-types";
+
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
 import NewEmail from "./EmailDialogue";
-import { v4 } from "uuid";
-import useAuth from "../../utils/useAuth";
+import useAuth from "@/utils/useAuth";
+import { listenToEvent, emitter } from "@/utils/eventemitter";
+import "./componeEmail.css";
 
 const ComposeEmail = () => {
   const { user } = useAuth();
@@ -120,6 +122,13 @@ const OneEmailBox = ({
       )}
     </div>
   );
+};
+OneEmailBox.propTypes = {
+  email: PropTypes.object,
+  index: PropTypes.number,
+  filterEmails: PropTypes.func,
+  user: PropTypes.object,
+  setNewEmailsToSend: PropTypes.func,
 };
 
 export default ComposeEmail;
