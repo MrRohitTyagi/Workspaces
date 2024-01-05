@@ -1,0 +1,31 @@
+.chat-window-cont {
+  height: 100%;
+  width: 100%;
+  /* border: 1px solid blue; */
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  padding-bottom: 20px;
+}
+.messages-box {
+  gap: 10px;
+  overflow: auto;
+  height: 80vh;
+  width: 100%;
+  /* border: 1px solid green; */
+  padding: 10%;
+  display: flex;
+  flex-direction: column;
+}
+.send-bar-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* border: 1px solid orange; */
+  height: 70px;
+  width: 100%;
+}
+.one-msg-box {
+  width: 80%;
+  /* border: 1px dotted red; */
+}

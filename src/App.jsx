@@ -58,9 +58,8 @@ function App() {
               />
               <Route path="/login" element={<LoginScreen />} />
               <Route path="/email/:id" element={<PerEmailScreen />} />
-              {/* <Route path="/email/:id" element={<PerEmailScreen />} /> */}
               <Route path="/settings" element={<UserSettings />} />
-              <Route path="/chats" element={<ChatIndex />} />
+              <Route path="/chats/*" element={<ChatIndex />} />
               <Route path="/*" element={<Redirect />} />
             </Routes>
           </div>

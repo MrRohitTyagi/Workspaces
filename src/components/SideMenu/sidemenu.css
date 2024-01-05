@@ -4,8 +4,11 @@
   overflow-x: hidden;
   background: #dfdfdf;
   z-index: 100;
+  border-right: 1px solid #b5b5b5;
 }
+
 .side-menu-container-dark {
+  border-right: 1px solid rgb(86 86 86);
   background: var(--dark-theme-color) !important;
 }
 

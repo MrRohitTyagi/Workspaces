@@ -1,7 +1,8 @@
 .new-email-container {
   position: fixed;
   bottom: 0;
-  height: 4rem;
+  height: 0rem;
+  visibility: hidden;
   left: 0;
   right: 0;
   display: flex;
@@ -120,6 +121,8 @@
 }
 @media (max-width: 1000px) {
   .new-email-container {
+    height: 0rem;
+    visibility: hidden;
     bottom: var(--navbar-height);
   }
   .refresh-button {

@@ -8,7 +8,7 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import SendIcon from "@mui/icons-material/Send";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
+import ChatIcon from "@mui/icons-material/Chat";
 
 import { emitEvent, emitter, listenToEvent } from "@/utils/eventemitter";
 
@@ -148,15 +148,13 @@ const SideMenu = memo(() => {
           }}
           onClick={() => {
             setActiveIndex(5);
-            navigate("/chats");
+            navigate("/chats/select");
           }}
         >
           <div className="menu-item">
             <Tooltip title={"Chats"}>
               <motion.div initial="hidden" animate="visible" variants={varient}>
-                <ChatBubbleIcon
-                  className={isDarkTheme ? "l-t-svg" : "d-t-svg"}
-                />
+                <ChatIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />
               </motion.div>
             </Tooltip>
             {isExpanded && (

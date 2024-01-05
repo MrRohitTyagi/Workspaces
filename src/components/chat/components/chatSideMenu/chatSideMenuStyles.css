@@ -1,0 +1,27 @@
+.chat-side-menu-container {
+  width: var(--chat-side-width);
+  border-right: 1px solid #c2c2c2;
+}
+.add-new-chat-button-const {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.fdsafda {
+  border-bottom: 1px solid var(--bg-color) !important;
+}
+.add-new-chat-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  background-color: #f3f3f3;
+  gap: 10px;
+}
+.per-chat-line {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+}
