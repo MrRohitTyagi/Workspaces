@@ -1,23 +1,38 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import "./chatWindow.css";
 import { useParams } from "react-router-dom";
+
 import SendIcon from "@mui/icons-material/Send";
 import { IconButton, InputAdornment, OutlinedInput } from "@mui/material";
+
 import { v4 } from "uuid";
+import useAuth from "@/utils/useAuth";
+import { ThemeTypeContext } from "@/App";
+import { saveMessages } from "@/controllers/chatController";
 
 const ChatWindow = ({ allChats }) => {
-  const { id } = useParams();
+  const { user: currentUser } = useAuth();
+  const { isDarkTheme } = useContext(ThemeTypeContext);
+  const { id: msgId } = useParams();
   const [messages, setMessages] = useState([]);
   const [value, setValue] = useState("");
-  const messageref = useRef();
+  const ref = useRef();
 
   useEffect(() => {
-    const perChat = allChats.find((c) => c._id === id);
-    console.log(`%c perChat `, "color: green;border:1px solid green", perChat);
+    const perChat = allChats.find((c) => c._id === msgId);
+    console.log(
+      `%c perChat `,
+      "color: yellow;border:1px solid lightgreen",
+      perChat
+    );
     setMessages(perChat?.messages || []);
-    const { messages, ...rest } = perChat || {};
-    messageref.current = rest;
-  }, [allChats, id]);
+  }, [allChats, msgId]);
 
   console.log(
     `%c messages `,
@@ -25,43 +40,74 @@ const ChatWindow = ({ allChats }) => {
     messages
   );
 
-  const handleMessages = useCallback(() => {
-    if (!value) return;
-    let a = Math.random() * 100;
-    const { from } = messageref.current || {};
-    setMessages((p) => [
-      ...p,
-      { [a > 50 ? "from" : "to"]: from._id, msg: value, id: v4() },
-    ]);
-    // setValue("");
-  }, [value]);
+  const handleMessages = useCallback(
+    (e) => {
+      window.ee = e;
 
-  const { from: currentUser } = messageref.current || {};
+      if (!value) return;
+
+      const newMessage = {
+        from: currentUser._id,
+        msg: value,
+        _id: v4(),
+      };
+
+      setMessages((p) => [...p, newMessage]);
+      saveMessages({ msgId: msgId, message: newMessage });
+      setValue("");
+      setTimeout(() => {
+        ref.current.scroll({
+          top: ref.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }, 100);
+    },
+    [currentUser, msgId, value]
+  );
 
   return (
     <div className={`chat-window-cont`}>
-      <div className="messages-box">
-        {messages.map(({ msg, from, id }) => {
+      <div ref={ref} className="messages-box">
+        {messages.map(({ msg, from, _id }) => {
+          const isMyMsg = from === currentUser._id;
           return (
             <div
-              key={id}
-              className="one-msg-box"
+              key={_id}
+              className="msg-box"
               style={{
-                alignSelf:
-                  from === currentUser?._id ? "flex-start" : "flex-end",
-                textAlign: from === currentUser?._id ? "start" : "end",
+                justifyContent: isMyMsg ? "flex-end" : "flex-start",
               }}
             >
-              {msg}
+              <div
+                className={
+                  isDarkTheme ? "single-message-box-dark" : `single-message-box`
+                }
+                style={{
+                  borderRadius: isMyMsg
+                    ? "20px 20px 2px 20px"
+                    : "20px 20px 20px 2px",
+                }}
+              >
+                {msg}
+              </div>
             </div>
           );
         })}
       </div>
       <div className="send-bar-bottom">
         <OutlinedInput
+          placeholder="Type Here ..."
+          onKeyDown={(e) => {
+            if (e.keyCode === 13) handleMessages();
+          }}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          sx={{ width: "80%", height: "80%", borderRadius: "30px" }}
+          sx={{
+            width: "80%",
+            height: "80%",
+            borderRadius: "30px",
+            ...(isDarkTheme ? { color: "white", background: "#555555" } : {}),
+          }}
           endAdornment={
             <InputAdornment position="end">
               <IconButton onClick={handleMessages}>

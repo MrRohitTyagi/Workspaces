@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
 import { ThemeTypeContext } from "@/App";
 import "./chatStyles.css";
@@ -13,6 +13,7 @@ const ChatIndex = () => {
   const { user } = useAuth();
   const [allChats, setAllChats] = useState([]);
 
+
   useEffect(() => {
     (async function () {
       const { response } = await getAllChatsPerUser(user._id);
@@ -25,12 +26,15 @@ const ChatIndex = () => {
     <div
       className={`chat-main-container ${isDarkTheme ? "chat-cont-dark" : ""}`}
     >
-      <ChatSideMenu allChats={allChats} />
+      <ChatSideMenu allChats={allChats}  />
       <Routes>
-        {console.log(`%c xxxxxxxx `, "color: green;border:1px solid green")}
-
         <Route path="/select" element={<ChatNotSelected />} />
-        <Route path="/:id" element={<ChatWindow allChats={allChats} />} />
+        <Route
+          path="/:id"
+          element={
+            <ChatWindow allChats={allChats}  />
+          }
+        />
       </Routes>
     </div>
   );

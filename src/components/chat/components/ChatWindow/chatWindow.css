@@ -13,7 +13,7 @@
   height: 80vh;
   width: 100%;
   /* border: 1px solid green; */
-  padding: 10%;
+  padding: 5% 10%;
   display: flex;
   flex-direction: column;
 }
@@ -25,7 +25,19 @@
   height: 70px;
   width: 100%;
 }
-.one-msg-box {
-  width: 80%;
+.msg-box {
+  width: 100%;
   /* border: 1px dotted red; */
+  display: flex;
+  flex-direction: row;
+}
+
+/* add in dark also  */
+.single-message-box {
+  background-color: lightgray;
+  padding: 10px;
+}
+.single-message-box-dark {
+  background-color: #555555;
+  padding: 10px;
 }

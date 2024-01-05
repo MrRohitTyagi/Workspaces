@@ -2,7 +2,7 @@
   width: var(--chat-side-width);
   border-right: 1px solid #c2c2c2;
 }
-.add-new-chat-button-const {
+.add-new-chat-button-cont {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -14,10 +14,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: 80%;
   padding: 10px;
   background-color: #f3f3f3;
+  border-radius: 50px;
+  margin: auto;
   gap: 10px;
+  margin-top: 10px;
+}
+.add-chat-dark {
+  background-color: var(--dark-theme-color);
+  color: white;
 }
 .per-chat-line {
   display: flex;
