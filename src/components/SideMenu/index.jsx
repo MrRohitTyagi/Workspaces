@@ -135,9 +135,7 @@ const SideMenu = memo(() => {
         <MenuItem
           key={"chat"}
           sx={{
-            ":hover": {
-              background: "initial",
-            },
+           
             padding: "15px",
             background:
               activeIndex === 5

@@ -307,7 +307,6 @@ function ResponsiveDialog({ children, imageUrl }) {
       downloadLink.href = blobUrl;
       const ext = imageUrl.split(".").at(-1);
       // Set the download attribute with a desired filename
-      console.log("ext", ext);
       downloadLink.download = `downloaded_image.${ext}`;
 
       // Append the download link to the body

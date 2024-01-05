@@ -32,3 +32,30 @@
   gap: 5px;
   align-items: center;
 }
+.new-chat-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.he-20 {
+  height: 20px;
+}
+
+.custom-async-dropdown-option {
+  background-color: white !important;
+  transition: all 200ms ease;
+  height: 50px;
+  width: 100%;
+  border-bottom: 1px solid var(--bg-color);
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  align-items: center;
+  gap: 10px;
+  z-index: 20;
+}
+
+.ffffffffffff .css-1nmdiq5-menu * {
+  background-color: white !important;
+}

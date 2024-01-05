@@ -8,3 +8,7 @@ export const saveMessages = async (payload) => {
   const { data } = await caller("post", `chat/save-message`, payload);
   return data;
 };
+export const newChat = async (payload) => {
+  const { data } = await caller("post", `chat/create`, payload);
+  return data;
+};

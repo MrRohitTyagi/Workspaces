@@ -29,6 +29,9 @@ const Authorize = memo(({ children }) => {
       console.log("Socket-id", id);
       window.socket_id = id;
     });
+    socket.on("NEW_MESSAGE_RECEIVED", (data) => {
+      console.log("NEW_MESSAGE_RECEIVED", data);
+    });
     return () => {
       socket.disconnect();
     };

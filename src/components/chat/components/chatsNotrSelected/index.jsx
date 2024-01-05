@@ -7,7 +7,6 @@ import useAuth from "@/utils/useAuth";
 const ChatNotSelected = () => {
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const { user } = useAuth();
-  console.log("loaded");
   return (
     <div
       className={`chat-not-selected ${isDarkTheme ? "dark-theme-light" : ""}`}

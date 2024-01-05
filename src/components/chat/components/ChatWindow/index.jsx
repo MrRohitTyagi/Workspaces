@@ -9,35 +9,40 @@ import "./chatWindow.css";
 import { useParams } from "react-router-dom";
 
 import SendIcon from "@mui/icons-material/Send";
-import { IconButton, InputAdornment, OutlinedInput } from "@mui/material";
+import {
+  Avatar,
+  IconButton,
+  InputAdornment,
+  OutlinedInput,
+} from "@mui/material";
 
 import { v4 } from "uuid";
 import useAuth from "@/utils/useAuth";
 import { ThemeTypeContext } from "@/App";
 import { saveMessages } from "@/controllers/chatController";
+import { emitter } from "@/utils/eventemitter";
 
 const ChatWindow = ({ allChats }) => {
+  const [messages, setMessages] = useState([]);
+  const [value, setValue] = useState("");
+  const [perChat, setPerChat] = useState({});
+
   const { user: currentUser } = useAuth();
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const { id: msgId } = useParams();
-  const [messages, setMessages] = useState([]);
-  const [value, setValue] = useState("");
+
   const ref = useRef();
 
   useEffect(() => {
     const perChat = allChats.find((c) => c._id === msgId);
-    console.log(
-      `%c perChat `,
-      "color: yellow;border:1px solid lightgreen",
-      perChat
-    );
+    setPerChat(perChat);
     setMessages(perChat?.messages || []);
   }, [allChats, msgId]);
 
   console.log(
-    `%c messages `,
-    "color: yellow;border:1px solid lightgreen",
-    messages
+    `%c {perChat,messages,value,currentUser} `,
+    "color: orange;border:2px dotted oranfe",
+    { perChat, messages, value, currentUser, allChats }
   );
 
   const handleMessages = useCallback(
@@ -51,6 +56,10 @@ const ChatWindow = ({ allChats }) => {
         msg: value,
         _id: v4(),
       };
+      emitter.emit("UPDATE_MESSAGES_PER_CHAT", {
+        message_id: msgId,
+        message: newMessage,
+      });
 
       setMessages((p) => [...p, newMessage]);
       saveMessages({ msgId: msgId, message: newMessage });
@@ -67,6 +76,10 @@ const ChatWindow = ({ allChats }) => {
 
   return (
     <div className={`chat-window-cont`}>
+      <div className="messaging-to-cont">
+        <Avatar lazy src={perChat?.to?.picture} />
+        <h3>{perChat?.to?.username || perChat?.to?.email}</h3>
+      </div>
       <div ref={ref} className="messages-box">
         {messages.map(({ msg, from, _id }) => {
           const isMyMsg = from === currentUser._id;

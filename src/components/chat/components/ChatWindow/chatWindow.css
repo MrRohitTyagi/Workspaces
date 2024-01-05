@@ -10,7 +10,7 @@
 .messages-box {
   gap: 10px;
   overflow: auto;
-  height: 80vh;
+  height: 70vh;
   width: 100%;
   /* border: 1px solid green; */
   padding: 5% 10%;
@@ -40,4 +40,13 @@
 .single-message-box-dark {
   background-color: #555555;
   padding: 10px;
+}
+.messaging-to-cont {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  border-bottom: 1px solid var(--bg-color);
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
 }
