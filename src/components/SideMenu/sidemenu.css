@@ -18,7 +18,7 @@
   flex-direction: row;
   gap: 10px;
 }
-@media (max-width: 1050px) {
+@media (max-width: 800px) {
   .side-menu-container {
     position: fixed;
     bottom: 0;
