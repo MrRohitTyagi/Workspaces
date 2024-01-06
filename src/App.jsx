@@ -89,5 +89,6 @@ const Redirect = () => {
   });
   return <></>;
 };
+
 export { ThemeTypeContext };
 export default App;

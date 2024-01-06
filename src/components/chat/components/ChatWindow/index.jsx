@@ -60,9 +60,11 @@ const ChatWindow = ({ allChats }) => {
         message_id: msgId,
         message: newMessage,
       });
+      const userToshow =
+        perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
 
       setMessages((p) => [...p, newMessage]);
-      saveMessages({ msgId: msgId, message: newMessage });
+      saveMessages({ msgId: msgId, message: newMessage, to: userToshow._id });
       setValue("");
       setTimeout(() => {
         ref.current.scroll({
@@ -71,13 +73,13 @@ const ChatWindow = ({ allChats }) => {
         });
       }, 100);
     },
-    [currentUser, msgId, value]
+    [currentUser._id, msgId, perChat?.from, perChat?.to, value]
   );
 
   return (
     <div className={`chat-window-cont`}>
       <div className="messaging-to-cont">
-        <Avatar lazy src={perChat?.to?.picture} />
+        <Avatar src={perChat?.to?.picture} />
         <h3>{perChat?.to?.username || perChat?.to?.email}</h3>
       </div>
       <div ref={ref} className="messages-box">

@@ -9,6 +9,7 @@ import ChatNotSelected from "./components/chatsNotrSelected";
 import useAuth from "@/utils/useAuth";
 import { getAllChatsPerUser, newChat } from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
+import { socket } from "@/components/authorizeUser";
 
 const ChatIndex = () => {
   const { user } = useAuth();
@@ -21,6 +22,36 @@ const ChatIndex = () => {
       setAllChats(response);
     })();
   }, [user]);
+
+  const updateMessageWithId = useCallback(({ message_id, message }) => {
+    setAllChats((prev) => {
+      const chatArr = [];
+      for (const chat of prev) {
+        if (chat._id === message_id) {
+          let obj = chat;
+          obj.messages = [...obj.messages, message];
+          chatArr.push(obj);
+        } else chatArr.push(chat);
+      }
+      return chatArr;
+    });
+  }, []);
+
+  const addNewchatFromSocket = useCallback(
+    (data) => {
+      const { message_id, message } = data || {};
+      updateMessageWithId({ message_id, message });
+    },
+    [updateMessageWithId]
+  );
+
+  useEffect(() => {
+    // Listen for messages from the server
+    socket.on("NEW_MESSAGE_RECEIVED", (data) => {
+      console.log("NEW_MESSAGE_RECEIVED", data);
+      addNewchatFromSocket(data);
+    });
+  }, [addNewchatFromSocket]);
 
   const addNewChat = useCallback(
     async (data) => {
@@ -43,20 +74,6 @@ const ChatIndex = () => {
     [allChats, navigate, user._id]
   );
 
-  const updateMessageWithId = useCallback(({ message_id, message }) => {
-    setAllChats((prev) => {
-      const chatArr = [];
-      for (const chat of prev) {
-        if (chat._id === message_id) {
-          let obj = chat;
-          obj.messages = [...obj.messages, message];
-          chatArr.push(obj);
-        } else chatArr.push(chat);
-      }
-      return chatArr;
-    });
-  }, []);
-
   useEffect(() => {
     listenToEvent("ADD_NEW_CHAT", addNewChat);
     listenToEvent("UPDATE_MESSAGES_PER_CHAT", updateMessageWithId);
@@ -65,7 +82,7 @@ const ChatIndex = () => {
       emitter.off("ADD_NEW_CHAT", addNewChat);
       emitter.off("UPDATE_MESSAGES_PER_CHAT", updateMessageWithId);
     };
-  }, [addNewChat, allChats, updateMessageWithId, user]);
+  }, [addNewChat, updateMessageWithId]);
 
   const { pathname } = useLocation();
   const { isDarkTheme } = useContext(ThemeTypeContext);

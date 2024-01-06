@@ -1,19 +1,18 @@
 import { createContext, memo, useEffect, useState } from "react";
 import { isEmpty } from "lodash";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
 import PropTypes from "prop-types";
 
 import { getCookie } from "@/utils/cookieHandler";
 import { getUser } from "@/controllers/userController";
 import Loader from "@/components/Loader/index.jsx";
 
+import { io } from "socket.io-client";
+
+const AuthProvider = createContext();
 const socket = io(import.meta.env.VITE_BE_BASE_URL, {
   transports: ["websocket", "polling", "flashsocket"],
 });
-
-const AuthProvider = createContext();
-
 const Authorize = memo(({ children }) => {
   const navigate = useNavigate();
 
@@ -25,15 +24,17 @@ const Authorize = memo(({ children }) => {
 
   useEffect(() => {
     // Listen for messages from the server
+    const user_id = getCookie();
     socket.on("CONNECTED", (id) => {
       console.log("Socket-id", id);
       window.socket_id = id;
+      socket.emit("SAVE_SOCKET_ID", user_id);
     });
     socket.on("NEW_MESSAGE_RECEIVED", (data) => {
       console.log("NEW_MESSAGE_RECEIVED", data);
     });
     return () => {
-      socket.disconnect();
+      socket.disconnect(user_id);
     };
   }, []);
 
@@ -75,4 +76,6 @@ Authorize.propTypes = {
 };
 Authorize.displayName = "Authorize";
 export default Authorize;
-export { AuthProvider, socket };
+export { AuthProvider };
+
+export { socket };

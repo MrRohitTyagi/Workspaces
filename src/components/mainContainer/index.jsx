@@ -99,10 +99,6 @@ const MainContainer = () => {
       emitter.emit("INCREASE_NEW_EMAIL_COUNT");
       setEmailData((prev) => [email, ...prev]);
     });
-    // Clean up the socket connection on component unmount
-    return () => {
-      socket.disconnect();
-    };
   }, []);
 
   const filterEmailsViaId = useCallback((_id) => {
