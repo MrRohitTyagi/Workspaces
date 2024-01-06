@@ -25,12 +25,16 @@ const ChatIndex = () => {
 
   const params = useParams();
 
+  const fetchAllChats = useCallback(async () => {
+    const { response } = await getAllChatsPerUser(user._id);
+    setAllChats(response);
+  }, [user]);
+
   useEffect(() => {
     (async function () {
-      const { response } = await getAllChatsPerUser(user._id);
-      setAllChats(response);
+      fetchAllChats();
     })();
-  }, [user]);
+  }, [fetchAllChats]);
 
   const updateMessageWithId = useCallback(({ message_id, message }) => {
     setAllChats((prev) => {
@@ -69,23 +73,31 @@ const ChatIndex = () => {
   const addNewchatFromSocket = useCallback(
     (data) => {
       const { message_id, message } = data || {};
+      console.log("NEW_MESSAGE_RECEIVED", data);
+      console.log("allChats", allChats);
+      const chatAlreadyAdded = allChats.find((c) => c._id === message_id);
+      if (!chatAlreadyAdded) fetchAllChats();
+      console.log(
+        `%c chatAlreadyAdded `,
+        "color: orange;border:2px dotted red",
+        chatAlreadyAdded
+      );
 
       updateMessageWithIdFromSocket({ message_id, message });
     },
-    [updateMessageWithIdFromSocket]
+    [allChats, fetchAllChats, updateMessageWithIdFromSocket]
   );
 
-  useEffect(() => {
-    // Listen for messages from the server
-    socket.on("NEW_MESSAGE_RECEIVED", (data) => {
-      console.log("NEW_MESSAGE_RECEIVED", data);
-      addNewchatFromSocket(data);
+  // useEffect(() => {
+  //   // Listen for messages from the server
+  //   socket.on("NEW_MESSAGE_RECEIVED", (data) => {
+  //     addNewchatFromSocket(data);
 
-      return () => {
-        console.log("UNMOIUNTED");
-      };
-    });
-  }, []);
+  //     return () => {
+  //       console.log("UNMOIUNTED");
+  //     };
+  //   });
+  // }, [addNewchatFromSocket]);
 
   const addNewChat = useCallback(
     async (data) => {
@@ -109,16 +121,24 @@ const ChatIndex = () => {
     },
     [allChats, navigate, user._id]
   );
+  const deleteChat = useCallback(({ message_id }) => {
+    setAllChats((prev) => prev.filter((c) => c._id !== message_id));
+    navigate("/chats/select");
+  }, [navigate]);
 
   useEffect(() => {
+    listenToEvent("DELETE_CHATFROM_SIDEMENU", deleteChat);
     listenToEvent("ADD_NEW_CHAT", addNewChat);
     listenToEvent("UPDATE_MESSAGES_PER_CHAT", updateMessageWithId);
+    listenToEvent("NEW_MESSAGE_RECEIVED", addNewchatFromSocket);
 
     return () => {
+      emitter.off("DELETE_CHATFROM_SIDEMENU", deleteChat);
       emitter.off("ADD_NEW_CHAT", addNewChat);
       emitter.off("UPDATE_MESSAGES_PER_CHAT", updateMessageWithId);
+      emitter.off("NEW_MESSAGE_RECEIVED", addNewchatFromSocket);
     };
-  }, [addNewChat, updateMessageWithId]);
+  }, [addNewChat, addNewchatFromSocket, deleteChat, updateMessageWithId]);
 
   const { isDarkTheme } = useContext(ThemeTypeContext);
   return (

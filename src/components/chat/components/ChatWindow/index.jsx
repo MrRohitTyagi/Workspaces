@@ -90,8 +90,19 @@ const ChatWindow = ({ allChats }) => {
   return (
     <div className={`chat-window-cont`}>
       <div className="messaging-to-cont">
-        <Avatar src={chattingWith?.picture} />
-        <h3>{chattingWith?.username || chattingWith?.email}</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Avatar src={chattingWith?.picture} />
+          <h3>{chattingWith?.username || chattingWith?.email}</h3>
+        </div>
+        <IconButton
+          onClick={() =>
+            emitter.emit("DELETE_CHATFROM_SIDEMENU", {
+              message_id: perChat._id,
+            })
+          }
+        >
+          <DeleteForeverIcon color="warning" />
+        </IconButton>
       </div>
       <div ref={ref} className="messages-box">
         {messages.map((message) => {
@@ -143,6 +154,7 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 
 import Zoom from "@mui/material/Zoom";
+import { Delete } from "@mui/icons-material";
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({

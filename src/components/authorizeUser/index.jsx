@@ -8,6 +8,7 @@ import { getUser } from "@/controllers/userController";
 import Loader from "@/components/Loader/index.jsx";
 
 import { io } from "socket.io-client";
+import { emitter } from "@/utils/eventemitter";
 
 const AuthProvider = createContext();
 const socket = io(import.meta.env.VITE_BE_BASE_URL, {
@@ -30,9 +31,10 @@ const Authorize = memo(({ children }) => {
       window.socket_id = id;
       socket.emit("SAVE_SOCKET_ID", user_id);
     });
-    // socket.on("NEW_MESSAGE_RECEIVED", (data) => {
-    //   console.log("NEW_MESSAGE_RECEIVED", data);
-    // });
+    socket.on("NEW_MESSAGE_RECEIVED", (data) => {
+      console.log("NEW_MESSAGE_RECEIVED", data);
+      emitter.emit("NEW_MESSAGE_RECEIVED", data);
+    });
     return () => {
       socket.disconnect(user_id);
     };
