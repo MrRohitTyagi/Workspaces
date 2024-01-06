@@ -1,7 +1,9 @@
-import React, {
+/* eslint-disable react/prop-types */
+import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -33,17 +35,23 @@ const ChatWindow = ({ allChats }) => {
 
   const ref = useRef();
 
+  function deleteMessage(id) {
+    setMessages((prev) => prev.filter((m) => m._id !== id));
+  }
+
   useEffect(() => {
     const perChat = allChats.find((c) => c._id === msgId);
     setPerChat(perChat);
     setMessages(perChat?.messages || []);
+    if (ref.current) {
+      setTimeout(() => {
+        ref.current.scroll({
+          top: ref.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }, 100);
+    }
   }, [allChats, msgId]);
-
-  console.log(
-    `%c {perChat,messages,value,currentUser} `,
-    "color: orange;border:2px dotted oranfe",
-    { perChat, messages, value, currentUser, allChats }
-  );
 
   const handleMessages = useCallback(
     (e) => {
@@ -66,46 +74,37 @@ const ChatWindow = ({ allChats }) => {
       setMessages((p) => [...p, newMessage]);
       saveMessages({ msgId: msgId, message: newMessage, to: userToshow._id });
       setValue("");
-      setTimeout(() => {
-        ref.current.scroll({
-          top: ref.current.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 100);
     },
     [currentUser._id, msgId, perChat?.from, perChat?.to, value]
   );
 
+  const chattingWith = useMemo(() => {
+    return perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
+  }, [currentUser._id, perChat?.from, perChat?.to]);
+
+  console.log(
+    `%c {perChat,messages,value,currentUser} `,
+    "color: orange;border:2px dotted oranfe",
+    { perChat, messages, value, currentUser, allChats, chattingWith }
+  );
   return (
     <div className={`chat-window-cont`}>
       <div className="messaging-to-cont">
-        <Avatar src={perChat?.to?.picture} />
-        <h3>{perChat?.to?.username || perChat?.to?.email}</h3>
+        <Avatar src={chattingWith?.picture} />
+        <h3>{chattingWith?.username || chattingWith?.email}</h3>
       </div>
       <div ref={ref} className="messages-box">
-        {messages.map(({ msg, from, _id }) => {
+        {messages.map((message) => {
+          const { from, _id } = message || {};
           const isMyMsg = from === currentUser._id;
           return (
-            <div
+            <MessageTextBox
+              deleteMessage={deleteMessage}
               key={_id}
-              className="msg-box"
-              style={{
-                justifyContent: isMyMsg ? "flex-end" : "flex-start",
-              }}
-            >
-              <div
-                className={
-                  isDarkTheme ? "single-message-box-dark" : `single-message-box`
-                }
-                style={{
-                  borderRadius: isMyMsg
-                    ? "20px 20px 2px 20px"
-                    : "20px 20px 20px 2px",
-                }}
-              >
-                {msg}
-              </div>
-            </div>
+              isMyMsg={isMyMsg}
+              isDarkTheme={isDarkTheme}
+              message={message}
+            />
           );
         })}
       </div>
@@ -136,6 +135,55 @@ const ChatWindow = ({ allChats }) => {
           }}
         />
       </div>
+    </div>
+  );
+};
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
+
+import Zoom from "@mui/material/Zoom";
+const HtmlTooltip = styled(({ className, ...props }) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: "#f5f5f9",
+    color: "rgba(0, 0, 0, 0.87)",
+    maxWidth: 220,
+    fontSize: theme.typography.pxToRem(12),
+    border: "1px solid #dadde9",
+  },
+}));
+
+const MessageTextBox = ({ isMyMsg, isDarkTheme, message, deleteMessage }) => {
+  return (
+    <div
+      className="msg-box"
+      style={{
+        justifyContent: isMyMsg ? "flex-end" : "flex-start",
+      }}
+    >
+      <HtmlTooltip
+        TransitionComponent={Zoom}
+        sx={{ cusror: "pointer" }}
+        placement={isMyMsg ? "left" : "right"}
+        title={
+          <IconButton size="small" onClick={() => deleteMessage(message._id)}>
+            <DeleteForeverIcon color="warning" />
+          </IconButton>
+        }
+      >
+        <div
+          className={`single-message-box ${
+            isDarkTheme ? "single-message-box-dark" : ""
+          }`}
+          style={{
+            borderRadius: isMyMsg ? "20px 20px 2px 20px" : "20px 20px 20px 2px",
+          }}
+        >
+          {message.msg}
+        </div>
+      </HtmlTooltip>
     </div>
   );
 };

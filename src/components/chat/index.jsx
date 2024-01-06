@@ -4,7 +4,13 @@ import { ThemeTypeContext } from "@/App";
 import "./chatStyles.css";
 import ChatSideMenu from "./components/chatSideMenu";
 import ChatWindow from "./components/ChatWindow";
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import ChatNotSelected from "./components/chatsNotrSelected";
 import useAuth from "@/utils/useAuth";
 import { getAllChatsPerUser, newChat } from "@/controllers/chatController";
@@ -15,6 +21,9 @@ const ChatIndex = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [allChats, setAllChats] = useState([]);
+  const { pathname } = useLocation();
+
+  const params = useParams();
 
   useEffect(() => {
     (async function () {
@@ -37,12 +46,33 @@ const ChatIndex = () => {
     });
   }, []);
 
+  const updateMessageWithIdFromSocket = useCallback(
+    ({ message_id, message }) => {
+      setAllChats((prev) => {
+        const chatArr = [];
+        for (const chat of prev) {
+          if (chat._id === message_id) {
+            let obj = chat;
+            obj.messages = [...obj.messages, message];
+            if (params?.["*"] !== obj._id) {
+              obj.newMsgCount = (obj.newMsgCount ?? 0) + 1;
+            }
+            chatArr.push(obj);
+          } else chatArr.push(chat);
+        }
+        return chatArr;
+      });
+    },
+    [params]
+  );
+
   const addNewchatFromSocket = useCallback(
     (data) => {
       const { message_id, message } = data || {};
-      updateMessageWithId({ message_id, message });
+
+      updateMessageWithIdFromSocket({ message_id, message });
     },
-    [updateMessageWithId]
+    [updateMessageWithIdFromSocket]
   );
 
   useEffect(() => {
@@ -50,12 +80,18 @@ const ChatIndex = () => {
     socket.on("NEW_MESSAGE_RECEIVED", (data) => {
       console.log("NEW_MESSAGE_RECEIVED", data);
       addNewchatFromSocket(data);
+
+      return () => {
+        console.log("UNMOIUNTED");
+      };
     });
-  }, [addNewchatFromSocket]);
+  }, []);
 
   const addNewChat = useCallback(
     async (data) => {
-      const alreadyExistedChat = allChats.find(({ to }) => to._id === data._id);
+      const alreadyExistedChat = allChats.find(
+        ({ to, from }) => to._id === data._id || from._id === data._id
+      );
       console.log("data alreadyExistedChat", { data, alreadyExistedChat });
       const payload = {
         to: data._id,
@@ -84,7 +120,6 @@ const ChatIndex = () => {
     };
   }, [addNewChat, updateMessageWithId]);
 
-  const { pathname } = useLocation();
   const { isDarkTheme } = useContext(ThemeTypeContext);
   return (
     <div

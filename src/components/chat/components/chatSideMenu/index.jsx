@@ -1,17 +1,25 @@
 /* eslint-disable react/prop-types */
 import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "./chatSideMenuStyles.css";
+import { motion } from "framer-motion";
+import { debounce } from "lodash";
+import AsyncSelect from "react-select/async";
 
-import { Avatar, IconButton, MenuItem, MenuList } from "@mui/material";
 import Button from "@mui/material/Button";
+import { Avatar, IconButton, MenuItem, MenuList } from "@mui/material";
 import AddReactionIcon from "@mui/icons-material/AddReaction";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import { Close } from "@mui/icons-material";
 import Menu from "@mui/material/Menu";
 
 import useAuth from "@/utils/useAuth";
-import { ThemeTypeContext } from "@/App";
-import { debounce } from "lodash";
+import { emitter, listenToEvent } from "@/utils/eventemitter";
+
 import { searchEmail } from "@/controllers/emailController";
+import { ThemeTypeContext } from "@/App";
+
+import "./chatSideMenuStyles.css";
+
 const popperProps = {
   elevation: 0,
   sx: {
@@ -84,7 +92,7 @@ const ChatSideMenu = ({ allChats }) => {
             "add-new-chat-button" + (isDarkTheme ? " add-chat-dark" : "")
           }
         >
-          <AddReactionIcon color="success" />
+          <PersonAddAltIcon color="success" />
           <h3>New Chat</h3>
         </Button>
         <MenuList
@@ -94,7 +102,7 @@ const ChatSideMenu = ({ allChats }) => {
             "aria-labelledby": "basic-button",
           }}
         >
-          {allChats.map(({ _id, to, from }) => {
+          {allChats.map(({ _id, to, from, newMsgCount = 0 }) => {
             const userToshow = to._id === user._id ? from : to;
             return (
               <MenuItem
@@ -114,14 +122,27 @@ const ChatSideMenu = ({ allChats }) => {
                 }}
               >
                 <div className="per-chat-line">
-                  <Avatar
-                    src={userToshow.picture}
-                    sx={{ height: "35px", width: "35px" }}
-                  />
-                  <h5>
-                    {userToshow.username ||
-                      `${userToshow.email.slice(0, 15)}...`}
-                  </h5>
+                  <div>
+                    <Avatar
+                      src={userToshow.picture}
+                      sx={{ height: "35px", width: "35px" }}
+                    />
+                    <h5>
+                      {userToshow.username ||
+                        `${userToshow.email.slice(0, 15)}...`}
+                    </h5>
+                  </div>
+                  {newMsgCount > 0 && (
+                    <motion.div
+                      key={newMsgCount}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.3, type: "spring" }}
+                      className="new-msg-count"
+                    >
+                      {newMsgCount}
+                    </motion.div>
+                  )}
                 </div>
               </MenuItem>
             );
@@ -137,16 +158,13 @@ const ChatSideMenu = ({ allChats }) => {
         PaperProps={popperProps}
         anchorOrigin={{ horizontal: "right", vertical: "top" }}
       >
-        <CustomSelect user={user} handleClose={handleClose} />
+        <AddNewChat user={user} handleClose={handleClose} />
       </Menu>
     </div>
   );
 };
 
-import AsyncSelect from "react-select/async";
-import { Close } from "@mui/icons-material";
-import { emitter, listenToEvent } from "@/utils/eventemitter";
-const CustomSelect = memo(({ user, handleClose }) => {
+const AddNewChat = memo(({ user, handleClose }) => {
   const [value, setValue] = useState({});
   const [defaultOptions, setdefaultOptions] = useState([]);
 
@@ -181,6 +199,7 @@ const CustomSelect = memo(({ user, handleClose }) => {
     const payload = { ...value };
     emitter.emit("ADD_NEW_CHAT", payload);
   };
+
   return (
     <div style={{ width: "500px", padding: "20px" }} className="ffffffffffff">
       <div className="new-chat-header">
@@ -233,6 +252,6 @@ const CustomOption = ({ data }) => {
   );
 };
 
-CustomSelect.displayName = "CustomSelect";
+AddNewChat.displayName = "AddNewChat";
 
 export default ChatSideMenu;

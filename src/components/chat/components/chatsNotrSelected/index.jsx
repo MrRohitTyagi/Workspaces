@@ -14,6 +14,7 @@ const ChatNotSelected = () => {
       <h2>Welcome {user.username || user.email}</h2>
       <h4>Ready? Set. Chat! Let's jump right into things.</h4>
       <h5 style={{ color: "red" }}>This feature is Under development.</h5>
+      <h5 style={{ color: "red" }}>NOT MOBILE RESPONSIVE</h5>
     </div>
   );
 };

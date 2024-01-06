@@ -52,7 +52,7 @@
     max-width: 80vw !important;
   }
 }
-@media (max-width: 1250px) {
+@media (max-width: 800px) {
   .single-email-container {
     width: 100%;
     height: calc(100vh - var(--navbar-height));

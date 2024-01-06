@@ -34,13 +34,17 @@
 
 /* add in dark also  */
 .single-message-box {
+  position: relative;
   background-color: lightgray;
   padding: 10px;
+  cursor: pointer;
 }
+
 .single-message-box-dark {
   background-color: #555555;
-  padding: 10px;
+  cursor: pointer;
 }
+
 .messaging-to-cont {
   height: 50px;
   width: 100%;

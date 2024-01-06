@@ -1,6 +1,6 @@
 import { memo, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { Badge, Divider, MenuItem, MenuList, Tooltip } from "@mui/material";
 import AllInboxIcon from "@mui/icons-material/AllInbox";
@@ -14,6 +14,7 @@ import { emitEvent, emitter, listenToEvent } from "@/utils/eventemitter";
 
 import { ThemeTypeContext } from "@/App";
 import "./sidemenu.css";
+import { socket } from "../authorizeUser";
 
 const sideMenuConfig = (emailcount, isDarkTheme) => [
   {
@@ -64,8 +65,12 @@ const varient = {
 const SideMenu = memo(() => {
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const navigate = useNavigate();
-  const [activeIndex, setActiveIndex] = useState(1);
+  const { pathname } = useLocation();
+
+  const [activeIndex, setActiveIndex] = useState(pathname);
+
   const [isExpanded, setisExpanded] = useState(false);
+
   const [emailcount, setEmailcount] = useState(0);
 
   useEffect(() => {
@@ -79,6 +84,13 @@ const SideMenu = memo(() => {
       emitter.off("INCREASE_NEW_EMAIL_COUNT", () => {});
     };
   }, []);
+
+  // useEffect(() => {
+  //   // Listen for messages from the server
+  //   socket.on("NEW_MESSAGE_RECEIVED", () => {
+  //     console.log("NEW_MESSAGE_RECEIVED");
+  //   });
+  // }, []);
 
   return (
     <div
@@ -100,7 +112,7 @@ const SideMenu = memo(() => {
                 },
                 padding: "15px",
                 background:
-                  activeIndex === i
+                  activeIndex === menu.navUrl
                     ? isDarkTheme
                       ? "#313131"
                       : "#c1c1c1"
@@ -109,7 +121,9 @@ const SideMenu = memo(() => {
               onClick={() => {
                 if (i === 0) emitEvent(menu.event);
                 else navigate(menu.navUrl);
-                if (i !== 0) setActiveIndex(i);
+                if (i !== 0) {
+                  if (activeIndex !== menu.navUrl) setActiveIndex(menu.navUrl);
+                }
               }}
             >
               <div className="menu-item">
@@ -135,17 +149,18 @@ const SideMenu = memo(() => {
         <MenuItem
           key={"chat"}
           sx={{
-           
             padding: "15px",
             background:
-              activeIndex === 5
+              activeIndex === "/chats/select"
                 ? isDarkTheme
                   ? "#313131"
                   : "#c1c1c1"
                 : "transparent",
           }}
           onClick={() => {
-            setActiveIndex(5);
+            if (activeIndex !== "/chats/select") {
+              setActiveIndex("/chats/select");
+            }
             navigate("/chats/select");
           }}
         >

@@ -30,9 +30,9 @@ const Authorize = memo(({ children }) => {
       window.socket_id = id;
       socket.emit("SAVE_SOCKET_ID", user_id);
     });
-    socket.on("NEW_MESSAGE_RECEIVED", (data) => {
-      console.log("NEW_MESSAGE_RECEIVED", data);
-    });
+    // socket.on("NEW_MESSAGE_RECEIVED", (data) => {
+    //   console.log("NEW_MESSAGE_RECEIVED", data);
+    // });
     return () => {
       socket.disconnect(user_id);
     };
