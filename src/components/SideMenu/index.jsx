@@ -84,6 +84,12 @@ const SideMenu = memo(() => {
       emitter.off("INCREASE_NEW_EMAIL_COUNT", () => {});
     };
   }, []);
+  useEffect(() => {
+    // Listen for messages from the server
+    socket.on("NEW_MESSAGE_RECEIVED", () => {
+      console.log("NEW_MESSAGE_RECEIVED");
+    });
+  }, []);
 
   // useEffect(() => {
   //   // Listen for messages from the server
