@@ -25,7 +25,7 @@ function App() {
   useEffect(() => {
     listenToEvent("SWITCH_THEME", () => setIsDarkTheme((p) => !p));
   }, []);
-
+ 
   return (
     <ThemeTypeContext.Provider value={{ isDarkTheme }}>
       <div key={pathname}>
