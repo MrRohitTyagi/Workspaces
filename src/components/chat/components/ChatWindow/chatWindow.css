@@ -34,6 +34,7 @@
 
 /* add in dark also  */
 .single-message-box {
+  word-break: break-all;
   position: relative;
   background-color: lightgray;
   padding: 10px;
@@ -62,4 +63,12 @@
   top: 102%;
   font-size: 8px;
   opacity: 50%;
+}
+@media (max-width: 800px) {
+  .send-message-input {
+    width: 100% !important;
+  }
+  .messages-box {
+    padding: 5% 0%;
+  }
 }

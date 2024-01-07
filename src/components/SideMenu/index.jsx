@@ -111,6 +111,7 @@ const SideMenu = memo(() => {
         {sideMenuConfig(emailcount, isDarkTheme).map((menu, i) => {
           return (
             <MenuItem
+            className="menu-item-mui"
               key={menu.label}
               sx={{
                 ":hover": {
@@ -151,7 +152,7 @@ const SideMenu = memo(() => {
             </MenuItem>
           );
         })}
-        <Divider orientation="horizontal" sx={{ borderBottomWidth: "thick" }} />
+        <Divider orientation="horizontal" sx={{ borderBottomWidth: "thick" }} className="inbox-chat-divider" />
         <MenuItem
           key={"chat"}
           sx={{

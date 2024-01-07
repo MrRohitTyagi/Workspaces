@@ -1,12 +1,12 @@
 .chat-side-menu-container {
-  transition: all 200ms;
   width: var(--chat-side-width);
-  border-right: 1px solid #c2c2c2;
 }
 /* change in both  */
 .chat-side-menu-container-collapsed {
-  transition: all 200ms;
   width: 4rem;
+}
+.chat-side-menu-container {
+  transition: all 200ms;
   border-right: 1px solid #c2c2c2;
 }
 .add-new-chat-button-cont {
@@ -90,4 +90,17 @@
   width: 30px;
   align-items: center;
   justify-content: center;
+}
+.start-new-chat-container {
+  width: 500px;
+  padding: 10px;
+}
+@media (max-width: 800px) {
+  .start-new-chat-container {
+    width: 80vw;
+    padding: 10px;
+  }
+  .chat-side-menu-container {
+    /* display: none; */
+  }
 }

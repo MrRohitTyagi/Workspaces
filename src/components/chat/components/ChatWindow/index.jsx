@@ -138,6 +138,7 @@ const ChatWindow = () => {
           </div>
           <div className="send-bar-bottom">
             <OutlinedInput
+              className="send-message-input"
               placeholder="Type Here ..."
               onKeyDown={(e) => {
                 if (e.keyCode === 13) handleMessages();
@@ -147,7 +148,7 @@ const ChatWindow = () => {
               sx={{
                 width: "80%",
                 height: "80%",
-                borderRadius: "30px",
+                borderRadius: "10px",
                 ...(isDarkTheme
                   ? { color: "white", background: "#555555" }
                   : {}),

@@ -25,6 +25,7 @@ html {
   display: flex;
   flex-direction: row;
   background-color: white;
+  /* height: calc(100vh - var(--navbar-height)); */
 }
 svg {
   width: 21px !important;

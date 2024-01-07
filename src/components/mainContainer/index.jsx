@@ -281,13 +281,13 @@ const CustomDataTable = memo(
     return (
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="email-container">
-          <div className="filters-comp refresh-button">
+          {/* <div className="filters-comp refresh-button">
             <IconButton onClick={() => fetchData(filterTrackerRef.current)}>
               <Tooltip title="Refresh">
                 <RefreshIcon className={`${isDarkTheme ? "l-t-svg" : ""}`} />
               </Tooltip>
             </IconButton>
-          </div>
+          </div> */}
 
           <div className="all-email-container">
             {data.length === 0 ? (

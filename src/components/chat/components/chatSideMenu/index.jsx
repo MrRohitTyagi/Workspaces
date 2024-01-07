@@ -99,8 +99,8 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
     <div
       className={
         isEmpanded
-          ? "chat-side-menu-container"
-          : "chat-side-menu-container-collapsed"
+          ? "chat-side-menu-container chat-side-menu-container"
+          : "chat-side-menu-container-collapsed chat-side-menu-container"
       }
     >
       <div className="add-new-chat-button-cont">
@@ -260,7 +260,7 @@ const AddNewChat = memo(({ user, handleClose }) => {
   };
 
   return (
-    <div style={{ width: "500px", padding: "20px" }} className="ffffffffffff">
+    <div className="start-new-chat-container ffffffffffff">
       <div className="new-chat-header">
         <h3>Start New Chat</h3>
         <IconButton onClick={handleClose}>
