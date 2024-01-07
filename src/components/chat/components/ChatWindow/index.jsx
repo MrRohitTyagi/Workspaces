@@ -21,17 +21,19 @@ import {
 import { v4 } from "uuid";
 import useAuth from "@/utils/useAuth";
 import { ThemeTypeContext } from "@/App";
-import { saveMessages } from "@/controllers/chatController";
-import { emitter } from "@/utils/eventemitter";
+import { getUserChat, saveMessages } from "@/controllers/chatController";
+import { emitter, listenToEvent } from "@/utils/eventemitter";
 
-const ChatWindow = ({ allChats }) => {
+const ChatWindow = () => {
+  const firstLoadRef = useRef(true);
   const [messages, setMessages] = useState([]);
   const [value, setValue] = useState("");
   const [perChat, setPerChat] = useState({});
-
+  const [isLoading, setIsLoading] = useState(true);
   const { user: currentUser } = useAuth();
   const { isDarkTheme } = useContext(ThemeTypeContext);
-  const { id: msgId } = useParams();
+
+  const { id: message_id } = useParams();
 
   const ref = useRef();
 
@@ -40,112 +42,131 @@ const ChatWindow = ({ allChats }) => {
   }
 
   useEffect(() => {
-    const perChat = allChats.find((c) => c._id === msgId);
-    setPerChat(perChat);
-    setMessages(perChat?.messages || []);
-    if (ref.current) {
-      setTimeout(() => {
-        ref.current.scroll({
-          top: ref.current.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 100);
-    }
-  }, [allChats, msgId]);
+    (async function fetchChat() {
+      const { response: perChat } = await getUserChat(message_id);
+      setPerChat(perChat);
+      setMessages(perChat?.messages || []);
 
-  const handleMessages = useCallback(
-    (e) => {
-      window.ee = e;
+      setIsLoading(false);
+    })();
+  }, [message_id]);
 
-      if (!value) return;
+  const handleMessages = useCallback(() => {
+    if (!value) return;
+    const newMessage = {
+      from: currentUser._id,
+      msg: value,
+      _id: v4(),
+    };
 
-      const newMessage = {
-        from: currentUser._id,
-        msg: value,
-        _id: v4(),
-      };
-      emitter.emit("UPDATE_MESSAGES_PER_CHAT", {
-        message_id: msgId,
-        message: newMessage,
-      });
-      const userToshow =
-        perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
+    const userToshow =
+      perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
 
-      setMessages((p) => [...p, newMessage]);
-      saveMessages({ msgId: msgId, message: newMessage, to: userToshow._id });
-      setValue("");
-    },
-    [currentUser._id, msgId, perChat?.from, perChat?.to, value]
-  );
+    setMessages((p) => [...p, newMessage]);
+    saveMessages({
+      message_id: message_id,
+      message: newMessage,
+      to: userToshow._id,
+    });
+    setValue("");
+  }, [currentUser._id, message_id, perChat?.from, perChat?.to, value]);
 
   const chattingWith = useMemo(() => {
     return perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
   }, [currentUser._id, perChat?.from, perChat?.to]);
 
-  console.log(
-    `%c {perChat,messages,value,currentUser} `,
-    "color: orange;border:2px dotted oranfe",
-    { perChat, messages, value, currentUser, allChats, chattingWith }
-  );
+  useEffect(() => {
+    listenToEvent(`NEW_MESSAGE_RECEIVED_${message_id}`, (data) => {
+      setMessages((prev) => [...prev, data.message]);
+    });
+  }, [message_id]);
+
+  useEffect(() => {
+    if (ref.current) {
+      setTimeout(() => {
+        ref.current.scroll({
+          top: ref.current.scrollHeight,
+          behavior: firstLoadRef.current ? "instant" : "smooth",
+        });
+        firstLoadRef.current = false;
+      }, 100);
+    }
+  }, [messages]);
+
   return (
     <div className={`chat-window-cont`}>
-      <div className="messaging-to-cont">
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <Avatar src={chattingWith?.picture} />
-          <h3>{chattingWith?.username || chattingWith?.email}</h3>
-        </div>
-        <IconButton
-          onClick={() =>
-            emitter.emit("DELETE_CHATFROM_SIDEMENU", {
-              message_id: perChat._id,
-            })
-          }
-        >
-          <DeleteForeverIcon color="warning" />
-        </IconButton>
-      </div>
-      <div ref={ref} className="messages-box">
-        {messages.map((message) => {
-          const { from, _id } = message || {};
-          const isMyMsg = from === currentUser._id;
-          return (
-            <MessageTextBox
-              deleteMessage={deleteMessage}
-              key={_id}
-              isMyMsg={isMyMsg}
-              isDarkTheme={isDarkTheme}
-              message={message}
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <div className="messaging-to-cont">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginLeft: "20px",
+              }}
+            >
+              <Avatar src={chattingWith?.picture} />
+              <h3>{chattingWith?.username || chattingWith?.email}</h3>
+            </div>
+            <IconButton
+              onClick={() =>
+                emitter.emit("DELETE_CHATFROM_SIDEMENU", {
+                  message_id: perChat._id,
+                })
+              }
+            >
+              <DeleteForeverIcon color="warning" />
+            </IconButton>
+          </div>
+          <div ref={ref} className="messages-box">
+            {messages.map((message) => {
+              const { from, _id } = message || {};
+              const isMyMsg = from === currentUser._id;
+              return (
+                <MessageTextBox
+                  deleteMessage={deleteMessage}
+                  key={_id}
+                  isMyMsg={isMyMsg}
+                  isDarkTheme={isDarkTheme}
+                  message={message}
+                />
+              );
+            })}
+          </div>
+          <div className="send-bar-bottom">
+            <OutlinedInput
+              placeholder="Type Here ..."
+              onKeyDown={(e) => {
+                if (e.keyCode === 13) handleMessages();
+              }}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              sx={{
+                width: "80%",
+                height: "80%",
+                borderRadius: "30px",
+                ...(isDarkTheme
+                  ? { color: "white", background: "#555555" }
+                  : {}),
+              }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton onClick={handleMessages}>
+                    <SendIcon />
+                  </IconButton>
+                </InputAdornment>
+              }
+              aria-describedby="outlined-weight-helper-text"
+              inputProps={{
+                "aria-label": "weight",
+              }}
             />
-          );
-        })}
-      </div>
-      <div className="send-bar-bottom">
-        <OutlinedInput
-          placeholder="Type Here ..."
-          onKeyDown={(e) => {
-            if (e.keyCode === 13) handleMessages();
-          }}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          sx={{
-            width: "80%",
-            height: "80%",
-            borderRadius: "30px",
-            ...(isDarkTheme ? { color: "white", background: "#555555" } : {}),
-          }}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton onClick={handleMessages}>
-                <SendIcon />
-              </IconButton>
-            </InputAdornment>
-          }
-          aria-describedby="outlined-weight-helper-text"
-          inputProps={{
-            "aria-label": "weight",
-          }}
-        />
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -154,7 +175,8 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 
 import Zoom from "@mui/material/Zoom";
-import { Delete } from "@mui/icons-material";
+import Loader from "@/components/Loader";
+
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
@@ -168,6 +190,11 @@ const HtmlTooltip = styled(({ className, ...props }) => (
 }));
 
 const MessageTextBox = ({ isMyMsg, isDarkTheme, message, deleteMessage }) => {
+  const time = new Date(message.timestamp);
+  const displayTime = `${time.getHours()}:${time.getMinutes()} ${
+    time.getHours() > 12 ? "AM" : "PM"
+  }`;
+
   return (
     <div
       className="msg-box"
@@ -190,10 +217,17 @@ const MessageTextBox = ({ isMyMsg, isDarkTheme, message, deleteMessage }) => {
             isDarkTheme ? "single-message-box-dark" : ""
           }`}
           style={{
-            borderRadius: isMyMsg ? "20px 20px 2px 20px" : "20px 20px 20px 2px",
+            borderRadius: isMyMsg ? "10px 10px 2px 10px" : "10px 10px 10px 2px",
+            textAlign: isMyMsg ? "right" : "left",
           }}
         >
           {message.msg}
+          <div
+            className="message-timestamp"
+            style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
+          >
+            {displayTime}
+          </div>
         </div>
       </HtmlTooltip>
     </div>

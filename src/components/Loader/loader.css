@@ -4,6 +4,7 @@
   background-color: white !important;
   border-radius: 5px;
   padding: 10px;
+  position: relative;
 }
 .loader-container-dark {
   background-color: var(--dark-theme-color) !important;

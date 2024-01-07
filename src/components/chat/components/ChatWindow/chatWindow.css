@@ -8,7 +8,7 @@
   padding-bottom: 20px;
 }
 .messages-box {
-  gap: 10px;
+  gap: 20px;
   overflow: auto;
   height: 70vh;
   width: 100%;
@@ -38,6 +38,8 @@
   background-color: lightgray;
   padding: 10px;
   cursor: pointer;
+  position: relative;
+  min-width: 100px;
 }
 
 .single-message-box-dark {
@@ -54,4 +56,10 @@
   justify-content: space-between;
   gap: 10px;
   align-items: center;
+}
+.message-timestamp {
+  position: absolute;
+  top: 102%;
+  font-size: 8px;
+  opacity: 50%;
 }

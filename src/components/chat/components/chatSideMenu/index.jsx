@@ -7,11 +7,11 @@ import AsyncSelect from "react-select/async";
 
 import Button from "@mui/material/Button";
 import { Avatar, IconButton, MenuItem, MenuList } from "@mui/material";
-import AddReactionIcon from "@mui/icons-material/AddReaction";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import { Close } from "@mui/icons-material";
 import Menu from "@mui/material/Menu";
-
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import useAuth from "@/utils/useAuth";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 
@@ -41,7 +41,8 @@ const popperProps = {
   },
 };
 
-const ChatSideMenu = ({ allChats }) => {
+const ChatSideMenu = ({ allChats, setAllChats }) => {
+  const [isEmpanded, setIsEmpanded] = useState(false);
   const { ...params } = useParams();
   const message_id = params?.["*"];
 
@@ -55,12 +56,6 @@ const ChatSideMenu = ({ allChats }) => {
   useEffect(() => {
     setActiveUser(message_id);
   }, [message_id]);
-
-  console.log(
-    `%c allChats `,
-    "color: orange;border:2px dotted oranfe",
-    allChats
-  );
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -79,9 +74,69 @@ const ChatSideMenu = ({ allChats }) => {
     };
   }, []);
 
+  const clearNewMessageCountOnClick = useCallback(
+    (_id) => {
+      let haveNewMessage = false;
+      setAllChats((prev) => {
+        const chatArr = [];
+        for (const chat of prev) {
+          if (chat._id === _id && chat.newMsgCount > 0) {
+            haveNewMessage = true;
+            chatArr.push({ ...chat, newMsgCount: 0 });
+          } else chatArr.push(chat);
+        }
+        if (haveNewMessage) return chatArr;
+        else return prev;
+      });
+    },
+    [setAllChats]
+  );
+
+  const handleToggleSidebar = () => {
+    setIsEmpanded((prev) => !prev);
+  };
   return (
-    <div className="chat-side-menu-container">
+    <div
+      className={
+        isEmpanded
+          ? "chat-side-menu-container"
+          : "chat-side-menu-container-collapsed"
+      }
+    >
       <div className="add-new-chat-button-cont">
+        <div className="chat-sm-toggle">
+          {isEmpanded ? (
+            <IconButton
+              onClick={handleToggleSidebar}
+              size="small"
+              sx={{
+                ":hover": {
+                  background: "white",
+                },
+                border: "1px solid white",
+                padding: "0px",
+                background: "white",
+              }}
+            >
+              <ArrowLeftIcon sx={{ color: "black" }} />
+            </IconButton>
+          ) : (
+            <IconButton
+              onClick={handleToggleSidebar}
+              size="small"
+              sx={{
+                ":hover": {
+                  background: "white",
+                },
+                border: "1px solid white",
+                padding: "0px",
+                background: "white",
+              }}
+            >
+              <ArrowRightIcon sx={{ color: "black" }} />
+            </IconButton>
+          )}
+        </div>
         <Button
           aria-controls={open ? "account-menu" : undefined}
           aria-haspopup="true"
@@ -93,7 +148,7 @@ const ChatSideMenu = ({ allChats }) => {
           }
         >
           <PersonAddAltIcon color="success" />
-          <h3>New Chat</h3>
+          {isEmpanded && <h3>New Chat</h3>}
         </Button>
         <MenuList
           id="basic-menu"
@@ -107,9 +162,10 @@ const ChatSideMenu = ({ allChats }) => {
             return (
               <MenuItem
                 key={_id}
-                className="fdsafda"
+                className="border-bottom-chat-menu"
                 onClick={() => {
                   setActiveUser(_id);
+                  clearNewMessageCountOnClick(_id);
                   navigate(`/chats/${_id}`);
                 }}
                 sx={{
@@ -127,10 +183,12 @@ const ChatSideMenu = ({ allChats }) => {
                       src={userToshow.picture}
                       sx={{ height: "35px", width: "35px" }}
                     />
-                    <h5>
-                      {userToshow.username ||
-                        `${userToshow.email.slice(0, 15)}...`}
-                    </h5>
+                    {isEmpanded && (
+                      <h5>
+                        {userToshow.username ||
+                          `${userToshow.email.slice(0, 15)}...`}
+                      </h5>
+                    )}
                   </div>
                   {newMsgCount > 0 && (
                     <motion.div
@@ -139,6 +197,7 @@ const ChatSideMenu = ({ allChats }) => {
                       animate={{ scale: 1 }}
                       transition={{ duration: 0.3, type: "spring" }}
                       className="new-msg-count"
+                      style={{ color: isDarkTheme ? "white" : "navy" }}
                     >
                       {newMsgCount}
                     </motion.div>
