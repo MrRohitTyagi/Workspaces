@@ -138,6 +138,8 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
           )}
         </div>
         <Button
+          size="small"
+          variant="outline"
           aria-controls={open ? "account-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
@@ -154,59 +156,60 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
         >
           <PersonAddAltIcon color="success" />
           {isEmpanded && (
-            <motion.h3 initial={{ scale: 0 }} animate={{ scale: 1 }}>
+            <motion.h4 initial={{ scale: 0 }} animate={{ scale: 1 }}>
               New Chat
-            </motion.h3>
+            </motion.h4>
           )}
         </Button>
-        <MenuList
-          id="basic-menu"
-          open={open}
-          MenuListProps={{
-            "aria-labelledby": "basic-button",
-          }}
-        >
-          {allChats.map(({ _id, to, from, newMsgCount = 0 }) => {
-            const userToshow = to._id === user._id ? from : to;
-            return (
-              <MenuItem
-                key={_id}
-                className="border-bottom-chat-menu"
-                onClick={() => {
-                  setActiveUser(_id);
-                  clearNewMessageCountOnClick(_id);
-                  navigate(`/chats/${_id}`);
-                }}
-                sx={{
-                  background:
-                    activeUser === _id
-                      ? isDarkTheme
-                        ? "#313131"
-                        : "#c1c1c1"
-                      : "transparent",
-                }}
-              >
-                <div className="per-chat-line">
-                  <div>
-                    <Badge badgeContent={newMsgCount} color="primary">
-                      <Avatar
-                        src={userToshow.picture}
-                        sx={{ height: "35px", width: "35px" }}
-                      />
-                    </Badge>
-                    {isEmpanded && (
-                      <motion.h5 initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                        {userToshow.username ||
-                          `${userToshow.email.slice(0, 15)}...`}
-                      </motion.h5>
-                    )}
-                  </div>
-                </div>
-              </MenuItem>
-            );
-          })}
-        </MenuList>
       </div>
+      <MenuList
+        id="basic-menu"
+        open={open}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
+      >
+        {allChats.map(({ _id, to, from, newMsgCount = 0 }) => {
+          const userToshow = to._id === user._id ? from : to;
+          return (
+            <MenuItem
+              key={_id}
+              className="border-bottom-chat-menu"
+              onClick={() => {
+                setActiveUser(_id);
+                clearNewMessageCountOnClick(_id);
+                navigate(`/chats/${_id}`);
+              }}
+              sx={{
+                background:
+                  activeUser === _id
+                    ? isDarkTheme
+                      ? "#313131"
+                      : "#c1c1c1"
+                    : "transparent",
+              }}
+            >
+              <div className="per-chat-line">
+                <div>
+                  <Badge badgeContent={newMsgCount} color="primary">
+                    <Avatar
+                      src={userToshow.picture}
+                      sx={{ height: "35px", width: "35px" }}
+                    />
+                  </Badge>
+                  {isEmpanded && (
+                    <motion.h5 initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                      {userToshow.username ||
+                        `${userToshow.email.slice(0, 15)}...`}
+                    </motion.h5>
+                  )}
+                </div>
+              </div>
+            </MenuItem>
+          );
+        })}
+      </MenuList>
+
       <Menu
         anchorEl={anchorEl}
         id="account-menu"
