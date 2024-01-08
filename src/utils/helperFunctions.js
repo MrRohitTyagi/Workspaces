@@ -5,31 +5,19 @@ export async function caller(type, extendedUrl, body, headers = {}) {
   switch (type) {
     case "get":
       return await axios.get(baseUrl + extendedUrl, body, {
-        headers: {
-          socket_id: window.socket_id,
-          ...headers,
-        },
+        headers: { ...headers },
       });
     case "delete":
       return await axios.delete(baseUrl + extendedUrl, body, {
-        headers: {
-          socket_id: window.socket_id,
-          ...headers,
-        },
+        headers: { ...headers },
       });
     case "post":
       return await axios.post(baseUrl + extendedUrl, body, {
-        headers: {
-          socket_id: window.socket_id,
-          ...headers,
-        },
+        headers: { ...headers },
       });
     case "put":
       return await axios.put(baseUrl + extendedUrl, body, {
-        headers: {
-          socket_id: window.socket_id,
-          ...headers,
-        },
+        headers: { ...headers },
       });
     default:
       break;

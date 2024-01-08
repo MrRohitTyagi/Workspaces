@@ -21,8 +21,24 @@ import {
 import { v4 } from "uuid";
 import useAuth from "@/utils/useAuth";
 import { ThemeTypeContext } from "@/App";
-import { getUserChat, saveMessages } from "@/controllers/chatController";
+import {
+  deleteSingleMessage,
+  getUserChat,
+  saveMessages,
+} from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
+
+const HtmlTooltip = styled(({ className, ...props }) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: "#f5f5f9",
+    color: "rgba(0, 0, 0, 0.87)",
+    maxWidth: 220,
+    fontSize: theme.typography.pxToRem(12),
+    border: "1px solid #dadde9",
+  },
+}));
 
 const ChatWindow = () => {
   const firstLoadRef = useRef(true);
@@ -32,24 +48,39 @@ const ChatWindow = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user: currentUser } = useAuth();
   const { isDarkTheme } = useContext(ThemeTypeContext);
+  const [deletedMsgs, setdeletedMsgs] = useState([]);
 
-  const { id: message_id } = useParams();
+  const { id: chat_id } = useParams();
 
   const ref = useRef();
 
-  function deleteMessage(id) {
-    setMessages((prev) => prev.filter((m) => m._id !== id));
-  }
+  const chattingWith = useMemo(() => {
+    return (
+      (perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to) || {}
+    );
+  }, [currentUser._id, perChat?.from, perChat?.to]);
+
+  const deleteMessage = useCallback(
+    (id) => {
+      setMessages((prev) => prev.filter((m) => m._id !== id));
+      deleteSingleMessage({
+        chat_id: chat_id,
+        message_id: id,
+        to: chattingWith._id,
+      });
+    },
+    [chat_id, chattingWith._id]
+  );
 
   useEffect(() => {
     (async function fetchChat() {
-      const { response: perChat } = await getUserChat(message_id);
+      const { response: perChat } = await getUserChat(chat_id);
       setPerChat(perChat);
       setMessages(perChat?.messages || []);
 
       setIsLoading(false);
     })();
-  }, [message_id]);
+  }, [chat_id]);
 
   const handleMessages = useCallback(() => {
     if (!value) return;
@@ -64,22 +95,26 @@ const ChatWindow = () => {
 
     setMessages((p) => [...p, newMessage]);
     saveMessages({
-      message_id: message_id,
+      message_id: chat_id,
       message: newMessage,
       to: userToshow._id,
     });
     setValue("");
-  }, [currentUser._id, message_id, perChat?.from, perChat?.to, value]);
-
-  const chattingWith = useMemo(() => {
-    return perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
-  }, [currentUser._id, perChat?.from, perChat?.to]);
+  }, [currentUser._id, chat_id, perChat?.from, perChat?.to, value]);
 
   useEffect(() => {
-    listenToEvent(`NEW_MESSAGE_RECEIVED_${message_id}`, (data) => {
+    listenToEvent(`NEW_MESSAGE_RECEIVED_${chat_id}`, (data) => {
       setMessages((prev) => [...prev, data.message]);
     });
-  }, [message_id]);
+    listenToEvent(`DELETE_SINGLE_MESSAGE_${chat_id}`, (data) => {
+      const { message_id } = data || {};
+      setMessages((prev) => prev.filter((m) => m._id !== message_id));
+    });
+    return () => {
+      emitter.off(`NEW_MESSAGE_RECEIVED_${chat_id}`, () => {});
+      emitter.off(`DELETE_SINGLE_MESSAGE_${chat_id}`, () => {});
+    };
+  }, [chat_id]);
 
   useEffect(() => {
     if (ref.current) {
@@ -93,8 +128,57 @@ const ChatWindow = () => {
     }
   }, [messages]);
 
+  const handleDoubleClickSelectMessage = useCallback(({ _id }) => {
+    setMessages((prev) => {
+      const array = [];
+      for (let msg of prev) {
+        if (msg._id === _id) {
+          if (msg.isSelected) {
+            delete msg.isSelected;
+            setdeletedMsgs((prev) => prev.filter((m) => m !== _id));
+          } else {
+            setdeletedMsgs((prev) => [...prev, _id]);
+            msg.isSelected = true;
+          }
+          array.push(msg);
+        } else array.push(msg);
+      }
+      return array;
+    });
+  }, []);
+
+  const deleteAllSelected = useCallback(async () => {
+    for (const message_id of deletedMsgs) {
+      await deleteSingleMessage({ chat_id, message_id, to: chattingWith._id });
+    }
+    setMessages((prev) => prev.filter((m) => !deletedMsgs.includes(m._id)));
+    setdeletedMsgs([]);
+
+    toast.success("Messages Deleted");
+  }, [chat_id, chattingWith._id, deletedMsgs]);
+
   return (
     <div className={`chat-window-cont`}>
+      <AnimatePresence>
+        {deletedMsgs.length > 0 && (
+          <motion.div
+            initial={{ top: "-10%" }}
+            animate={{ top: "15%" }}
+            exit={{ top: "-10%" }}
+            className="delete-all-messages"
+          >
+            <h4
+              className={isDarkTheme ? "dark" : ""}
+              style={{ color: isDarkTheme ? "white" : "black" }}
+            >
+              Delete Selected
+            </h4>
+            <IconButton size="small" onClick={deleteAllSelected}>
+              <DeleteForeverIcon color="warning" />
+            </IconButton>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {isLoading ? (
         <Loader />
       ) : (
@@ -108,18 +192,27 @@ const ChatWindow = () => {
                 marginLeft: "20px",
               }}
             >
-              <Avatar src={chattingWith?.picture} />
+              <HtmlTooltip
+                TransitionComponent={Zoom}
+                sx={{ cusror: "pointer" }}
+                placement={"bottom"}
+                title={
+                  <IconButton
+                    onClick={() =>
+                      emitter.emit("DELETE_CHATFROM_SIDEMENU", {
+                        message_id: perChat._id,
+                      })
+                    }
+                  >
+                    <DeleteForeverIcon color="warning" />
+                  </IconButton>
+                }
+              >
+                <Avatar src={chattingWith?.picture} />
+              </HtmlTooltip>
               <h3>{chattingWith?.username || chattingWith?.email}</h3>
             </div>
-            <IconButton
-              onClick={() =>
-                emitter.emit("DELETE_CHATFROM_SIDEMENU", {
-                  message_id: perChat._id,
-                })
-              }
-            >
-              <DeleteForeverIcon color="warning" />
-            </IconButton>
+            {}
           </div>
           <div ref={ref} className="messages-box">
             {messages.map((message) => {
@@ -127,6 +220,9 @@ const ChatWindow = () => {
               const isMyMsg = from === currentUser._id;
               return (
                 <MessageTextBox
+                  handleDoubleClickSelectMessage={
+                    handleDoubleClickSelectMessage
+                  }
                   deleteMessage={deleteMessage}
                   key={_id}
                   isMyMsg={isMyMsg}
@@ -177,61 +273,99 @@ import { styled } from "@mui/material/styles";
 
 import Zoom from "@mui/material/Zoom";
 import Loader from "@/components/Loader";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
 
-const HtmlTooltip = styled(({ className, ...props }) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: "#f5f5f9",
-    color: "rgba(0, 0, 0, 0.87)",
-    maxWidth: 220,
-    fontSize: theme.typography.pxToRem(12),
-    border: "1px solid #dadde9",
-  },
-}));
-
-const MessageTextBox = ({ isMyMsg, isDarkTheme, message, deleteMessage }) => {
-  const time = new Date(message.timestamp);
+const MessageTextBox = ({
+  isMyMsg,
+  isDarkTheme,
+  message,
+  deleteMessage,
+  handleDoubleClickSelectMessage,
+}) => {
+  const time = new Date(message?.timestamp || new Date().getTime());
   const displayTime = `${time.getHours()}:${time.getMinutes()} ${
-    time.getHours() > 12 ? "AM" : "PM"
+    time.getHours() > 12 ? "PM" : "AM"
   }`;
+  const handleSelect = useCallback(() => {
+    handleDoubleClickSelectMessage(message);
+  }, [handleDoubleClickSelectMessage, message]);
 
   return (
-    <div
+    <motion.div
       className="msg-box"
       style={{
+        borderRadius: isMyMsg ? "10px 10px 2px 10px" : "10px 10px 10px 2px",
+        ...(message.isSelected ? { background: "rgba(79, 79, 147, 0.5)" } : {}),
         justifyContent: isMyMsg ? "flex-end" : "flex-start",
       }}
     >
-      <HtmlTooltip
-        TransitionComponent={Zoom}
-        sx={{ cusror: "pointer" }}
-        placement={isMyMsg ? "left" : "right"}
-        title={
-          <IconButton size="small" onClick={() => deleteMessage(message._id)}>
-            <DeleteForeverIcon color="warning" />
-          </IconButton>
-        }
-      >
-        <div
-          className={`single-message-box ${
-            isDarkTheme ? "single-message-box-dark" : ""
-          }`}
-          style={{
-            borderRadius: isMyMsg ? "10px 10px 2px 10px" : "10px 10px 10px 2px",
-            textAlign: isMyMsg ? "right" : "left",
-          }}
-        >
-          {message.msg}
-          <div
-            className="message-timestamp"
-            style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
+      <AnimatePresence>
+        {isMyMsg && !message.isSelected ? (
+          <HtmlTooltip
+            TransitionComponent={Zoom}
+            sx={{ cusror: "pointer" }}
+            placement={isMyMsg ? "left" : "right"}
+            title={
+              <IconButton
+                size="small"
+                onClick={() => deleteMessage(message._id)}
+              >
+                <DeleteForeverIcon color="warning" />
+              </IconButton>
+            }
           >
-            {displayTime}
-          </div>
-        </div>
-      </HtmlTooltip>
-    </div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              onDoubleClick={handleSelect}
+              className={`single-message-box ${
+                isDarkTheme ? "single-message-box-dark" : ""
+              }`}
+              style={{
+                ...(message.isSelected ? { background: "#4f4f93" } : {}),
+                borderRadius: isMyMsg
+                  ? "10px 10px 2px 10px"
+                  : "10px 10px 10px 2px",
+                textAlign: isMyMsg ? "right" : "left",
+              }}
+            >
+              {message.msg}
+              <div
+                className="message-timestamp"
+                style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
+              >
+                {displayTime}
+              </div>
+            </motion.div>
+          </HtmlTooltip>
+        ) : (
+          <motion.div
+            onDoubleClick={isMyMsg ? handleSelect : () => {}}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`single-message-box ${
+              isDarkTheme ? "single-message-box-dark" : ""
+            }`}
+            style={{
+              borderRadius: isMyMsg
+                ? "10px 10px 2px 10px"
+                : "10px 10px 10px 2px",
+              textAlign: isMyMsg ? "right" : "left",
+            }}
+          >
+            {message.msg}
+            <div
+              className="message-timestamp"
+              style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
+            >
+              {displayTime}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

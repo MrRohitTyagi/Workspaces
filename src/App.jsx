@@ -14,7 +14,7 @@ import UserSettings from "@/components/userSettings";
 import ChatIndex from "@/components/chat/index.jsx";
 
 import useAuth from "@/utils/useAuth";
-import { listenToEvent } from "@/utils/eventemitter";
+import { emitter, listenToEvent } from "@/utils/eventemitter";
 
 const ThemeTypeContext = createContext();
 function App() {
@@ -24,8 +24,11 @@ function App() {
 
   useEffect(() => {
     listenToEvent("SWITCH_THEME", () => setIsDarkTheme((p) => !p));
+    return () => {
+      emitter.off("SWITCH_THEME", () => {});
+    };
   }, []);
- 
+
   return (
     <ThemeTypeContext.Provider value={{ isDarkTheme }}>
       <div key={pathname}>

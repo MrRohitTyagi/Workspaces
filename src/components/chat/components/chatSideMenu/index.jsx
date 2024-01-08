@@ -6,7 +6,7 @@ import { debounce } from "lodash";
 import AsyncSelect from "react-select/async";
 
 import Button from "@mui/material/Button";
-import { Avatar, IconButton, MenuItem, MenuList } from "@mui/material";
+import { Avatar, Badge, IconButton, MenuItem, MenuList } from "@mui/material";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import { Close } from "@mui/icons-material";
 import Menu from "@mui/material/Menu";
@@ -142,13 +142,22 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
-          sx={{ alignSelf: "center" }}
+          sx={{
+            minHeight: "50px",
+            alignSelf: "center",
+            textWrap: "nowrap",
+            // padding: isEmpanded ? "2px" : "0px",
+          }}
           className={
             "add-new-chat-button" + (isDarkTheme ? " add-chat-dark" : "")
           }
         >
           <PersonAddAltIcon color="success" />
-          {isEmpanded && <h3>New Chat</h3>}
+          {isEmpanded && (
+            <motion.h3 initial={{ scale: 0 }} animate={{ scale: 1 }}>
+              New Chat
+            </motion.h3>
+          )}
         </Button>
         <MenuList
           id="basic-menu"
@@ -179,29 +188,19 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
               >
                 <div className="per-chat-line">
                   <div>
-                    <Avatar
-                      src={userToshow.picture}
-                      sx={{ height: "35px", width: "35px" }}
-                    />
+                    <Badge badgeContent={newMsgCount} color="primary">
+                      <Avatar
+                        src={userToshow.picture}
+                        sx={{ height: "35px", width: "35px" }}
+                      />
+                    </Badge>
                     {isEmpanded && (
-                      <h5>
+                      <motion.h5 initial={{ scale: 0 }} animate={{ scale: 1 }}>
                         {userToshow.username ||
                           `${userToshow.email.slice(0, 15)}...`}
-                      </h5>
+                      </motion.h5>
                     )}
                   </div>
-                  {newMsgCount > 0 && (
-                    <motion.div
-                      key={newMsgCount}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ duration: 0.3, type: "spring" }}
-                      className="new-msg-count"
-                      style={{ color: isDarkTheme ? "white" : "navy" }}
-                    >
-                      {newMsgCount}
-                    </motion.div>
-                  )}
                 </div>
               </MenuItem>
             );
@@ -212,8 +211,6 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
         anchorEl={anchorEl}
         id="account-menu"
         open={open}
-        // onClose={handleClose}
-        // onClick={handleClose}
         PaperProps={popperProps}
         anchorOrigin={{ horizontal: "right", vertical: "top" }}
       >

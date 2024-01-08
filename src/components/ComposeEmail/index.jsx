@@ -29,7 +29,7 @@ const ComposeEmail = () => {
     });
 
     return () => {
-      emitter.off("ADD_NEW_EMAIL");
+      emitter.off("ADD_NEW_EMAIL", () => {});
     };
   }, []);
 

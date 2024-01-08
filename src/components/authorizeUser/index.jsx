@@ -31,12 +31,25 @@ const Authorize = memo(({ children }) => {
       window.socket_id = id;
       socket.emit("SAVE_SOCKET_ID", user_id);
     });
-
+    //new chat message
     socket.on("NEW_MESSAGE_RECEIVED", (data) => {
       const { message_id } = data || {};
       console.log("NEW_MESSAGE_RECEIVED", data);
       emitter.emit(`NEW_MESSAGE_RECEIVED_${message_id}`, data);
       emitter.emit(`HANDLE_NEW_MESSAGE_RECEIVED_FOR_CHAT_SIDEBAR`, data);
+    });
+
+    //delete single message
+    socket.on("DELETE_SINGLE_MESSAGE", (data) => {
+      const { chat_id } = data || {};
+      console.log("DELETE_SINGLE_MESSAGE", data);
+      emitter.emit(`DELETE_SINGLE_MESSAGE_${chat_id}`, data);
+    });
+
+    // new Email received
+    socket.on("NEW_EMAIL_RECEIVED", (email) => {
+      emitter.emit("INCREASE_NEW_EMAIL_COUNT");
+      emitter.emit("NEW_EMAIL_RECEIVED", email);
     });
 
     return () => {

@@ -118,7 +118,6 @@ const ChatIndex = () => {
   useEffect(() => {
     listenToEvent("DELETE_CHATFROM_SIDEMENU", deleteChat);
     listenToEvent("ADD_NEW_CHAT", addNewChat);
-    // listenToEvent("UPDATE_MESSAGES_PER_CHAT", updateMessageWithId);
     listenToEvent("NEW_MESSAGE_RECEIVED", handleChatSideMenuStatusUpdate);
     listenToEvent(
       "HANDLE_NEW_MESSAGE_RECEIVED_FOR_CHAT_SIDEBAR",
@@ -128,7 +127,7 @@ const ChatIndex = () => {
     return () => {
       emitter.off("DELETE_CHATFROM_SIDEMENU", deleteChat);
       emitter.off("ADD_NEW_CHAT", addNewChat);
-      // emitter.off("UPDATE_MESSAGES_PER_CHAT", updateMessageWithId);
+      emitter.off("NEW_MESSAGE_RECEIVED", handleChatSideMenuStatusUpdate);
       emitter.off(
         "HANDLE_NEW_MESSAGE_RECEIVED_FOR_CHAT_SIDEBAR",
         handleChatSideMenuStatusUpdate

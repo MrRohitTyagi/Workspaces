@@ -14,7 +14,6 @@ import PullToRefresh from "react-simple-pull-to-refresh";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { CircularProgress, IconButton, Tooltip } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -35,7 +34,6 @@ import { emitter, listenToEvent } from "@/utils/eventemitter";
 import "./customDataTable.css";
 import "./maincontainer.css";
 
-import { socket } from "@/components/authorizeUser";
 import Loader from "@/components/Loader";
 import { ThemeTypeContext } from "@/App";
 
@@ -47,6 +45,7 @@ const messages = {
   SHOW_ALL_SENT: "SHOW_ALL_SENT",
   SHOW_ALL_ARCHIVED: "SHOW_ALL_ARCHIVED",
   GLOBAL_SEARCH_QUERY: "GLOBAL_SEARCH_QUERY",
+  NEW_EMAIL_RECEIVED: "NEW_EMAIL_RECEIVED",
 };
 const filterObjs = {
   "/inbox": "SHOW_ALL_INBOX",
@@ -93,14 +92,6 @@ const MainContainer = () => {
     })();
   }, [fetchData, user]);
 
-  useEffect(() => {
-    // Listen for messages from the server
-    socket.on("NEW_EMAIL_RECEIVED", (email) => {
-      emitter.emit("INCREASE_NEW_EMAIL_COUNT");
-      setEmailData((prev) => [email, ...prev]);
-    });
-  }, []);
-
   const filterEmailsViaId = useCallback((_id) => {
     setEmailData((prev) => prev.filter((e) => e._id !== _id));
   }, []);
@@ -109,7 +100,7 @@ const MainContainer = () => {
     listenToEvent(messages.SHOW_ALL_INBOX, () => {
       fetchData(messages.SHOW_ALL_INBOX);
     });
-    listenToEvent(messages.SHOW_ALL_STARRED, () => {
+    +listenToEvent(messages.SHOW_ALL_STARRED, () => {
       fetchData(messages.SHOW_ALL_STARRED);
     });
     listenToEvent(messages.SHOW_ALL_SENT, () => {
@@ -122,12 +113,17 @@ const MainContainer = () => {
       fetchData(messages.GLOBAL_SEARCH_QUERY, txt);
     });
 
+    listenToEvent(messages.NEW_EMAIL_RECEIVED, (email) => {
+      setEmailData((prev) => [email, ...prev]);
+    });
+
     return () => {
       emitter.off(messages.SHOW_ALL_INBOX, () => {});
       emitter.off(messages.SHOW_ALL_STARRED, () => {});
       emitter.off(messages.SHOW_ALL_SENT, () => {});
       emitter.off(messages.SHOW_ALL_ARCHIVED, () => {});
       emitter.off(messages.GLOBAL_SEARCH_QUERY, () => {});
+      emitter.off(messages.NEW_EMAIL_RECEIVED, () => {});
     };
   }, [fetchData]);
 
@@ -318,7 +314,9 @@ const CustomDataTable = memo(
                       key={_id}
                       className={
                         isUnread
-                          ? `email-row unread reset-all`
+                          ? `email-row ${
+                              isDarkTheme ? "unread-dark" : "unread"
+                            } reset-all`
                           : `reset-all email-row`
                       }
                     >

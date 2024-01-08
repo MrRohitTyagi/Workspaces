@@ -11,6 +11,9 @@
 .unread {
   background-color: #f6f6f6;
 }
+.unread-dark {
+  background-color: #121212;
+}
 .main-email-container-dark {
   background-color: var(--dark-theme-color-little-light) !important;
   color: white;

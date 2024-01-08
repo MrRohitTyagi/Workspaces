@@ -16,3 +16,7 @@ export const newChat = async (payload) => {
   const { data } = await caller("post", `chat/create`, payload);
   return data;
 };
+export const deleteSingleMessage = async (payload) => {
+  const { data } = await caller("put", `chat/delete-single-message`, payload);
+  return data;
+};
