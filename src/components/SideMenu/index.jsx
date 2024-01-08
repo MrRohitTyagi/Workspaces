@@ -68,8 +68,8 @@ const SideMenu = memo(() => {
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const navigate = useNavigate();
   const { pathname } = useLocation();
-
   const [activeIndex, setActiveIndex] = useState(pathname);
+  const [hideAppMenu, sethideAppMenu] = useState(false);
 
   const [isExpanded, setisExpanded] = useState(false);
 
@@ -80,21 +80,25 @@ const SideMenu = memo(() => {
     listenToEvent("INCREASE_NEW_EMAIL_COUNT", () =>
       setEmailcount((p) => p + 1)
     );
+    listenToEvent("HIDE_APP_BAR", () => sethideAppMenu((p) => !p));
 
     return () => {
       emitter.off("EXPAND_COLLAPSE_SIDEBAR", () => {});
       emitter.off("INCREASE_NEW_EMAIL_COUNT", () => {});
+      emitter.off("HIDE_APP_BAR", () => {});
     };
   }, []);
+
   useEffect(() => {
     // Listen for messages from the server
     socket.on("NEW_MESSAGE_RECEIVED", () => {
       console.log("NEW_MESSAGE_RECEIVED");
     });
   }, []);
+
   const innerWidth = useWindowDimens();
   if (innerWidth < 750) {
-    return <MobileAppMenu />;
+    return hideAppMenu ? <></> : <MobileAppMenu />;
   } else
     return (
       <div

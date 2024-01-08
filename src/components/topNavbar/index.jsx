@@ -14,7 +14,7 @@ import SearchBar from "./searchBar";
 import useAuth from "@/utils/useAuth";
 import LoggedInUserProfile from "@/components/userProfile";
 import { ThemeTypeContext } from "@/App";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",

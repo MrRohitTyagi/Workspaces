@@ -76,6 +76,13 @@ const ChatWindow = () => {
   );
 
   useEffect(() => {
+    emitter.emit("HIDE_APP_BAR");
+    return () => {
+      emitter.emit("HIDE_APP_BAR");
+    };
+  }, []);
+
+  useEffect(() => {
     (async function fetchChat() {
       const { response: perChat } = await getUserChat(chat_id);
       setPerChat(perChat);
@@ -235,7 +242,9 @@ const ChatWindow = () => {
               }}
             >
               <IconButton size="small" onClick={() => window.history.back()}>
-                <ArrowBackIcon />
+                <ArrowBackIcon
+                  className={isDarkTheme ? "l-t-svg" : "d-t-svg"}
+                />
               </IconButton>
               <HtmlTooltip
                 TransitionComponent={Zoom}
