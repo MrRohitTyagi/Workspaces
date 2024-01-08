@@ -15,12 +15,14 @@ import ChatIndex from "@/components/chat/index.jsx";
 
 import useAuth from "@/utils/useAuth";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
+import useWindowDimens from "./utils/useWindowDimens";
 
 const ThemeTypeContext = createContext();
 function App() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const [isDarkTheme, setIsDarkTheme] = useState(user.isDarkTheme);
-  const pathname = useLocation();
+  const { pathname } = useLocation();
+  const innerWidth = useWindowDimens();
 
   useEffect(() => {
     listenToEvent("SWITCH_THEME", () => setIsDarkTheme((p) => !p));
@@ -31,8 +33,8 @@ function App() {
 
   return (
     <ThemeTypeContext.Provider value={{ isDarkTheme }}>
-      <div key={pathname}>
-        <TopNavbar />
+      <div>
+        {(!pathname.includes("/chat") || innerWidth > 750) && <TopNavbar />}
         {isLoading ? (
           <Loader />
         ) : (

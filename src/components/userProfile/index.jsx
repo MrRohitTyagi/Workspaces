@@ -8,7 +8,7 @@ function LoggedInUserProfile() {
 
   return (
     <IconButton
-      sx={{ padding: 0, all: "unset" }}
+      sx={{ padding: 0, all: "unset", cursor: "pointer" }}
       disableRipple={true}
       size="small"
       onClick={() => emitter.emit("OPEN_DRAWER")}

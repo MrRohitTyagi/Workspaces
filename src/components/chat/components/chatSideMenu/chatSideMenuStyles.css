@@ -12,10 +12,11 @@
 .add-new-chat-button-cont {
   position: relative;
   display: flex;
-  flex-direction: column;
+  padding: 2px 10px;
   width: 100%;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  flex-direction: row;
   /* height: 100%; */
 }
 .chat-sm-toggle {
@@ -30,7 +31,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 80%;
+  width: fit-content;
   padding: 10px;
   background-color: #f3f3f3;
   border-radius: 50px;
@@ -99,9 +100,18 @@
   width: 500px;
   padding: 10px;
 }
+.time-and-lastmsg {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
 @media (max-width: 800px) {
   .start-new-chat-container {
     width: 80vw;
+    padding: 10px;
+  }
+  .per-chat-line {
     padding: 10px;
   }
   .chat-side-menu-container {

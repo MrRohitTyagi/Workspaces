@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ThemeTypeContext } from "@/App";
 import "./chatStyles.css";
@@ -19,20 +19,23 @@ import {
   newChat,
 } from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
-import { socket } from "@/components/authorizeUser";
 import useWindowDimens from "@/utils/useWindowDimens";
 
 const ChatIndex = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const [allChats, setAllChats] = useState([]);
+
+  const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  const { user } = useAuth();
+  const { isDarkTheme } = useContext(ThemeTypeContext);
+  const innerWidth = useWindowDimens();
 
   const params = useParams();
 
   const fetchAllChats = useCallback(async () => {
     const { response } = await getAllChatsPerUser(user._id);
-    setAllChats(response);
+    setAllChats(response || []);
   }, [user]);
 
   useEffect(() => {
@@ -48,19 +51,6 @@ const ChatIndex = () => {
     },
     [navigate]
   );
-  // const updateMessageWithId = useCallback(({ message_id, message }) => {
-  //   setAllChats((prev) => {
-  //     const chatArr = [];
-  //     for (const chat of prev) {
-  //       if (chat._id === message_id) {
-  //         let obj = chat;
-  //         obj.messages = [...obj.messages, message];
-  //         chatArr.push(obj);
-  //       } else chatArr.push(chat);
-  //     }
-  //     return chatArr;
-  //   });
-  // }, []);
 
   const handleChatSideMenuStatusUpdate = useCallback(
     async (data) => {
@@ -136,8 +126,6 @@ const ChatIndex = () => {
     };
   }, [addNewChat, handleChatSideMenuStatusUpdate, deleteChat]);
 
-  const { isDarkTheme } = useContext(ThemeTypeContext);
-  const innerWidth = useWindowDimens();
   return (
     <div
       className={`chat-main-container ${isDarkTheme ? "chat-cont-dark" : ""}`}

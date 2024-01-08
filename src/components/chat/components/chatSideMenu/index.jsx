@@ -20,6 +20,7 @@ import { ThemeTypeContext } from "@/App";
 
 import "./chatSideMenuStyles.css";
 import useWindowDimens from "@/utils/useWindowDimens";
+import LoggedInUserProfile from "@/components/userProfile";
 
 const popperProps = {
   elevation: 0,
@@ -27,18 +28,6 @@ const popperProps = {
     overflow: "visible",
     filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
     mt: 1.5,
-    "&::before": {
-      content: '""',
-      display: "block",
-      position: "absolute",
-      top: 8,
-      left: -4,
-      width: 10,
-      height: 10,
-      bgcolor: "background.paper",
-      transform: "translateY(-50%) rotate(45deg)",
-      zIndex: 0,
-    },
   },
 };
 
@@ -98,7 +87,6 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
   const handleToggleSidebar = () => {
     setIsEmpanded((prev) => !prev);
   };
-  const isMobileView = useWindowDimens();
 
   return (
     <div
@@ -108,7 +96,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
           : "chat-side-menu-container-collapsed chat-side-menu-container"
       }
     >
-      <div className="add-new-chat-button-cont">
+      <div className="add-new-chat-button-cont border-bottom-chat-menu">
         {innerWidth > 750 && (
           <div className="chat-sm-toggle">
             {isEmpanded ? (
@@ -144,30 +132,41 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
             )}
           </div>
         )}
-        <Button
-          size="small"
-          variant="outline"
-          aria-controls={open ? "account-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleClick}
-          sx={{
-            minHeight: "50px",
-            alignSelf: "center",
-            textWrap: "nowrap",
-            // padding: isEmpanded ? "2px" : "0px",
-          }}
-          className={
-            "add-new-chat-button" + (isDarkTheme ? " add-chat-dark" : "")
-          }
-        >
-          <PersonAddAltIcon color="success" />
-          {isEmpanded && (
-            <motion.h4 initial={{ scale: 0 }} animate={{ scale: 1 }}>
-              New Chat
-            </motion.h4>
-          )}
-        </Button>
+        <h3>{innerWidth > 750 ? null : "Workspace"}</h3>
+        <div style={{ gap: "10px", display: "flex" }}>
+          <IconButton
+            disableFocusRipple
+            disableRipple
+            size="small"
+            variant="outline"
+            aria-controls={open ? "account-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            onClick={handleClick}
+            sx={{
+              minHeight: "50px",
+              alignSelf: "center",
+              textWrap: "nowrap",
+              // padding: isEmpanded ? "2px" : "0px",
+            }}
+            className={
+              "add-new-chat-button" + (isDarkTheme ? " add-chat-dark" : "")
+            }
+          >
+            <PersonAddAltIcon color="success" />
+            {isEmpanded && innerWidth > 750 && (
+              <motion.h4
+                style={{ color: isDarkTheme ? "white" : "black" }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+              >
+                New Chat
+              </motion.h4>
+            )}
+          </IconButton>
+
+          {innerWidth < 750 && <LoggedInUserProfile />}
+        </div>
       </div>
       <MenuList
         id="basic-menu"
@@ -176,12 +175,22 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
           "aria-labelledby": "basic-button",
         }}
       >
-        {allChats.map(({ _id, to, from, newMsgCount = 0 }) => {
+        {allChats.map(({ _id, to, from, newMsgCount = 0, messages }) => {
+          const lastMessage = messages.at(-1) || {};
+
+          const time = new Date(lastMessage?.timestamp);
+
+          const displayTime = lastMessage._id
+            ? `${
+                time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
+              }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
+            : "";
+
+          // const lastMessage = {msg:'hello'};
           const userToshow = to._id === user._id ? from : to;
           return (
             <MenuItem
               key={_id}
-              className="border-bottom-chat-menu"
               onClick={() => {
                 setActiveUser(_id);
                 clearNewMessageCountOnClick(_id);
@@ -196,7 +205,11 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
                     : "transparent",
               }}
             >
-              <div className="per-chat-line">
+              <motion.div
+                className="per-chat-line"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+              >
                 <Badge badgeContent={newMsgCount} color="primary">
                   <Avatar
                     src={userToshow.picture}
@@ -204,12 +217,36 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
                   />
                 </Badge>
                 {isEmpanded && (
-                  <motion.h5 initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                    {userToshow.username ||
-                      `${userToshow.email.slice(0, 15)}...`}
-                  </motion.h5>
+                  <motion.div
+                    style={{ width: "100%" }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                  >
+                    <h5>
+                      {userToshow.username ||
+                        `${userToshow?.email?.slice(0, 15)}...`}
+                    </h5>
+                    <div className="time-and-lastmsg">
+                      <h6
+                        style={{
+                          color: isDarkTheme ? "white" : "black",
+                          opacity: "50%",
+                        }}
+                      >
+                        {lastMessage.msg}
+                      </h6>
+                      <h6
+                        style={{
+                          color: isDarkTheme ? "white" : "black",
+                          opacity: "50%",
+                        }}
+                      >
+                        {displayTime}
+                      </h6>
+                    </div>
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
             </MenuItem>
           );
         })}

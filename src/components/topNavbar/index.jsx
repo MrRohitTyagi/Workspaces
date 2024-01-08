@@ -14,6 +14,7 @@ import SearchBar from "./searchBar";
 import useAuth from "@/utils/useAuth";
 import LoggedInUserProfile from "@/components/userProfile";
 import { ThemeTypeContext } from "@/App";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -32,6 +33,7 @@ const Search = styled("div")(({ theme }) => ({
 }));
 
 const TopNavbar = memo(() => {
+  const { pathname } = useLocation();
   const { isAuthenticated } = useAuth();
   const isLoggedIn = isAuthenticated;
   const { isDarkTheme } = useContext(ThemeTypeContext);
@@ -70,7 +72,7 @@ const TopNavbar = memo(() => {
           >
             Workspaces
           </Typography>
-          {isLoggedIn && (
+          {isLoggedIn && !pathname.includes("/chat") && (
             <Search>
               <SearchBar />
             </Search>

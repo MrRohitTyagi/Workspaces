@@ -253,7 +253,9 @@ const ChatWindow = () => {
                   </IconButton>
                 }
               >
-                <Avatar src={chattingWith?.picture} />
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                  <Avatar src={chattingWith?.picture} />
+                </motion.div>
               </HtmlTooltip>
               <h3>{chattingWith?.username || chattingWith?.email}</h3>
             </div>
