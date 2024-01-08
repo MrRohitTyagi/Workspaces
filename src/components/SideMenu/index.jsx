@@ -91,13 +91,6 @@ const SideMenu = memo(() => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   // Listen for messages from the server
-  //   socket.on("NEW_MESSAGE_RECEIVED", () => {
-  //     console.log("NEW_MESSAGE_RECEIVED");
-  //   });
-  // }, []);
-
   return (
     <div
       style={{
@@ -111,7 +104,7 @@ const SideMenu = memo(() => {
         {sideMenuConfig(emailcount, isDarkTheme).map((menu, i) => {
           return (
             <MenuItem
-            className="menu-item-mui"
+              className="menu-item-mui"
               key={menu.label}
               sx={{
                 ":hover": {
@@ -152,7 +145,11 @@ const SideMenu = memo(() => {
             </MenuItem>
           );
         })}
-        <Divider orientation="horizontal" sx={{ borderBottomWidth: "thick" }} className="inbox-chat-divider" />
+        <Divider
+          orientation="horizontal"
+          sx={{ borderBottomWidth: "thick" }}
+          className="inbox-chat-divider"
+        />
         <MenuItem
           key={"chat"}
           sx={{

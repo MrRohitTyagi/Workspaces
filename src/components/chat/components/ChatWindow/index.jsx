@@ -14,6 +14,7 @@ import SendIcon from "@mui/icons-material/Send";
 import {
   Avatar,
   IconButton,
+  Input,
   InputAdornment,
   OutlinedInput,
 } from "@mui/material";
@@ -24,6 +25,7 @@ import { ThemeTypeContext } from "@/App";
 import {
   deleteSingleMessage,
   getUserChat,
+  saveEditedMessageController,
   saveMessages,
 } from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
@@ -43,7 +45,7 @@ const HtmlTooltip = styled(({ className, ...props }) => (
 const ChatWindow = () => {
   const firstLoadRef = useRef(true);
   const [messages, setMessages] = useState([]);
-  const [value, setValue] = useState("");
+  const [messageInputValue, setMessageInputValue] = useState("");
   const [perChat, setPerChat] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { user: currentUser } = useAuth();
@@ -83,10 +85,10 @@ const ChatWindow = () => {
   }, [chat_id]);
 
   const handleMessages = useCallback(() => {
-    if (!value) return;
+    if (!messageInputValue) return;
     const newMessage = {
       from: currentUser._id,
-      msg: value,
+      msg: messageInputValue,
       _id: v4(),
     };
 
@@ -99,8 +101,8 @@ const ChatWindow = () => {
       message: newMessage,
       to: userToshow._id,
     });
-    setValue("");
-  }, [currentUser._id, chat_id, perChat?.from, perChat?.to, value]);
+    setMessageInputValue("");
+  }, [messageInputValue, currentUser._id, perChat?.to, perChat?.from, chat_id]);
 
   useEffect(() => {
     listenToEvent(`NEW_MESSAGE_RECEIVED_${chat_id}`, (data) => {
@@ -110,9 +112,18 @@ const ChatWindow = () => {
       const { message_id } = data || {};
       setMessages((prev) => prev.filter((m) => m._id !== message_id));
     });
+    listenToEvent(`EDITED_SINGLE_MESSAGE_${chat_id}`, (data) => {
+      const { message_id, msg } = data || {};
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === message_id ? { ...m, msg, edited: true } : m
+        )
+      );
+    });
     return () => {
       emitter.off(`NEW_MESSAGE_RECEIVED_${chat_id}`, () => {});
       emitter.off(`DELETE_SINGLE_MESSAGE_${chat_id}`, () => {});
+      emitter.off(`EDITED_SINGLE_MESSAGE_${chat_id}`, () => {});
     };
   }, [chat_id]);
 
@@ -156,6 +167,36 @@ const ChatWindow = () => {
 
     toast.success("Messages Deleted");
   }, [chat_id, chattingWith._id, deletedMsgs]);
+
+  const deleteEditMessage = useCallback((message_id) => {
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m._id === message_id) {
+          return { ...m, isEditing: true };
+        } else return m;
+      })
+    );
+  }, []);
+
+  const saveEditedMessage = useCallback(
+    (message_id, val) => {
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m._id === message_id) {
+            const payload = {
+              chat_id,
+              message_id,
+              to: chattingWith._id,
+              msg: val,
+            };
+            saveEditedMessageController(payload);
+            return { ...m, isEditing: false, msg: val, edited: true };
+          } else return m;
+        })
+      );
+    },
+    [chat_id, chattingWith._id]
+  );
 
   return (
     <div className={`chat-window-cont`}>
@@ -224,6 +265,8 @@ const ChatWindow = () => {
                     handleDoubleClickSelectMessage
                   }
                   deleteMessage={deleteMessage}
+                  saveEditedMessage={saveEditedMessage}
+                  deleteEditMessage={deleteEditMessage}
                   key={_id}
                   isMyMsg={isMyMsg}
                   isDarkTheme={isDarkTheme}
@@ -239,8 +282,8 @@ const ChatWindow = () => {
               onKeyDown={(e) => {
                 if (e.keyCode === 13) handleMessages();
               }}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+              value={messageInputValue}
+              onChange={(e) => setMessageInputValue(e.target.value)}
               sx={{
                 width: "80%",
                 height: "80%",
@@ -275,14 +318,22 @@ import Zoom from "@mui/material/Zoom";
 import Loader from "@/components/Loader";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
-
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 const MessageTextBox = ({
   isMyMsg,
   isDarkTheme,
   message,
   deleteMessage,
+  deleteEditMessage,
   handleDoubleClickSelectMessage,
+  saveEditedMessage,
 }) => {
+  const [value, setvalue] = useState("");
+  useEffect(() => {
+    setvalue(message.msg);
+  }, [message.msg]);
+
   const time = new Date(message?.timestamp || new Date().getTime());
   const displayTime = `${time.getHours()}:${time.getMinutes()} ${
     time.getHours() > 12 ? "PM" : "AM"
@@ -301,18 +352,48 @@ const MessageTextBox = ({
       }}
     >
       <AnimatePresence>
-        {isMyMsg && !message.isSelected ? (
+        {message.isEditing ? (
+          <div>
+            <IconButton
+              size="small"
+              onClick={() => {
+                saveEditedMessage(message._id, value);
+              }}
+            >
+              <FileDownloadDoneIcon fontSize="small" color="success" />
+            </IconButton>
+            <Input
+              sx={{
+                input: { textAlign: isMyMsg ? "right" : "left" },
+                ":before": { border: "none !important" },
+                ":after": { border: "none !important" },
+                ...(isDarkTheme ? { color: "white" } : {}),
+              }}
+              onChange={(e) => setvalue(e.target.value)}
+              value={value}
+            />
+          </div>
+        ) : isMyMsg && !message.isSelected ? (
           <HtmlTooltip
             TransitionComponent={Zoom}
             sx={{ cusror: "pointer" }}
             placement={isMyMsg ? "left" : "right"}
             title={
-              <IconButton
-                size="small"
-                onClick={() => deleteMessage(message._id)}
-              >
-                <DeleteForeverIcon color="warning" />
-              </IconButton>
+              <div>
+                <IconButton
+                  size="small"
+                  onClick={() => deleteMessage(message._id)}
+                >
+                  <DeleteForeverIcon fontSize="small" color="warning" />
+                </IconButton>
+
+                <IconButton
+                  size="small"
+                  onClick={() => deleteEditMessage(message._id)}
+                >
+                  <BorderColorIcon fontSize="small" color="success" />
+                </IconButton>
+              </div>
             }
           >
             <motion.div
@@ -336,7 +417,7 @@ const MessageTextBox = ({
                 className="message-timestamp"
                 style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
               >
-                {displayTime}
+                {message.edited ? "Edited  " : null} {displayTime}
               </div>
             </motion.div>
           </HtmlTooltip>
@@ -360,7 +441,7 @@ const MessageTextBox = ({
               className="message-timestamp"
               style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
             >
-              {displayTime}
+              {displayTime} {message.edited ? "  Edited" : null}
             </div>
           </motion.div>
         )}

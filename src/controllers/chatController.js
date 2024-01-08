@@ -20,3 +20,7 @@ export const deleteSingleMessage = async (payload) => {
   const { data } = await caller("put", `chat/delete-single-message`, payload);
   return data;
 };
+export const saveEditedMessageController = async (payload) => {
+  const { data } = await caller("put", `chat/save-edited-message`, payload);
+  return data;
+};
