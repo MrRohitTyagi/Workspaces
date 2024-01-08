@@ -10,6 +10,7 @@ import {
 import "./chatWindow.css";
 import { useParams } from "react-router-dom";
 
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SendIcon from "@mui/icons-material/Send";
 import {
   Avatar,
@@ -233,6 +234,9 @@ const ChatWindow = () => {
                 marginLeft: "20px",
               }}
             >
+              <IconButton size="small" onClick={() => window.history.back()}>
+                <ArrowBackIcon />
+              </IconButton>
               <HtmlTooltip
                 TransitionComponent={Zoom}
                 sx={{ cusror: "pointer" }}

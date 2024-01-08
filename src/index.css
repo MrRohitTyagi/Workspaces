@@ -22,10 +22,11 @@ html {
   box-sizing: border-box;
 }
 .main-container {
+  position: relative;
   display: flex;
   flex-direction: row;
   background-color: white;
-  /* height: calc(100vh - var(--navbar-height)); */
+  height: calc(100vh - var(--navbar-height));
 }
 svg {
   width: 21px !important;

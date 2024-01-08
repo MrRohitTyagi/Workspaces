@@ -20,13 +20,14 @@
 }
 @media (max-width: 800px) {
   .side-menu-container {
-    position: fixed;
+    /* display: none; */
+    /* position: fixed;
     bottom: 0;
     right: 0;
     height: 4rem;
-    width: 100% !important;
+    width: 100% !important; */
   }
-  .side-menu-icon-container {
+  /* .side-menu-icon-container {
     padding: 0 !important;
     display: flex;
     justify-content: space-around;
@@ -36,5 +37,5 @@
   }
   .inbox-chat-divider {
     display: none;
-  }
+  } */
 }

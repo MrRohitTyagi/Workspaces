@@ -50,11 +50,12 @@
   align-items: center;
   width: 100%;
 }
-.per-chat-line > div {
+.per-chat-line {
   display: flex;
   flex-direction: row;
-  gap: 5px;
+  gap: 10px;
   align-items: center;
+  justify-content: start;
 }
 .new-chat-header {
   display: flex;
@@ -104,6 +105,8 @@
     padding: 10px;
   }
   .chat-side-menu-container {
+    width: 100vw;
+    border: none;
     /* display: none; */
   }
 }

@@ -20,6 +20,7 @@ import {
 } from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import { socket } from "@/components/authorizeUser";
+import useWindowDimens from "@/utils/useWindowDimens";
 
 const ChatIndex = () => {
   const { user } = useAuth();
@@ -136,13 +137,25 @@ const ChatIndex = () => {
   }, [addNewChat, handleChatSideMenuStatusUpdate, deleteChat]);
 
   const { isDarkTheme } = useContext(ThemeTypeContext);
+  const innerWidth = useWindowDimens();
   return (
     <div
       className={`chat-main-container ${isDarkTheme ? "chat-cont-dark" : ""}`}
     >
-      <ChatSideMenu allChats={allChats} setAllChats={setAllChats} />
+      {innerWidth > 750 && (
+        <ChatSideMenu allChats={allChats} setAllChats={setAllChats} />
+      )}
       <Routes>
-        <Route path="/select" element={<ChatNotSelected />} />
+        <Route
+          path="/select"
+          element={
+            innerWidth > 750 ? (
+              <ChatNotSelected />
+            ) : (
+              <ChatSideMenu allChats={allChats} setAllChats={setAllChats} />
+            )
+          }
+        />
         <Route path="/:id" element={<ChatWindow key={pathname} />} />
       </Routes>
     </div>

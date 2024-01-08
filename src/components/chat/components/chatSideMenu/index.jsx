@@ -19,6 +19,7 @@ import { searchEmail } from "@/controllers/emailController";
 import { ThemeTypeContext } from "@/App";
 
 import "./chatSideMenuStyles.css";
+import useWindowDimens from "@/utils/useWindowDimens";
 
 const popperProps = {
   elevation: 0,
@@ -42,7 +43,9 @@ const popperProps = {
 };
 
 const ChatSideMenu = ({ allChats, setAllChats }) => {
-  const [isEmpanded, setIsEmpanded] = useState(false);
+  const innerWidth = useWindowDimens();
+
+  const [isEmpanded, setIsEmpanded] = useState(innerWidth > 750 ? false : true);
   const { ...params } = useParams();
   const message_id = params?.["*"];
 
@@ -95,6 +98,8 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
   const handleToggleSidebar = () => {
     setIsEmpanded((prev) => !prev);
   };
+  const isMobileView = useWindowDimens();
+
   return (
     <div
       className={
@@ -104,39 +109,41 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
       }
     >
       <div className="add-new-chat-button-cont">
-        <div className="chat-sm-toggle">
-          {isEmpanded ? (
-            <IconButton
-              onClick={handleToggleSidebar}
-              size="small"
-              sx={{
-                ":hover": {
+        {innerWidth > 750 && (
+          <div className="chat-sm-toggle">
+            {isEmpanded ? (
+              <IconButton
+                onClick={handleToggleSidebar}
+                size="small"
+                sx={{
+                  ":hover": {
+                    background: "white",
+                  },
+                  border: "1px solid white",
+                  padding: "0px",
                   background: "white",
-                },
-                border: "1px solid white",
-                padding: "0px",
-                background: "white",
-              }}
-            >
-              <ArrowLeftIcon sx={{ color: "black" }} />
-            </IconButton>
-          ) : (
-            <IconButton
-              onClick={handleToggleSidebar}
-              size="small"
-              sx={{
-                ":hover": {
+                }}
+              >
+                <ArrowLeftIcon sx={{ color: "black" }} />
+              </IconButton>
+            ) : (
+              <IconButton
+                onClick={handleToggleSidebar}
+                size="small"
+                sx={{
+                  ":hover": {
+                    background: "white",
+                  },
+                  border: "1px solid white",
+                  padding: "0px",
                   background: "white",
-                },
-                border: "1px solid white",
-                padding: "0px",
-                background: "white",
-              }}
-            >
-              <ArrowRightIcon sx={{ color: "black" }} />
-            </IconButton>
-          )}
-        </div>
+                }}
+              >
+                <ArrowRightIcon sx={{ color: "black" }} />
+              </IconButton>
+            )}
+          </div>
+        )}
         <Button
           size="small"
           variant="outline"
@@ -190,20 +197,18 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
               }}
             >
               <div className="per-chat-line">
-                <div>
-                  <Badge badgeContent={newMsgCount} color="primary">
-                    <Avatar
-                      src={userToshow.picture}
-                      sx={{ height: "35px", width: "35px" }}
-                    />
-                  </Badge>
-                  {isEmpanded && (
-                    <motion.h5 initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                      {userToshow.username ||
-                        `${userToshow.email.slice(0, 15)}...`}
-                    </motion.h5>
-                  )}
-                </div>
+                <Badge badgeContent={newMsgCount} color="primary">
+                  <Avatar
+                    src={userToshow.picture}
+                    sx={{ height: "35px", width: "35px" }}
+                  />
+                </Badge>
+                {isEmpanded && (
+                  <motion.h5 initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                    {userToshow.username ||
+                      `${userToshow.email.slice(0, 15)}...`}
+                  </motion.h5>
+                )}
               </div>
             </MenuItem>
           );

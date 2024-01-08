@@ -15,8 +15,10 @@ import { emitEvent, emitter, listenToEvent } from "@/utils/eventemitter";
 import { ThemeTypeContext } from "@/App";
 import "./sidemenu.css";
 import { socket } from "../authorizeUser";
+import MobileAppMenu from "./MobileAPpMenu";
+import useWindowDimens from "@/utils/useWindowDimens";
 
-const sideMenuConfig = (emailcount, isDarkTheme) => [
+export const sideMenuConfig = (emailcount, isDarkTheme) => [
   {
     label: "Componse",
     event: "ADD_NEW_EMAIL",
@@ -90,98 +92,108 @@ const SideMenu = memo(() => {
       console.log("NEW_MESSAGE_RECEIVED");
     });
   }, []);
-
-  return (
-    <div
-      style={{
-        width: isExpanded ? "12rem" : "4rem",
-      }}
-      className={`side-menu-container ${
-        isDarkTheme ? "side-menu-container-dark" : ""
-      }`}
-    >
-      <MenuList className="side-menu-icon-container">
-        {sideMenuConfig(emailcount, isDarkTheme).map((menu, i) => {
-          return (
-            <MenuItem
-              className="menu-item-mui"
-              key={menu.label}
-              sx={{
-                ":hover": {
-                  background: "initial",
-                },
-                padding: "15px",
-                background:
-                  activeIndex === menu.navUrl
-                    ? isDarkTheme
-                      ? "#313131"
-                      : "#c1c1c1"
-                    : "transparent",
-              }}
-              onClick={() => {
-                if (i === 0) emitEvent(menu.event);
-                else navigate(menu.navUrl);
-                if (i !== 0) {
-                  if (activeIndex !== menu.navUrl) setActiveIndex(menu.navUrl);
-                }
-              }}
-            >
-              <div className="menu-item">
-                <Tooltip title={menu.tooltip}>
-                  <motion.div
-                    initial="hidden"
-                    animate="visible"
-                    variants={varient}
-                  >
-                    {menu.icon}
-                  </motion.div>
-                </Tooltip>
-                {isExpanded && (
-                  <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>
-                    {menu.label}
-                  </h4>
-                )}
-              </div>
-            </MenuItem>
-          );
-        })}
-        <Divider
-          orientation="horizontal"
-          sx={{ borderBottomWidth: "thick" }}
-          className="inbox-chat-divider"
-        />
-        <MenuItem
-          key={"chat"}
-          sx={{
-            padding: "15px",
-            background:
-              activeIndex === "/chats/select"
-                ? isDarkTheme
-                  ? "#313131"
-                  : "#c1c1c1"
-                : "transparent",
-          }}
-          onClick={() => {
-            if (activeIndex !== "/chats/select") {
-              setActiveIndex("/chats/select");
-            }
-            navigate("/chats/select");
-          }}
-        >
-          <div className="menu-item">
-            <Tooltip title={"Chats"}>
-              <motion.div initial="hidden" animate="visible" variants={varient}>
-                <ChatIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />
-              </motion.div>
-            </Tooltip>
-            {isExpanded && (
-              <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>{"Chats"}</h4>
-            )}
-          </div>
-        </MenuItem>
-      </MenuList>
-    </div>
-  );
+  const innerWidth = useWindowDimens();
+  if (innerWidth < 750) {
+    return <MobileAppMenu />;
+  } else
+    return (
+      <div
+        style={{
+          width: isExpanded ? "12rem" : "4rem",
+        }}
+        className={`side-menu-container ${
+          isDarkTheme ? "side-menu-container-dark" : ""
+        }`}
+      >
+        <MenuList className="side-menu-icon-container">
+          {sideMenuConfig(emailcount, isDarkTheme).map((menu, i) => {
+            return (
+              <MenuItem
+                className="menu-item-mui"
+                key={menu.label}
+                sx={{
+                  ":hover": {
+                    background: "initial",
+                  },
+                  padding: "15px",
+                  background:
+                    activeIndex === menu.navUrl
+                      ? isDarkTheme
+                        ? "#313131"
+                        : "#c1c1c1"
+                      : "transparent",
+                }}
+                onClick={() => {
+                  if (i === 0) emitEvent(menu.event);
+                  else navigate(menu.navUrl);
+                  if (i !== 0) {
+                    if (activeIndex !== menu.navUrl)
+                      setActiveIndex(menu.navUrl);
+                  }
+                }}
+              >
+                <div className="menu-item">
+                  <Tooltip title={menu.tooltip}>
+                    <motion.div
+                      initial="hidden"
+                      animate="visible"
+                      variants={varient}
+                    >
+                      {menu.icon}
+                    </motion.div>
+                  </Tooltip>
+                  {isExpanded && (
+                    <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>
+                      {menu.label}
+                    </h4>
+                  )}
+                </div>
+              </MenuItem>
+            );
+          })}
+          <Divider
+            orientation="horizontal"
+            sx={{ borderBottomWidth: "thick" }}
+            className="inbox-chat-divider"
+          />
+          <MenuItem
+            key={"chat"}
+            sx={{
+              padding: "15px",
+              background:
+                activeIndex === "/chats/select"
+                  ? isDarkTheme
+                    ? "#313131"
+                    : "#c1c1c1"
+                  : "transparent",
+            }}
+            onClick={() => {
+              if (activeIndex !== "/chats/select") {
+                setActiveIndex("/chats/select");
+              }
+              navigate("/chats/select");
+            }}
+          >
+            <div className="menu-item">
+              <Tooltip title={"Chats"}>
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={varient}
+                >
+                  <ChatIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />
+                </motion.div>
+              </Tooltip>
+              {isExpanded && (
+                <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>
+                  {"Chats"}
+                </h4>
+              )}
+            </div>
+          </MenuItem>
+        </MenuList>
+      </div>
+    );
 });
 
 SideMenu.displayName = "SideMenu";
