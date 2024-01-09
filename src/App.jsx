@@ -12,6 +12,7 @@ import LoginScreen from "@/components/loginScreen";
 import RightDrawer from "@/components/coreComponents/RightDrawer";
 import UserSettings from "@/components/userSettings";
 import ChatIndex from "@/components/chat/index.jsx";
+import GroupIndex from "@/components/group/index.jsx";
 
 import useAuth from "@/utils/useAuth";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
@@ -64,7 +65,9 @@ function App() {
               <Route path="/login" element={<LoginScreen />} />
               <Route path="/email/:id" element={<PerEmailScreen />} />
               <Route path="/settings" element={<UserSettings />} />
+
               <Route path="/chats/*" element={<ChatIndex />} />
+              <Route path="/groups/*" element={<GroupIndex />} />
               <Route path="/*" element={<Redirect />} />
             </Routes>
           </div>

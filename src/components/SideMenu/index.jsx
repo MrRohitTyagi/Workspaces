@@ -17,8 +17,8 @@ import "./sidemenu.css";
 import { socket } from "../authorizeUser";
 import MobileAppMenu from "./MobileAPpMenu";
 import useWindowDimens from "@/utils/useWindowDimens";
-
-export const sideMenuConfig = (emailcount, isDarkTheme) => [
+import GroupsIcon from "@mui/icons-material/Groups";
+export const sideMenuConfig = (isDarkTheme, emailcount) => [
   {
     label: "Componse",
     event: "ADD_NEW_EMAIL",
@@ -58,7 +58,23 @@ export const sideMenuConfig = (emailcount, isDarkTheme) => [
     navUrl: "/archived",
   },
 ];
-
+export const chatMEnuConfig = (isDarkTheme) => {
+  return [
+    {
+      label: "Chats",
+      tooltip: "Chats",
+      icon: <ChatIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,
+      navUrl: "/chats/select",
+    },
+    {
+      isDisabled: true,
+      label: "Groups",
+      tooltip: "Groups",
+      icon: <GroupsIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,
+      navUrl: "/groups/select",
+    },
+  ];
+};
 const varient = {
   hidden: { x: -100 },
   visible: { x: 0 },
@@ -110,7 +126,7 @@ const SideMenu = memo(() => {
         }`}
       >
         <MenuList className="side-menu-icon-container">
-          {sideMenuConfig(emailcount, isDarkTheme).map((menu, i) => {
+          {sideMenuConfig(isDarkTheme, emailcount).map((menu, i) => {
             return (
               <MenuItem
                 className="menu-item-mui"
@@ -160,41 +176,44 @@ const SideMenu = memo(() => {
             sx={{ borderBottomWidth: "thick" }}
             className="inbox-chat-divider"
           />
-          <MenuItem
-            key={"chat"}
-            sx={{
-              padding: "15px",
-              background:
-                activeIndex === "/chats/select"
-                  ? isDarkTheme
-                    ? "#313131"
-                    : "#c1c1c1"
-                  : "transparent",
-            }}
-            onClick={() => {
-              if (activeIndex !== "/chats/select") {
-                setActiveIndex("/chats/select");
-              }
-              navigate("/chats/select");
-            }}
-          >
-            <div className="menu-item">
-              <Tooltip title={"Chats"}>
-                <motion.div
-                  initial="hidden"
-                  animate="visible"
-                  variants={varient}
-                >
-                  <ChatIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />
-                </motion.div>
-              </Tooltip>
-              {isExpanded && (
-                <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>
-                  {"Chats"}
-                </h4>
-              )}
-            </div>
-          </MenuItem>
+          {chatMEnuConfig(isDarkTheme).map((menu) => (
+            <MenuItem
+              disabled={menu.isDisabled}
+              key={menu.label}
+              sx={{
+                padding: "15px",
+                background:
+                  activeIndex === menu.navUrl
+                    ? isDarkTheme
+                      ? "#313131"
+                      : "#c1c1c1"
+                    : "transparent",
+              }}
+              onClick={() => {
+                if (activeIndex !== menu.navUrl) {
+                  setActiveIndex(menu.navUrl);
+                }
+                navigate(menu.navUrl);
+              }}
+            >
+              <div className="menu-item">
+                <Tooltip title={menu.tooltip}>
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={varient}
+                  >
+                    {menu.icon}
+                  </motion.div>
+                </Tooltip>
+                {isExpanded && (
+                  <h4 className={isDarkTheme ? "l-t-svg" : "d-t-svg"}>
+                    {menu.label}
+                  </h4>
+                )}
+              </div>
+            </MenuItem>
+          ))}
         </MenuList>
       </div>
     );

@@ -1,0 +1,9 @@
+.chat-not-selected {
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}

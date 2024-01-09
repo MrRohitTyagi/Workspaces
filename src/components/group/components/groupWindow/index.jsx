@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import "./chatWindow.css";
+import "./groupWindow.css";
 import { useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";

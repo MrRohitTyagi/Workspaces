@@ -1,0 +1,107 @@
+.chat-window-cont {
+  height: 100%;
+  width: 100%;
+  /* border: 1px solid blue; */
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  padding-bottom: 20px;
+}
+.messages-box {
+  gap: 20px;
+  overflow: auto;
+  height: 80vh;
+  width: 100%;
+  /* border: 1px solid green; */
+  padding: 5% 10%;
+  display: flex;
+  flex-direction: column;
+}
+.send-bar-bottom {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* border: 1px solid orange; */
+  height: 70px;
+  width: 100%;
+}
+.typing-effect-text {
+  /* position: absolute;
+  top: -14px;
+  left: 11%; */
+  color: inherit;
+  opacity: 50%;
+  font-size: 14px;
+}
+.msg-box {
+  width: 100%;
+  /* border: 1px dotted red; */
+  display: flex;
+  flex-direction: row;
+}
+
+/* add in dark also  */
+.single-message-box {
+  word-break: break-all;
+  position: relative;
+  background-color: lightgray;
+  padding: 10px;
+  cursor: pointer;
+  position: relative;
+  min-width: 100px;
+}
+
+.single-message-box-dark {
+  background-color: #555555;
+  cursor: pointer;
+}
+
+.messaging-to-cont {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  border-bottom: 1px solid var(--bg-color);
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+.message-timestamp {
+  position: absolute;
+  top: 102%;
+  font-size: 8px;
+  opacity: 50%;
+}
+.delete-all-messages {
+  position: fixed;
+  /* top: 15%; */
+  left: 50%;
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  padding: 0px 10px;
+  border-radius: 10px;
+  background-color: white;
+}
+.delete-all-messages:has(.dark) {
+  background-color: var(--dark-theme-color);
+}
+@media (max-width: 800px) {
+  .typing-effect-text {
+    left: 0;
+  }
+  .send-message-input {
+    width: 100% !important;
+  }
+  .messages-box {
+    padding: 5% 0%;
+    height: 90vh;
+  }
+  .messaging-to-cont > div {
+    margin-left: 0px !important;
+  }
+}

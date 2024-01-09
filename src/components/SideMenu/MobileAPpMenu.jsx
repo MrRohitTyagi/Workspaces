@@ -1,12 +1,10 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import Backdrop from "@mui/material/Backdrop";
 import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import ChatIcon from "@mui/icons-material/Chat";
 
-import { sideMenuConfig } from ".";
+import { chatMEnuConfig, sideMenuConfig } from ".";
 import { emitEvent } from "@/utils/eventemitter";
 import { useNavigate } from "react-router-dom";
 import { ThemeTypeContext } from "@/App";
@@ -43,24 +41,20 @@ export default function MobileAppMenu() {
           }}
         />
       ))}
-      <SpeedDialAction
-        key={chatMEnu().label}
-        icon={chatMEnu(isDarkTheme).icon}
-        tooltipTitle={chatMEnu().tooltip}
-        tooltipOpen
-        onClick={() => {
-          navigate(chatMEnu().navUrl);
-          handleClose();
-        }}
-      />
+      {chatMEnuConfig(isDarkTheme).map((menu) => {
+        return (
+          <SpeedDialAction
+            key={menu.label}
+            icon={menu.icon}
+            tooltipTitle={menu.tooltip}
+            tooltipOpen
+            onClick={() => {
+              navigate(menu.navUrl);
+              handleClose();
+            }}
+          />
+        );
+      })}
     </SpeedDial>
   );
 }
-const chatMEnu = (isDarkTheme) => {
-  return {
-    label: "Chats",
-    tooltip: "Chats",
-    icon: <ChatIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,
-    navUrl: "/chats/select",
-  };
-};
