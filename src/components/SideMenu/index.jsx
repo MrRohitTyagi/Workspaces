@@ -67,7 +67,7 @@ export const chatMEnuConfig = (isDarkTheme) => {
       navUrl: "/chats/select",
     },
     {
-      isDisabled: true,
+      // isDisabled: true,
       label: "Groups",
       tooltip: "Groups",
       icon: <GroupsIcon className={isDarkTheme ? "l-t-svg" : "d-t-svg"} />,

@@ -2,8 +2,8 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ThemeTypeContext } from "@/App";
 import "./groupStyles.css";
-import ChatSideMenu from "./components/groupSideMenu";
-import ChatWindow from "./components/groupWindow";
+import GroupSideMenu from "./components/groupSideMenu";
+import GroupWindow from "./components/groupWindow";
 import {
   Route,
   Routes,
@@ -11,13 +11,15 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import ChatNotSelected from "./components/groupNotrSelected";
+import GroupNotSelected from "./components/groupNotrSelected";
 import useAuth from "@/utils/useAuth";
+
 import {
   getAllChatsPerUser,
   getUserChat,
   newChat,
 } from "@/controllers/chatController";
+
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import useWindowDimens from "@/utils/useWindowDimens";
 
@@ -47,7 +49,7 @@ const ChatIndex = () => {
   const deleteChat = useCallback(
     ({ message_id }) => {
       setAllChats((prev) => prev.filter((c) => c._id !== message_id));
-      navigate("/chats/select");
+      navigate("/groups/select");
     },
     [navigate]
   );
@@ -131,20 +133,20 @@ const ChatIndex = () => {
       className={`chat-main-container ${isDarkTheme ? "chat-cont-dark" : ""}`}
     >
       {innerWidth > 750 && (
-        <ChatSideMenu allChats={allChats} setAllChats={setAllChats} />
+        <GroupSideMenu allChats={allChats} setAllChats={setAllChats} />
       )}
       <Routes>
         <Route
           path="/select"
           element={
             innerWidth > 750 ? (
-              <ChatNotSelected />
+              <GroupNotSelected />
             ) : (
-              <ChatSideMenu allChats={allChats} setAllChats={setAllChats} />
+              <GroupSideMenu allChats={allChats} setAllChats={setAllChats} />
             )
           }
         />
-        <Route path="/:id" element={<ChatWindow key={pathname} />} />
+        <Route path="/:id" element={<GroupWindow key={pathname} />} />
       </Routes>
     </div>
   );

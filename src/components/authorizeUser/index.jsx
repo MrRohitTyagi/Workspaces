@@ -30,6 +30,7 @@ const Authorize = memo(({ children }) => {
       window.socket_id = id;
       socket.emit("SAVE_SOCKET_ID", user_id);
     });
+    
     //new chat message
     socket.on("NEW_MESSAGE_RECEIVED", (data) => {
       const { message_id } = data || {};

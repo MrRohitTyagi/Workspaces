@@ -178,7 +178,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
               >
-                New Chat
+                New Group
               </motion.h4>
             )}
           </IconButton>
@@ -212,7 +212,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
               onClick={() => {
                 setActiveUser(_id);
                 clearNewMessageCountOnClick(_id);
-                navigate(`/chats/${_id}`);
+                navigate(`/groups/${_id}`);
               }}
               sx={{
                 background:
