@@ -52,6 +52,7 @@ const ChatWindow = () => {
   const { user: currentUser } = useAuth();
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const [deletedMsgs, setdeletedMsgs] = useState([]);
+  const [typingEffect, setTypingEffect] = useState(false);
 
   const { id: chat_id } = useParams();
 
@@ -120,6 +121,13 @@ const ChatWindow = () => {
       const { message_id } = data || {};
       setMessages((prev) => prev.filter((m) => m._id !== message_id));
     });
+    listenToEvent(`SHOW_TYPING_EFFECT_${chat_id}`, (e) => {
+      setTypingEffect(true);
+      let id = setTimeout(() => {
+        clearTimeout(id);
+        setTypingEffect(false);
+      }, 2000);
+    });
     listenToEvent(`EDITED_SINGLE_MESSAGE_${chat_id}`, (data) => {
       const { message_id, msg } = data || {};
       setMessages((prev) =>
@@ -129,9 +137,11 @@ const ChatWindow = () => {
       );
     });
     return () => {
+      emitter.off(`SIDE_MENU_TYPING_EFFECT`, () => {});
       emitter.off(`NEW_MESSAGE_RECEIVED_${chat_id}`, () => {});
       emitter.off(`DELETE_SINGLE_MESSAGE_${chat_id}`, () => {});
       emitter.off(`EDITED_SINGLE_MESSAGE_${chat_id}`, () => {});
+      emitter.off(`SHOW_TYPING_EFFECT_${chat_id}`, () => {});
     };
   }, [chat_id]);
 
@@ -206,6 +216,17 @@ const ChatWindow = () => {
     [chat_id, chattingWith._id]
   );
 
+  const handleOnchange = useCallback(
+    (e) => {
+      setMessageInputValue(e.target.value);
+      socket.emit("USER_TYPING", {
+        chattingTo: chattingWith._id,
+        chat_id,
+      });
+    },
+    [chat_id, chattingWith._id]
+  );
+
   return (
     <div className={`chat-window-cont`}>
       <AnimatePresence>
@@ -266,7 +287,16 @@ const ChatWindow = () => {
                   <Avatar src={chattingWith?.picture} />
                 </motion.div>
               </HtmlTooltip>
-              <h3>{chattingWith?.username || chattingWith?.email}</h3>
+              <div>
+                <h3>{chattingWith?.username || chattingWith?.email}</h3>
+                {typingEffect ? (
+                  <motion.h4 className="typing-effect-text">
+                    Typing...
+                  </motion.h4>
+                ) : (
+                  <h3 style={{ height: "16px" }} />
+                )}
+              </div>
             </div>
             {}
           </div>
@@ -298,7 +328,7 @@ const ChatWindow = () => {
                 if (e.keyCode === 13) handleMessages();
               }}
               value={messageInputValue}
-              onChange={(e) => setMessageInputValue(e.target.value)}
+              onChange={handleOnchange}
               sx={{
                 width: "80%",
                 height: "80%",
@@ -335,6 +365,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
+import { socket } from "@/components/authorizeUser";
 const MessageTextBox = ({
   isMyMsg,
   isDarkTheme,

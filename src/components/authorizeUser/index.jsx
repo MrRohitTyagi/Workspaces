@@ -48,6 +48,11 @@ const Authorize = memo(({ children }) => {
       const { chat_id } = data || {};
       emitter.emit(`EDITED_SINGLE_MESSAGE_${chat_id}`, data);
     });
+    socket.on("SHOW_TYPING_EFFECT", (data) => {
+      const { chat_id } = data || {};
+      emitter.emit(`SHOW_TYPING_EFFECT_${chat_id}`, data);
+      emitter.emit("SIDE_MENU_TYPING_EFFECT", data);
+    });
 
     // new Email received
     socket.on("NEW_EMAIL_RECEIVED", (email) => {

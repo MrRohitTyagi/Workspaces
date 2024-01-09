@@ -34,7 +34,7 @@ const popperProps = {
 const ChatSideMenu = ({ allChats, setAllChats }) => {
   const innerWidth = useWindowDimens();
 
-  const [isEmpanded, setIsEmpanded] = useState(innerWidth > 750 ? false : true);
+  const [isEmpanded, setIsEmpanded] = useState(true);
   const { ...params } = useParams();
   const message_id = params?.["*"];
 
@@ -42,6 +42,8 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const [activeUser, setActiveUser] = useState(message_id || null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [typingEffect, setTypingEffect] = useState(false);
+
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
 
@@ -61,9 +63,25 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
       setAnchorEl(null);
     }
     listenToEvent("CLOSE_ADD_NEW_CHAT_POPUP", closeLayer);
+    listenToEvent(`SIDE_MENU_TYPING_EFFECT`, ({ chattingTo, chat_id }) => {
+      console.log(
+        `%c chat_id `,
+        "color: green;border:1px solid green",
+        chat_id
+      );
+      setTypingEffect(chat_id);
+      let id = setTimeout(() => {
+        clearTimeout(id);
+        setTypingEffect(null);
+      }, 2000);
+    });
     return () => {
       emitter.off("CLOSE_ADD_NEW_CHAT_POPUP", closeLayer);
     };
+  }, []);
+
+  useEffect(() => {
+    return () => {};
   }, []);
 
   const clearNewMessageCountOnClick = useCallback(
@@ -233,7 +251,11 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
                           opacity: "50%",
                         }}
                       >
-                        {lastMessage.msg}
+                        {typingEffect === _id ? (
+                          <h4 className="green-typing">Typing...</h4>
+                        ) : (
+                          lastMessage.msg
+                        )}
                       </h6>
                       <h6
                         style={{

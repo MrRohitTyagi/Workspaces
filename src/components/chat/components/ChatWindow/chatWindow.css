@@ -18,12 +18,21 @@
   flex-direction: column;
 }
 .send-bar-bottom {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   /* border: 1px solid orange; */
   height: 70px;
   width: 100%;
+}
+.typing-effect-text {
+  /* position: absolute;
+  top: -14px;
+  left: 11%; */
+  color: inherit;
+  opacity: 50%;
+  font-size: 14px;
 }
 .msg-box {
   width: 100%;
@@ -82,6 +91,9 @@
   background-color: var(--dark-theme-color);
 }
 @media (max-width: 800px) {
+  .typing-effect-text {
+    left: 0;
+  }
   .send-message-input {
     width: 100% !important;
   }
