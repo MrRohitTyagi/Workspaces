@@ -322,6 +322,7 @@ const CustomSelect = memo(
     const loadOptions = (inputValue, callback) => {
       debouncedLoadOptions(inputValue, callback);
     };
+
     const handleChange = useCallback(
       (selectedValues) => {
         setSelectedOptions(selectedValues);

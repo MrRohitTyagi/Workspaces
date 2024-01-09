@@ -43,37 +43,29 @@ const HtmlTooltip = styled(({ className, ...props }) => (
   },
 }));
 
-const ChatWindow = () => {
+const GroupWindow = () => {
   const firstLoadRef = useRef(true);
   const [messages, setMessages] = useState([]);
   const [messageInputValue, setMessageInputValue] = useState("");
-  const [perChat, setPerChat] = useState({});
+  const [perGroup, setPerGroup] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { user: currentUser } = useAuth();
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const [deletedMsgs, setdeletedMsgs] = useState([]);
   const [typingEffect, setTypingEffect] = useState(false);
-
-  const { id: chat_id } = useParams();
-
+  const { id: group_id } = useParams();
   const ref = useRef();
-
-  const chattingWith = useMemo(() => {
-    return (
-      (perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to) || {}
-    );
-  }, [currentUser._id, perChat?.from, perChat?.to]);
 
   const deleteMessage = useCallback(
     (id) => {
       setMessages((prev) => prev.filter((m) => m._id !== id));
       deleteSingleMessage({
-        chat_id: chat_id,
+        chat_id: group_id,
         message_id: id,
-        to: chattingWith._id,
+        to: perGroup._id,
       });
     },
-    [chat_id, chattingWith._id]
+    [group_id, perGroup._id]
   );
 
   useEffect(() => {
@@ -82,16 +74,20 @@ const ChatWindow = () => {
       emitter.emit("HIDE_APP_BAR");
     };
   }, []);
-
+  console.log(
+    `%c perGroup `,
+    "color: yellow;border:1px solid lightgreen",
+    perGroup
+  );
   useEffect(() => {
     (async function fetchChat() {
-      const { response: perChat } = await getUserChat(chat_id);
-      setPerChat(perChat);
-      setMessages(perChat?.messages || []);
+      const { response: perGroup } = await getOneGroup(group_id);
+      setPerGroup(perGroup);
+      setMessages(perGroup?.messages || []);
 
       setIsLoading(false);
     })();
-  }, [chat_id]);
+  }, [group_id]);
 
   const handleMessages = useCallback(() => {
     if (!messageInputValue) return;
@@ -101,34 +97,32 @@ const ChatWindow = () => {
       _id: v4(),
     };
 
-    const userToshow =
-      perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
-
     setMessages((p) => [...p, newMessage]);
-    saveMessages({
-      message_id: chat_id,
+
+    saveGroupMessage({
+      group_id: group_id,
       message: newMessage,
-      to: userToshow._id,
+      // to: userToshow._id,
     });
     setMessageInputValue("");
-  }, [messageInputValue, currentUser._id, perChat?.to, perChat?.from, chat_id]);
+  }, [messageInputValue, currentUser._id, group_id]);
 
   useEffect(() => {
-    listenToEvent(`NEW_MESSAGE_RECEIVED_${chat_id}`, (data) => {
+    listenToEvent(`NEW_MESSAGE_RECEIVED_${group_id}`, (data) => {
       setMessages((prev) => [...prev, data.message]);
     });
-    listenToEvent(`DELETE_SINGLE_MESSAGE_${chat_id}`, (data) => {
+    listenToEvent(`DELETE_SINGLE_MESSAGE_${group_id}`, (data) => {
       const { message_id } = data || {};
       setMessages((prev) => prev.filter((m) => m._id !== message_id));
     });
-    listenToEvent(`SHOW_TYPING_EFFECT_${chat_id}`, (e) => {
+    listenToEvent(`SHOW_TYPING_EFFECT_${group_id}`, () => {
       setTypingEffect(true);
       let id = setTimeout(() => {
         clearTimeout(id);
         setTypingEffect(false);
       }, 2000);
     });
-    listenToEvent(`EDITED_SINGLE_MESSAGE_${chat_id}`, (data) => {
+    listenToEvent(`EDITED_SINGLE_MESSAGE_${group_id}`, (data) => {
       const { message_id, msg } = data || {};
       setMessages((prev) =>
         prev.map((m) =>
@@ -138,12 +132,12 @@ const ChatWindow = () => {
     });
     return () => {
       emitter.off(`SIDE_MENU_TYPING_EFFECT`, () => {});
-      emitter.off(`NEW_MESSAGE_RECEIVED_${chat_id}`, () => {});
-      emitter.off(`DELETE_SINGLE_MESSAGE_${chat_id}`, () => {});
-      emitter.off(`EDITED_SINGLE_MESSAGE_${chat_id}`, () => {});
-      emitter.off(`SHOW_TYPING_EFFECT_${chat_id}`, () => {});
+      emitter.off(`NEW_MESSAGE_RECEIVED_${group_id}`, () => {});
+      emitter.off(`DELETE_SINGLE_MESSAGE_${group_id}`, () => {});
+      emitter.off(`EDITED_SINGLE_MESSAGE_${group_id}`, () => {});
+      emitter.off(`SHOW_TYPING_EFFECT_${group_id}`, () => {});
     };
-  }, [chat_id]);
+  }, [group_id]);
 
   useEffect(() => {
     if (ref.current) {
@@ -178,13 +172,13 @@ const ChatWindow = () => {
 
   const deleteAllSelected = useCallback(async () => {
     for (const message_id of deletedMsgs) {
-      await deleteSingleMessage({ chat_id, message_id, to: chattingWith._id });
+      await deleteSingleMessage({ group_id, message_id, to: perGroup._id });
     }
     setMessages((prev) => prev.filter((m) => !deletedMsgs.includes(m._id)));
     setdeletedMsgs([]);
 
     toast.success("Messages Deleted");
-  }, [chat_id, chattingWith._id, deletedMsgs]);
+  }, [group_id, perGroup._id, deletedMsgs]);
 
   const deleteEditMessage = useCallback((message_id) => {
     setMessages((prev) =>
@@ -202,9 +196,9 @@ const ChatWindow = () => {
         prev.map((m) => {
           if (m._id === message_id) {
             const payload = {
-              chat_id,
+              group_id,
               message_id,
-              to: chattingWith._id,
+              to: perGroup._id,
               msg: val,
             };
             saveEditedMessageController(payload);
@@ -213,18 +207,18 @@ const ChatWindow = () => {
         })
       );
     },
-    [chat_id, chattingWith._id]
+    [group_id, perGroup._id]
   );
 
   const handleOnchange = useCallback(
     (e) => {
       setMessageInputValue(e.target.value);
       socket.emit("USER_TYPING", {
-        chattingTo: chattingWith._id,
-        chat_id,
+        chattingTo: perGroup._id,
+        group_id,
       });
     },
-    [chat_id, chattingWith._id]
+    [group_id, perGroup._id]
   );
 
   return (
@@ -275,7 +269,7 @@ const ChatWindow = () => {
                   <IconButton
                     onClick={() =>
                       emitter.emit("DELETE_CHATFROM_SIDEMENU", {
-                        message_id: perChat._id,
+                        message_id: perGroup._id,
                       })
                     }
                   >
@@ -284,11 +278,11 @@ const ChatWindow = () => {
                 }
               >
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                  <Avatar src={chattingWith?.picture} />
+                  <Avatar src={perGroup?.picture} />
                 </motion.div>
               </HtmlTooltip>
               <div>
-                <h3>{chattingWith?.username || chattingWith?.email}</h3>
+                <h3>{perGroup?.title}</h3>
 
                 {typingEffect ? (
                   <motion.h4
@@ -372,6 +366,7 @@ import { toast } from "react-toastify";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import { socket } from "@/components/authorizeUser";
+import { getOneGroup, saveGroupMessage } from "@/controllers/groupController";
 const MessageTextBox = ({
   isMyMsg,
   isDarkTheme,
@@ -502,4 +497,4 @@ const MessageTextBox = ({
   );
 };
 
-export default ChatWindow;
+export default GroupWindow;

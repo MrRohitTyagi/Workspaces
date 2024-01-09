@@ -3,10 +3,16 @@ import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { debounce } from "lodash";
-import AsyncSelect from "react-select/async";
 
 import Button from "@mui/material/Button";
-import { Avatar, Badge, IconButton, MenuItem, MenuList } from "@mui/material";
+import {
+  Avatar,
+  Badge,
+  IconButton,
+  MenuItem,
+  MenuList,
+  TextField,
+} from "@mui/material";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import { Close } from "@mui/icons-material";
 import Menu from "@mui/material/Menu";
@@ -21,9 +27,10 @@ import { ThemeTypeContext } from "@/App";
 import "./groupSideMenuStyles.css";
 import useWindowDimens from "@/utils/useWindowDimens";
 import LoggedInUserProfile from "@/components/userProfile";
+import AsyncSelect from "@/components/coreComponents/AsyncSelect";
 
 const popperProps = {
-  elevation: 0,
+  elevation: 1,
   sx: {
     overflow: "visible",
     filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
@@ -31,7 +38,12 @@ const popperProps = {
   },
 };
 
-const ChatSideMenu = ({ allChats, setAllChats }) => {
+const GroupSideMenu = ({ allGroups, setAllGroups }) => {
+  console.log(
+    `%c allGroups `,
+    "color: green;border:1px solid green",
+    allGroups
+  );
   const innerWidth = useWindowDimens();
 
   const [isEmpanded, setIsEmpanded] = useState(true);
@@ -51,7 +63,8 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
     setActiveUser(message_id);
   }, [message_id]);
 
-  const handleClick = (event) => {
+  const handleOpen = (event) => {
+    // setOpen(true);
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -87,7 +100,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
   const clearNewMessageCountOnClick = useCallback(
     (_id) => {
       let haveNewMessage = false;
-      setAllChats((prev) => {
+      setAllGroups((prev) => {
         const chatArr = [];
         for (const chat of prev) {
           if (chat._id === _id && chat.newMsgCount > 0) {
@@ -99,7 +112,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
         else return prev;
       });
     },
-    [setAllChats]
+    [setAllGroups]
   );
 
   const handleToggleSidebar = () => {
@@ -160,7 +173,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
             aria-controls={open ? "account-menu" : undefined}
             aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
-            onClick={handleClick}
+            onClick={handleOpen}
             sx={{
               minHeight: "50px",
               alignSelf: "center",
@@ -193,85 +206,85 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
           "aria-labelledby": "basic-button",
         }}
       >
-        {allChats.map(({ _id, to, from, newMsgCount = 0, messages }) => {
-          const lastMessage = messages.at(-1) || {};
+        {allGroups.map(
+          ({ _id, messages, members, description, title, picture }) => {
+            const lastMessage = messages.at(-1) || {};
 
-          const time = new Date(lastMessage?.timestamp);
+            const time = new Date(lastMessage?.timestamp);
 
-          const displayTime = lastMessage._id
-            ? `${
-                time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
-              }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
-            : "";
-
-          // const lastMessage = {msg:'hello'};
-          const userToshow = to._id === user._id ? from : to;
-          return (
-            <MenuItem
-              key={_id}
-              onClick={() => {
-                setActiveUser(_id);
-                clearNewMessageCountOnClick(_id);
-                navigate(`/groups/${_id}`);
-              }}
-              sx={{
-                background:
-                  activeUser === _id
-                    ? isDarkTheme
-                      ? "#313131"
-                      : "#c1c1c1"
-                    : "transparent",
-              }}
-            >
-              <motion.div
-                className="per-chat-line"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+            const displayTime = lastMessage._id
+              ? `${
+                  time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
+                }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
+              : "";
+            return (
+              <MenuItem
+                key={_id}
+                onClick={() => {
+                  setActiveUser(_id);
+                  clearNewMessageCountOnClick(_id);
+                  navigate(`/groups/${_id}`);
+                }}
+                sx={{
+                  background:
+                    activeUser === _id
+                      ? isDarkTheme
+                        ? "#313131"
+                        : "#c1c1c1"
+                      : "transparent",
+                }}
               >
-                <Badge badgeContent={newMsgCount} color="primary">
-                  <Avatar
-                    src={userToshow.picture}
-                    sx={{ height: "35px", width: "35px" }}
-                  />
-                </Badge>
-                {isEmpanded && (
-                  <motion.div
-                    style={{ width: "100%" }}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                  >
-                    <h5>
-                      {userToshow.username ||
-                        `${userToshow?.email?.slice(0, 15)}...`}
-                    </h5>
-                    <div className="time-and-lastmsg">
-                      <h6
-                        style={{
-                          color: isDarkTheme ? "white" : "black",
-                          opacity: "50%",
-                        }}
-                      >
-                        {typingEffect === _id ? (
-                          <h4 className="green-typing">Typing...</h4>
-                        ) : (
-                          lastMessage.msg
-                        )}
-                      </h6>
-                      <h6
-                        style={{
-                          color: isDarkTheme ? "white" : "black",
-                          opacity: "50%",
-                        }}
-                      >
-                        {displayTime}
-                      </h6>
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            </MenuItem>
-          );
-        })}
+                <motion.div
+                  className="per-chat-line"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                >
+                  <Badge badgeContent={0} color="primary">
+                    <Avatar
+                      src={picture}
+                      sx={{ height: "35px", width: "35px" }}
+                    />
+                  </Badge>
+                  {isEmpanded && (
+                    <motion.div
+                      style={{ width: "100%" }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <h5>
+                        {title.length < 15
+                          ? title
+                          : `${title?.slice(0, 15)}...`}
+                      </h5>
+                      <div className="time-and-lastmsg">
+                        <h6
+                          style={{
+                            color: isDarkTheme ? "white" : "black",
+                            opacity: "50%",
+                          }}
+                        >
+                          {typingEffect === _id ? (
+                            <h4 className="green-typing">Typing...</h4>
+                          ) : (
+                            lastMessage.msg
+                          )}
+                        </h6>
+                        <h6
+                          style={{
+                            color: isDarkTheme ? "white" : "black",
+                            opacity: "50%",
+                          }}
+                        >
+                          {displayTime}
+                        </h6>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              </MenuItem>
+            );
+          }
+        )}
       </MenuList>
 
       <Menu
@@ -281,91 +294,95 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
         PaperProps={popperProps}
         anchorOrigin={{ horizontal: "right", vertical: "top" }}
       >
+        {/* <Dialog open={isOpen} onClose={() => setOpen(false)}> */}
         <AddNewChat user={user} handleClose={handleClose} />
+        {/* </Dialog> */}
       </Menu>
     </div>
   );
 };
 
 const AddNewChat = memo(({ user, handleClose }) => {
-  const [value, setValue] = useState({});
-  const [defaultOptions, setdefaultOptions] = useState([]);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    members: [],
+  });
 
-  const debouncedLoadOptions = debounce(async (inputValue, callback) => {
-    try {
-      const { response = [] } = await searchEmail(inputValue);
-      const options = response.filter((u) => u._id !== user._id);
+  const handleStartMessage = useCallback(() => {
+    const payload = {
+      messages: [],
+      ...formData,
+      members: formData.members.concat(user),
+      picture: "",
+    };
+    emitter.emit("ADD_NEW_GROUP", payload);
+    handleClose();
+  }, [formData, handleClose, user]);
 
-      callback(options);
-    } catch (error) {
-      console.error("Error fetching options:", error);
-      callback([]);
-    }
-  }, 500);
-
-  const loadOptions = (inputValue, callback) => {
-    debouncedLoadOptions(inputValue, callback);
-  };
-
-  const handleChange = useCallback((val) => setValue(val), []);
-
-  useEffect(() => {
-    async function fetchOptions() {
-      debouncedLoadOptions("", (opts) => {
-        setdefaultOptions(opts);
-      });
-    }
-    fetchOptions();
+  const handleChangeFormData = useCallback((e) => {
+    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
   }, []);
 
-  const handleStartMessage = () => {
-    const payload = { ...value };
-    emitter.emit("ADD_NEW_CHAT", payload);
-  };
+  console.log("formData", formData);
+
+  const handleOnChange = useCallback((data) => {
+    setFormData((p) => ({ ...p, members: data }));
+  }, []);
+
+  const fetchOptions = useCallback(async (searchValue) => {
+    const { response = [] } = await searchEmail(searchValue);
+    return response;
+  }, []);
 
   return (
-    <div className="start-new-chat-container ffffffffffff">
+    <div className="start-new-chat-container">
       <div className="new-chat-header">
-        <h3>Start New Chat</h3>
+        <h3>Create a group</h3>
         <IconButton onClick={handleClose}>
           <Close />
         </IconButton>
       </div>
       <div className="he-20"></div>
-      <AsyncSelect
-        defaultOptions={defaultOptions}
-        // components={{
-        //   Option: CustomOption,
-        // }}
-        getOptionLabel={(o) => {
-          return <CustomOption data={o} />;
-        }}
-        // labelKey="username"
-        value={value}
-        loadOptions={loadOptions}
-        onChange={handleChange}
-        isClearable
-        placeholder="Search..."
-      />
-      {value._id && (
-        <div
-          style={{ display: "flex", justifyContent: "end", paddingTop: "20px" }}
+      <div className="create-edit-group-box">
+        <TextField
+          placeholder="Group name"
+          onChange={handleChangeFormData}
+          value={formData.title}
+          name="title"
+        />
+        <TextField
+          placeholder="Group Description (optional)"
+          onChange={handleChangeFormData}
+          value={formData.description}
+          name="description"
+        />
+        <h4>Group Members</h4>
+        <AsyncSelect
+          fetchOptions={fetchOptions}
+          handleOnChange={handleOnChange}
+          label={"Add member"}
+          CustomOption={CustomOption}
+        />
+      </div>
+
+      <div
+        style={{ display: "flex", justifyContent: "end", paddingTop: "20px" }}
+      >
+        <Button
+          onClick={handleStartMessage}
+          sx={{ alignSelf: "end" }}
+          variant="outlined"
         >
-          <Button
-            onClick={handleStartMessage}
-            sx={{ alignSelf: "end" }}
-            variant="outlined"
-          >
-            Start Messaging
-          </Button>
-        </div>
-      )}
+          Save Group
+        </Button>
+      </div>
     </div>
   );
 });
 const CustomOption = ({ data }) => {
   return (
-    <div className="custom-async-dropdown-option">
+    <div className="custom-async-dropdown-option-group">
       <Avatar src={data.picture} />
       <div className="fsfkfijge">
         <h4>{data.username || data.email}</h4>
@@ -374,7 +391,6 @@ const CustomOption = ({ data }) => {
     </div>
   );
 };
-
 AddNewChat.displayName = "AddNewChat";
 
-export default ChatSideMenu;
+export default GroupSideMenu;

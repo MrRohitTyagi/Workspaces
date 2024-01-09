@@ -72,11 +72,13 @@ const TopNavbar = memo(() => {
           >
             Workspaces
           </Typography>
-          {isLoggedIn && !pathname.includes("/chat") && (
-            <Search>
-              <SearchBar />
-            </Search>
-          )}
+          {isLoggedIn &&
+            !pathname.includes("/chat") &&
+            !pathname.includes("/group") && (
+              <Search>
+                <SearchBar />
+              </Search>
+            )}
           <Box sx={{ flexGrow: 1 }} />
 
           {isLoggedIn && (

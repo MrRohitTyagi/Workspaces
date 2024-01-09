@@ -68,8 +68,7 @@
   height: 20px;
 }
 
-.custom-async-dropdown-option {
-  background-color: white !important;
+.custom-async-dropdown-option-group {
   transition: all 200ms ease;
   height: 50px;
   width: 100%;
@@ -82,9 +81,6 @@
   z-index: 20;
 }
 
-.ffffffffffff .css-1nmdiq5-menu * {
-  background-color: white !important;
-}
 .new-msg-count {
   font-weight: bold;
   display: flex;
@@ -110,6 +106,14 @@
   color: #7aff7a !important;
   opacity: 100%;
 }
+
+/* group css  */
+.create-edit-group-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 @media (max-width: 800px) {
   .add-new-chat-button-cont {
     justify-content: space-between;

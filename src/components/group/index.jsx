@@ -22,9 +22,10 @@ import {
 
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import useWindowDimens from "@/utils/useWindowDimens";
+import { createGroup, getAllGroupsOfUser } from "@/controllers/groupController";
 
 const ChatIndex = () => {
-  const [allChats, setAllChats] = useState([]);
+  const [allGroups, setAllGroups] = useState([]);
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -35,20 +36,22 @@ const ChatIndex = () => {
 
   const params = useParams();
 
-  const fetchAllChats = useCallback(async () => {
-    const { response } = await getAllChatsPerUser(user._id);
-    setAllChats(response || []);
+  const fetchAllGroups = useCallback(async () => {
+    // const { response } = await getAllChatsPerUser(user._id);
+    const { response } = await getAllGroupsOfUser(user._id);
+
+    setAllGroups(response || []);
   }, [user]);
 
   useEffect(() => {
     (async function () {
-      fetchAllChats();
+      fetchAllGroups();
     })();
-  }, [fetchAllChats]);
+  }, [fetchAllGroups]);
 
   const deleteChat = useCallback(
     ({ message_id }) => {
-      setAllChats((prev) => prev.filter((c) => c._id !== message_id));
+      setAllGroups((prev) => prev.filter((c) => c._id !== message_id));
       navigate("/groups/select");
     },
     [navigate]
@@ -57,14 +60,14 @@ const ChatIndex = () => {
   const handleChatSideMenuStatusUpdate = useCallback(
     async (data) => {
       const { message_id } = data || {};
-      const chatAlreadyAdded = allChats.find((c) => c._id === message_id);
+      const chatAlreadyAdded = allGroups.find((c) => c._id === message_id);
       if (!chatAlreadyAdded) {
         const { response: newChat } = await getUserChat(message_id);
-        setAllChats((prev) => [{ ...newChat, newMsgCount: 1 }, ...prev]);
+        setAllGroups((prev) => [{ ...newChat, newMsgCount: 1 }, ...prev]);
         return;
       }
 
-      setAllChats((prev) => {
+      setAllGroups((prev) => {
         let isUserOnDifferentChat = false;
         const chatArr = [];
         for (const chat of prev) {
@@ -82,35 +85,29 @@ const ChatIndex = () => {
         else return prev;
       });
     },
-    [allChats, params]
+    [allGroups, params]
   );
 
-  const addNewChat = useCallback(
-    async (data) => {
-      const alreadyExistedChat = allChats.find(
-        ({ to, from }) => to._id === data._id || from._id === data._id
-      );
-      console.log("data alreadyExistedChat", { data, alreadyExistedChat });
-      const payload = {
-        to: data._id,
-        from: user._id,
-        messages: [],
-      };
-      if (alreadyExistedChat) {
-        navigate(`/chats/${alreadyExistedChat._id}`);
-      } else {
-        const { response } = await newChat(payload);
-        setAllChats((p) => [...p, response]);
-        navigate(`/chats/${response._id}`);
-      }
-      emitter.emit("CLOSE_ADD_NEW_CHAT_POPUP");
+  const addNewGroup = useCallback(
+    async (group) => {
+      const payload = { ...group, members: group.members.map((m) => m._id) };
+      const { response } = await createGroup(payload);
+      console.log(`%c group `, "color: lightblue;border:1px solid lightblue", {
+        group,
+        payload,
+        response,
+      });
+      setAllGroups((p) => [...p, response]);
+      navigate(`/groups/${response._id}`);
+
+      // emitter.emit("CLOSE_ADD_NEW_CHAT_POPUP");
     },
-    [allChats, navigate, user._id]
+    [navigate]
   );
 
   useEffect(() => {
     listenToEvent("DELETE_CHATFROM_SIDEMENU", deleteChat);
-    listenToEvent("ADD_NEW_CHAT", addNewChat);
+    listenToEvent("ADD_NEW_GROUP", addNewGroup);
     listenToEvent("NEW_MESSAGE_RECEIVED", handleChatSideMenuStatusUpdate);
     listenToEvent(
       "HANDLE_NEW_MESSAGE_RECEIVED_FOR_CHAT_SIDEBAR",
@@ -119,21 +116,21 @@ const ChatIndex = () => {
 
     return () => {
       emitter.off("DELETE_CHATFROM_SIDEMENU", deleteChat);
-      emitter.off("ADD_NEW_CHAT", addNewChat);
+      emitter.off("ADD_NEW_GROUP", addNewGroup);
       emitter.off("NEW_MESSAGE_RECEIVED", handleChatSideMenuStatusUpdate);
       emitter.off(
         "HANDLE_NEW_MESSAGE_RECEIVED_FOR_CHAT_SIDEBAR",
         handleChatSideMenuStatusUpdate
       );
     };
-  }, [addNewChat, handleChatSideMenuStatusUpdate, deleteChat]);
+  }, [addNewGroup, handleChatSideMenuStatusUpdate, deleteChat]);
 
   return (
     <div
       className={`chat-main-container ${isDarkTheme ? "chat-cont-dark" : ""}`}
     >
       {innerWidth > 750 && (
-        <GroupSideMenu allChats={allChats} setAllChats={setAllChats} />
+        <GroupSideMenu allGroups={allGroups} setAllGroups={setAllGroups} />
       )}
       <Routes>
         <Route
@@ -142,7 +139,10 @@ const ChatIndex = () => {
             innerWidth > 750 ? (
               <GroupNotSelected />
             ) : (
-              <GroupSideMenu allChats={allChats} setAllChats={setAllChats} />
+              <GroupSideMenu
+                allGroups={allGroups}
+                setAllGroups={setAllGroups}
+              />
             )
           }
         />
