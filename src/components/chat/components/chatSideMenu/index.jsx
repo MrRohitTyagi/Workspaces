@@ -205,7 +205,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
             : "";
 
           // const lastMessage = {msg:'hello'};
-          const userToshow = to._id === user._id ? from : to;
+          const userToshow = (to?._id === user?._id ? from : to) || {};
           return (
             <MenuItem
               key={_id}

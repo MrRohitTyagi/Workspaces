@@ -9,7 +9,6 @@ import Button from "@mui/material/Button";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import {
-  Avatar,
   CircularProgress,
   Divider,
   IconButton,
@@ -20,6 +19,8 @@ import { createUser, getUser } from "@/controllers/userController";
 import { setCookie } from "@/utils/cookieHandler";
 
 import "./loginscreen.css";
+import InputFileUpload from "../coreComponents/InputFileUpload";
+import { uploadImage } from "@/utils/imageupload";
 
 const varients = {
   hidden: { y: -50, opacity: 0 },
@@ -185,6 +186,7 @@ function LoginScreen() {
                     endAdornment: (
                       <InputAdornment>
                         <InputFileUpload
+                          sx={{ marginBottom: "1rem" }}
                           picture={picture}
                           setPicture={setPicture}
                         />
@@ -309,52 +311,5 @@ function LoginScreen() {
     </AnimatePresence>
   );
 }
-import { styled } from "@mui/material/styles";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { uploadImage } from "@/utils/imageupload";
-import PropTypes from "prop-types";
-
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
-
-function InputFileUpload({ picture, setPicture }) {
-  return (
-    <IconButton
-      component="label"
-      variant="contained"
-      size="small"
-      color="success"
-      fullWidth
-    >
-      {picture ? (
-        <Avatar src={URL.createObjectURL(picture)} className="mb1rem" />
-      ) : (
-        <>
-          <h6>Picture ‎ </h6>
-          <CloudUploadIcon />
-        </>
-      )}
-      <VisuallyHiddenInput
-        type="file"
-        onChange={(e) => {
-          setPicture(e?.target?.files?.[0]);
-        }}
-      />
-    </IconButton>
-  );
-}
-InputFileUpload.propTypes = {
-  picture: PropTypes.any,
-  setPicture: PropTypes.func,
-};
 
 export default LoginScreen;

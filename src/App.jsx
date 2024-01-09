@@ -35,7 +35,9 @@ function App() {
   return (
     <ThemeTypeContext.Provider value={{ isDarkTheme }}>
       <div>
-        {(!pathname.includes("/chat") || innerWidth > 750) && <TopNavbar />}
+        {(!pathname.includes("/chat") ||
+          !pathname.includes("/groups") ||
+          innerWidth > 750) && <TopNavbar />}
         {isLoading ? (
           <Loader />
         ) : (

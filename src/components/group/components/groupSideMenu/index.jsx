@@ -9,6 +9,7 @@ import {
   Avatar,
   Badge,
   IconButton,
+  InputAdornment,
   MenuItem,
   MenuList,
   TextField,
@@ -28,6 +29,7 @@ import "./groupSideMenuStyles.css";
 import useWindowDimens from "@/utils/useWindowDimens";
 import LoggedInUserProfile from "@/components/userProfile";
 import AsyncSelect from "@/components/coreComponents/AsyncSelect";
+import InputFileUpload from "@/components/coreComponents/InputFileUpload";
 
 const popperProps = {
   elevation: 1,
@@ -295,14 +297,15 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
         anchorOrigin={{ horizontal: "right", vertical: "top" }}
       >
         {/* <Dialog open={isOpen} onClose={() => setOpen(false)}> */}
-        <AddNewChat user={user} handleClose={handleClose} />
+        <AddNewGroup user={user} handleClose={handleClose} />
         {/* </Dialog> */}
       </Menu>
     </div>
   );
 };
 
-const AddNewChat = memo(({ user, handleClose }) => {
+const AddNewGroup = memo(({ user, handleClose }) => {
+  const [picture, setPicture] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -314,17 +317,15 @@ const AddNewChat = memo(({ user, handleClose }) => {
       messages: [],
       ...formData,
       members: formData.members.concat(user),
-      picture: "",
+      picture,
     };
     emitter.emit("ADD_NEW_GROUP", payload);
     handleClose();
-  }, [formData, handleClose, user]);
+  }, [formData, handleClose, picture, user]);
 
   const handleChangeFormData = useCallback((e) => {
     setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
   }, []);
-
-  console.log("formData", formData);
 
   const handleOnChange = useCallback((data) => {
     setFormData((p) => ({ ...p, members: data }));
@@ -350,6 +351,13 @@ const AddNewChat = memo(({ user, handleClose }) => {
           onChange={handleChangeFormData}
           value={formData.title}
           name="title"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment>
+                <InputFileUpload picture={picture} setPicture={setPicture} />
+              </InputAdornment>
+            ),
+          }}
         />
         <TextField
           placeholder="Group Description (optional)"
@@ -391,6 +399,6 @@ const CustomOption = ({ data }) => {
     </div>
   );
 };
-AddNewChat.displayName = "AddNewChat";
+AddNewGroup.displayName = "AddNewGroup";
 
 export default GroupSideMenu;

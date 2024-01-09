@@ -23,6 +23,7 @@ import {
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import useWindowDimens from "@/utils/useWindowDimens";
 import { createGroup, getAllGroupsOfUser } from "@/controllers/groupController";
+import { uploadImage } from "@/utils/imageupload";
 
 const ChatIndex = () => {
   const [allGroups, setAllGroups] = useState([]);
@@ -90,7 +91,15 @@ const ChatIndex = () => {
 
   const addNewGroup = useCallback(
     async (group) => {
-      const payload = { ...group, members: group.members.map((m) => m._id) };
+      let imageUrl = "";
+      if (group.picture) {
+        imageUrl = await uploadImage(group.picture);
+      }
+      const payload = {
+        ...group,
+        members: group.members.map((m) => m._id),
+        picture: imageUrl,
+      };
       const { response } = await createGroup(payload);
       console.log(`%c group `, "color: lightblue;border:1px solid lightblue", {
         group,

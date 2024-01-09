@@ -25,10 +25,9 @@ import useAuth from "@/utils/useAuth";
 import { ThemeTypeContext } from "@/App";
 import {
   deleteSingleMessage,
-  getUserChat,
   saveEditedMessageController,
-  saveMessages,
 } from "@/controllers/chatController";
+
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
@@ -261,7 +260,7 @@ const GroupWindow = () => {
                   className={isDarkTheme ? "l-t-svg" : "d-t-svg"}
                 />
               </IconButton>
-              <HtmlTooltip
+              {/* <HtmlTooltip
                 TransitionComponent={Zoom}
                 sx={{ cusror: "pointer" }}
                 placement={"bottom"}
@@ -276,11 +275,11 @@ const GroupWindow = () => {
                     <DeleteForeverIcon color="warning" />
                   </IconButton>
                 }
-              >
+              > */}
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
                   <Avatar src={perGroup?.picture} />
                 </motion.div>
-              </HtmlTooltip>
+              {/* </HtmlTooltip> */}
               <div>
                 <h3>{perGroup?.title}</h3>
 
