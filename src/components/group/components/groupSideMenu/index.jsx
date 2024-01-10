@@ -2,7 +2,6 @@
 import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { debounce } from "lodash";
 
 import Button from "@mui/material/Button";
 import {
@@ -39,7 +38,7 @@ const popperProps = {
     mt: 1.5,
   },
 };
-
+let timerId;
 const GroupSideMenu = ({ allGroups, setAllGroups }) => {
   console.log(
     `%c allGroups `,
@@ -78,20 +77,25 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
       setAnchorEl(null);
     }
     listenToEvent("CLOSE_ADD_NEW_CHAT_POPUP", closeLayer);
-    listenToEvent(`SIDE_MENU_TYPING_EFFECT`, ({ chattingTo, chat_id }) => {
-      console.log(
-        `%c chat_id `,
-        "color: green;border:1px solid green",
-        chat_id
-      );
-      setTypingEffect(chat_id);
-      let id = setTimeout(() => {
-        clearTimeout(id);
-        setTypingEffect(null);
-      }, 2000);
-    });
+    listenToEvent(
+      `GROUP_SIDE_MENU_TYPING_EFFECT`,
+      ({ typing_by, group_id }) => {
+        console.log(
+          `%c { typing_by, group_id } `,
+          "color: orange;border:2px dotted oranfe",
+          { typing_by, group_id }
+        );
+        clearTimeout(timerId);
+        setTypingEffect({ typing_by, group_id });
+        timerId = setTimeout(() => {
+          setTypingEffect(null);
+          clearTimeout(timerId);
+        }, 2000);
+      }
+    );
     return () => {
       emitter.off("CLOSE_ADD_NEW_CHAT_POPUP", closeLayer);
+      emitter.off("GROUP_SIDE_MENU_TYPING_EFFECT");
     };
   }, []);
 
@@ -265,8 +269,13 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
                             opacity: "50%",
                           }}
                         >
-                          {typingEffect === _id ? (
-                            <h4 className="green-typing">Typing...</h4>
+                          {typingEffect &&
+                          typingEffect.group_id === _id &&
+                          typingEffect.typing_by !==
+                            (user.username || user.email) ? (
+                            <h4 className="green-typing">
+                              {typingEffect?.typing_by || ""}...
+                            </h4>
                           ) : (
                             lastMessage.msg
                           )}
@@ -315,6 +324,7 @@ const AddNewGroup = memo(({ user, handleClose }) => {
   const handleStartMessage = useCallback(() => {
     const payload = {
       messages: [],
+      admins: [user._id],
       ...formData,
       members: formData.members.concat(user),
       picture,

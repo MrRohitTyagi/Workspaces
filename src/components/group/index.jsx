@@ -14,16 +14,16 @@ import {
 import GroupNotSelected from "./components/groupNotrSelected";
 import useAuth from "@/utils/useAuth";
 
-import {
-  getAllChatsPerUser,
-  getUserChat,
-  newChat,
-} from "@/controllers/chatController";
+import { getUserChat } from "@/controllers/chatController";
 
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import useWindowDimens from "@/utils/useWindowDimens";
 import { createGroup, getAllGroupsOfUser } from "@/controllers/groupController";
 import { uploadImage } from "@/utils/imageupload";
+import { socket } from "../authorizeUser";
+import GroupEdit from "./components/GroupEdit";
+
+let groups;
 
 const ChatIndex = () => {
   const [allGroups, setAllGroups] = useState([]);
@@ -42,12 +42,22 @@ const ChatIndex = () => {
     const { response } = await getAllGroupsOfUser(user._id);
 
     setAllGroups(response || []);
+    return response;
   }, [user]);
 
   useEffect(() => {
     (async function () {
-      fetchAllGroups();
+      groups = await fetchAllGroups();
+      for (const grp of groups) {
+        socket.emit("JOIN_ROOM", grp._id);
+      }
     })();
+    return () => {
+      for (const grp of groups) {
+        socket.emit("LEAVE_ROOM", grp._id);
+      }
+      groups = null;
+    };
   }, [fetchAllGroups]);
 
   const deleteChat = useCallback(
@@ -155,6 +165,7 @@ const ChatIndex = () => {
             )
           }
         />
+        <Route path="/edit/:id" element={<GroupEdit key={pathname} />} />
         <Route path="/:id" element={<GroupWindow key={pathname} />} />
       </Routes>
     </div>

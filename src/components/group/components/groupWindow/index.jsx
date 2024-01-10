@@ -1,14 +1,7 @@
 /* eslint-disable react/prop-types */
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import "./groupWindow.css";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SendIcon from "@mui/icons-material/Send";
@@ -29,6 +22,19 @@ import {
 } from "@/controllers/chatController";
 
 import { emitter, listenToEvent } from "@/utils/eventemitter";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
+
+import Zoom from "@mui/material/Zoom";
+import Loader from "@/components/Loader";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
+import { socket } from "@/components/authorizeUser";
+import { getOneGroup, saveGroupMessage } from "@/controllers/groupController";
+import { startCase } from "lodash";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -41,9 +47,10 @@ const HtmlTooltip = styled(({ className, ...props }) => (
     border: "1px solid #dadde9",
   },
 }));
-
+let timerID;
 const GroupWindow = () => {
   const firstLoadRef = useRef(true);
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [messageInputValue, setMessageInputValue] = useState("");
   const [perGroup, setPerGroup] = useState({});
@@ -53,7 +60,24 @@ const GroupWindow = () => {
   const [deletedMsgs, setdeletedMsgs] = useState([]);
   const [typingEffect, setTypingEffect] = useState(false);
   const { id: group_id } = useParams();
+  const groupMembersRef = useRef({});
   const ref = useRef();
+  const inputRef = useRef();
+
+  // useEffect(() => {
+  //   socket.emit("JOIN_ROOM", group_id);
+  //   return () => {
+  //     socket.emit("LEAVE_ROOM", group_id);
+  //   };
+  // }, [group_id]);
+
+  useEffect(() => {
+    emitter.emit("HIDE_APP_BAR");
+
+    return () => {
+      emitter.emit("HIDE_APP_BAR");
+    };
+  }, []);
 
   const deleteMessage = useCallback(
     (id) => {
@@ -68,22 +92,15 @@ const GroupWindow = () => {
   );
 
   useEffect(() => {
-    emitter.emit("HIDE_APP_BAR");
-    return () => {
-      emitter.emit("HIDE_APP_BAR");
-    };
-  }, []);
-  console.log(
-    `%c perGroup `,
-    "color: yellow;border:1px solid lightgreen",
-    perGroup
-  );
-  useEffect(() => {
     (async function fetchChat() {
       const { response: perGroup } = await getOneGroup(group_id);
-      setPerGroup(perGroup);
+      const obj = {};
+      for (const member of perGroup.members) {
+        obj[member._id] = member;
+      }
+      groupMembersRef.current = obj;
       setMessages(perGroup?.messages || []);
-
+      setPerGroup(perGroup);
       setIsLoading(false);
     })();
   }, [group_id]);
@@ -107,36 +124,39 @@ const GroupWindow = () => {
   }, [messageInputValue, currentUser._id, group_id]);
 
   useEffect(() => {
-    listenToEvent(`NEW_MESSAGE_RECEIVED_${group_id}`, (data) => {
-      setMessages((prev) => [...prev, data.message]);
+    listenToEvent(`NEW_GROUP_MESSAGE_${group_id}`, (message) => {
+      if (message.from === currentUser._id) return;
+      setMessages((prev) => [...prev, message]);
     });
-    listenToEvent(`DELETE_SINGLE_MESSAGE_${group_id}`, (data) => {
-      const { message_id } = data || {};
-      setMessages((prev) => prev.filter((m) => m._id !== message_id));
-    });
-    listenToEvent(`SHOW_TYPING_EFFECT_${group_id}`, () => {
-      setTypingEffect(true);
-      let id = setTimeout(() => {
-        clearTimeout(id);
-        setTypingEffect(false);
+    // listenToEvent(`DELETE_SINGLE_MESSAGE_${group_id}`, (data) => {
+    //   const { message_id } = data || {};
+    //   setMessages((prev) => prev.filter((m) => m._id !== message_id));
+    // });
+    listenToEvent(`SHOW_GROUP_TYPING_EFFECT_${group_id}`, (data) => {
+      const { typing_by } = data;
+      setTypingEffect(typing_by);
+      clearTimeout(timerID);
+      timerID = setTimeout(() => {
+        setTypingEffect(null);
+        clearTimeout(timerID);
       }, 2000);
     });
-    listenToEvent(`EDITED_SINGLE_MESSAGE_${group_id}`, (data) => {
-      const { message_id, msg } = data || {};
-      setMessages((prev) =>
-        prev.map((m) =>
-          m._id === message_id ? { ...m, msg, edited: true } : m
-        )
-      );
-    });
+    // listenToEvent(`EDITED_SINGLE_MESSAGE_${group_id}`, (data) => {
+    //   const { message_id, msg } = data || {};
+    //   setMessages((prev) =>
+    //     prev.map((m) =>
+    //       m._id === message_id ? { ...m, msg, edited: true } : m
+    //     )
+    //   );
+    // });
     return () => {
-      emitter.off(`SIDE_MENU_TYPING_EFFECT`, () => {});
-      emitter.off(`NEW_MESSAGE_RECEIVED_${group_id}`, () => {});
-      emitter.off(`DELETE_SINGLE_MESSAGE_${group_id}`, () => {});
-      emitter.off(`EDITED_SINGLE_MESSAGE_${group_id}`, () => {});
-      emitter.off(`SHOW_TYPING_EFFECT_${group_id}`, () => {});
+      // emitter.off(`SIDE_MENU_TYPING_EFFECT`, () => {});
+      emitter.off(`NEW_GROUP_MESSAGE_${group_id}`, () => {});
+      // emitter.off(`DELETE_SINGLE_MESSAGE_${group_id}`, () => {});
+      // emitter.off(`EDITED_SINGLE_MESSAGE_${group_id}`, () => {});
+      emitter.off(`SHOW_GROUP_TYPING_EFFECT_${group_id}`, () => {});
     };
-  }, [group_id]);
+  }, [currentUser._id, group_id]);
 
   useEffect(() => {
     if (ref.current) {
@@ -212,12 +232,12 @@ const GroupWindow = () => {
   const handleOnchange = useCallback(
     (e) => {
       setMessageInputValue(e.target.value);
-      socket.emit("USER_TYPING", {
-        chattingTo: perGroup._id,
+      socket.emit("GROUP_USER_TYPING", {
+        typing_by: currentUser.username || currentUser.email,
         group_id,
       });
     },
-    [group_id, perGroup._id]
+    [currentUser, group_id]
   );
 
   return (
@@ -276,21 +296,26 @@ const GroupWindow = () => {
                   </IconButton>
                 }
               > */}
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                  <Avatar src={perGroup?.picture} />
-                </motion.div>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                onClick={() => navigate(`groups/edit/${group_id}`)}
+              >
+                <Avatar src={perGroup?.picture} />
+              </motion.div>
               {/* </HtmlTooltip> */}
               <div>
                 <h3>{perGroup?.title}</h3>
 
-                {typingEffect ? (
+                {typingEffect &&
+                typingEffect !== (currentUser.username || currentUser.email) ? (
                   <motion.h4
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     aniini
                     className="typing-effect-text"
                   >
-                    Typing...
+                    {startCase(typingEffect)} is typing...
                   </motion.h4>
                 ) : (
                   <h3 style={{ height: "16px" }} />
@@ -305,6 +330,7 @@ const GroupWindow = () => {
               const isMyMsg = from === currentUser._id;
               return (
                 <MessageTextBox
+                  groupMembersRef={groupMembersRef}
                   handleDoubleClickSelectMessage={
                     handleDoubleClickSelectMessage
                   }
@@ -321,6 +347,7 @@ const GroupWindow = () => {
           </div>
           <div className="send-bar-bottom">
             <OutlinedInput
+              ref={inputRef}
               className="send-message-input"
               placeholder="Type Here ..."
               onKeyDown={(e) => {
@@ -354,18 +381,6 @@ const GroupWindow = () => {
     </div>
   );
 };
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
-
-import Zoom from "@mui/material/Zoom";
-import Loader from "@/components/Loader";
-import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "react-toastify";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
-import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import { socket } from "@/components/authorizeUser";
-import { getOneGroup, saveGroupMessage } from "@/controllers/groupController";
 const MessageTextBox = ({
   isMyMsg,
   isDarkTheme,
@@ -374,6 +389,7 @@ const MessageTextBox = ({
   deleteEditMessage,
   handleDoubleClickSelectMessage,
   saveEditedMessage,
+  groupMembersRef,
 }) => {
   const [value, setvalue] = useState("");
   useEffect(() => {
@@ -384,6 +400,13 @@ const MessageTextBox = ({
   const displayTime = `${time.getHours()}:${time.getMinutes()} ${
     time.getHours() > 12 ? "PM" : "AM"
   }`;
+  const message_bottom_text = isMyMsg
+    ? displayTime
+    : `${displayTime} - @${
+        groupMembersRef?.current?.[message?.from]?.username ||
+        groupMembersRef?.current?.[message?.from]?.email ||
+        ""
+      }`;
   const handleSelect = useCallback(() => {
     handleDoubleClickSelectMessage(message);
   }, [handleDoubleClickSelectMessage, message]);
@@ -463,7 +486,7 @@ const MessageTextBox = ({
                 className="message-timestamp"
                 style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
               >
-                {message.edited ? "Edited  " : null} {displayTime}
+                {message.edited ? "Edited  " : null} {message_bottom_text}
               </div>
             </motion.div>
           </HtmlTooltip>
@@ -487,7 +510,7 @@ const MessageTextBox = ({
               className="message-timestamp"
               style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
             >
-              {displayTime} {message.edited ? "  Edited" : null}
+              {message_bottom_text} {message.edited ? "  Edited" : null}
             </div>
           </motion.div>
         )}

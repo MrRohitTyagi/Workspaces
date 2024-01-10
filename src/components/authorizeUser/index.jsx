@@ -30,7 +30,7 @@ const Authorize = memo(({ children }) => {
       window.socket_id = id;
       socket.emit("SAVE_SOCKET_ID", user_id);
     });
-    
+
     //new chat message
     socket.on("NEW_MESSAGE_RECEIVED", (data) => {
       const { message_id } = data || {};
@@ -49,6 +49,7 @@ const Authorize = memo(({ children }) => {
       const { chat_id } = data || {};
       emitter.emit(`EDITED_SINGLE_MESSAGE_${chat_id}`, data);
     });
+
     socket.on("SHOW_TYPING_EFFECT", (data) => {
       const { chat_id } = data || {};
       emitter.emit(`SHOW_TYPING_EFFECT_${chat_id}`, data);
@@ -59,6 +60,18 @@ const Authorize = memo(({ children }) => {
     socket.on("NEW_EMAIL_RECEIVED", (email) => {
       emitter.emit("INCREASE_NEW_EMAIL_COUNT");
       emitter.emit("NEW_EMAIL_RECEIVED", email);
+    });
+
+    //GROUP SOCKETS
+
+    socket.on("SHOW_GROUP_TYPING_EFFECT", (data) => {
+      const { group_id } = data || {};
+      emitter.emit(`SHOW_GROUP_TYPING_EFFECT_${group_id}`, data);
+      emitter.emit("GROUP_SIDE_MENU_TYPING_EFFECT", data);
+    });
+    socket.on("NEW_GROUP_MESSAGE", (data) => {
+      const { group_id, message } = data || {};
+      emitter.emit(`NEW_GROUP_MESSAGE_${group_id}`, message);
     });
 
     return () => {

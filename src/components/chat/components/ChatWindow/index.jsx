@@ -42,7 +42,7 @@ const HtmlTooltip = styled(({ className, ...props }) => (
     border: "1px solid #dadde9",
   },
 }));
-
+let timerId;
 const ChatWindow = () => {
   const firstLoadRef = useRef(true);
   const [messages, setMessages] = useState([]);
@@ -123,9 +123,10 @@ const ChatWindow = () => {
     });
     listenToEvent(`SHOW_TYPING_EFFECT_${chat_id}`, (e) => {
       setTypingEffect(true);
-      let id = setTimeout(() => {
-        clearTimeout(id);
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
         setTypingEffect(false);
+        clearTimeout(timerId);
       }, 2000);
     });
     listenToEvent(`EDITED_SINGLE_MESSAGE_${chat_id}`, (data) => {
