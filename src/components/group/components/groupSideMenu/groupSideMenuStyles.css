@@ -103,7 +103,11 @@
   justify-content: space-between;
 }
 .green-typing {
-  color: #7aff7a !important;
+  color: #063206 !important;
+  opacity: 100%;
+}
+.green-typing-dark {
+  color: #00fc00 !important;
   opacity: 100%;
 }
 

@@ -4,17 +4,9 @@ import { ThemeTypeContext } from "@/App";
 import "./groupStyles.css";
 import GroupSideMenu from "./components/groupSideMenu";
 import GroupWindow from "./components/groupWindow";
-import {
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import GroupNotSelected from "./components/groupNotrSelected";
 import useAuth from "@/utils/useAuth";
-
-import { getUserChat } from "@/controllers/chatController";
 
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import useWindowDimens from "@/utils/useWindowDimens";
@@ -22,10 +14,11 @@ import { createGroup, getAllGroupsOfUser } from "@/controllers/groupController";
 import { uploadImage } from "@/utils/imageupload";
 import { socket } from "../authorizeUser";
 import GroupEdit from "./components/GroupEdit";
+import { toast } from "react-toastify";
 
 let groups;
 
-const ChatIndex = () => {
+const GroupIndex = () => {
   const [allGroups, setAllGroups] = useState([]);
 
   const navigate = useNavigate();
@@ -34,8 +27,6 @@ const ChatIndex = () => {
   const { user } = useAuth();
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const innerWidth = useWindowDimens();
-
-  const params = useParams();
 
   const fetchAllGroups = useCallback(async () => {
     // const { response } = await getAllChatsPerUser(user._id);
@@ -60,45 +51,6 @@ const ChatIndex = () => {
     };
   }, [fetchAllGroups]);
 
-  const deleteChat = useCallback(
-    ({ message_id }) => {
-      setAllGroups((prev) => prev.filter((c) => c._id !== message_id));
-      navigate("/groups/select");
-    },
-    [navigate]
-  );
-
-  const handleChatSideMenuStatusUpdate = useCallback(
-    async (data) => {
-      const { message_id } = data || {};
-      const chatAlreadyAdded = allGroups.find((c) => c._id === message_id);
-      if (!chatAlreadyAdded) {
-        const { response: newChat } = await getUserChat(message_id);
-        setAllGroups((prev) => [{ ...newChat, newMsgCount: 1 }, ...prev]);
-        return;
-      }
-
-      setAllGroups((prev) => {
-        let isUserOnDifferentChat = false;
-        const chatArr = [];
-        for (const chat of prev) {
-          if (chat._id === message_id) {
-            let obj = chat;
-            if (params?.["*"] !== obj._id) {
-              isUserOnDifferentChat = true;
-              obj.newMsgCount = (obj.newMsgCount ?? 0) + 1;
-            }
-            chatArr.push(obj);
-          } else chatArr.push(chat);
-        }
-
-        if (isUserOnDifferentChat) return chatArr;
-        else return prev;
-      });
-    },
-    [allGroups, params]
-  );
-
   const addNewGroup = useCallback(
     async (group) => {
       let imageUrl = "";
@@ -111,38 +63,35 @@ const ChatIndex = () => {
         picture: imageUrl,
       };
       const { response } = await createGroup(payload);
-      console.log(`%c group `, "color: lightblue;border:1px solid lightblue", {
-        group,
-        payload,
-        response,
-      });
       setAllGroups((p) => [...p, response]);
       navigate(`/groups/${response._id}`);
 
       // emitter.emit("CLOSE_ADD_NEW_CHAT_POPUP");
+      toast.info("New group added");
     },
     [navigate]
   );
 
   useEffect(() => {
-    listenToEvent("DELETE_CHATFROM_SIDEMENU", deleteChat);
+    listenToEvent("U_GOT_ADDED_IN_A_GROUP", (data) => {
+      toast.info("New group added");
+      setAllGroups((p) => [...p, data]);
+    });
     listenToEvent("ADD_NEW_GROUP", addNewGroup);
-    listenToEvent("NEW_MESSAGE_RECEIVED", handleChatSideMenuStatusUpdate);
-    listenToEvent(
-      "HANDLE_NEW_MESSAGE_RECEIVED_FOR_CHAT_SIDEBAR",
-      handleChatSideMenuStatusUpdate
-    );
+
+    listenToEvent("GROUP_DELETED_BY_ADMIN", ({ group_id }) => {
+      setAllGroups((p) => p.filter((g) => g._id !== group_id));
+      navigate("/groups/select");
+      toast.info("Group deleted by admin");
+    });
 
     return () => {
-      emitter.off("DELETE_CHATFROM_SIDEMENU", deleteChat);
+      emitter.off("U_GOT_ADDED_IN_A_GROUP", () => {});
+      emitter.off("DELETE_GROUP", () => {});
+      emitter.off("GROUP_DELETED_BY_ADMIN", () => {});
       emitter.off("ADD_NEW_GROUP", addNewGroup);
-      emitter.off("NEW_MESSAGE_RECEIVED", handleChatSideMenuStatusUpdate);
-      emitter.off(
-        "HANDLE_NEW_MESSAGE_RECEIVED_FOR_CHAT_SIDEBAR",
-        handleChatSideMenuStatusUpdate
-      );
     };
-  }, [addNewGroup, handleChatSideMenuStatusUpdate, deleteChat]);
+  }, [addNewGroup]);
 
   return (
     <div
@@ -165,11 +114,14 @@ const ChatIndex = () => {
             )
           }
         />
-        <Route path="/edit/:id" element={<GroupEdit key={pathname} />} />
+        <Route
+          path="/edit/:id"
+          element={<GroupEdit key={pathname} allGroups={allGroups} />}
+        />
         <Route path="/:id" element={<GroupWindow key={pathname} />} />
       </Routes>
     </div>
   );
 };
 
-export default ChatIndex;
+export default GroupIndex;

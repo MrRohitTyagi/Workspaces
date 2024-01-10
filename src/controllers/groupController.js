@@ -16,3 +16,11 @@ export const saveGroupMessage = async (payload) => {
   const { data } = await caller("put", "group/save-group-message", payload);
   return data;
 };
+export const deleteGroup = async (id) => {
+  const { data } = await caller("delete", `group/delete/${id}`);
+  return data;
+};
+export const updateGroup = async (payload) => {
+  const { data } = await caller("put", "group/update", payload);
+  return data;
+};

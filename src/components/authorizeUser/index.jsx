@@ -73,6 +73,12 @@ const Authorize = memo(({ children }) => {
       const { group_id, message } = data || {};
       emitter.emit(`NEW_GROUP_MESSAGE_${group_id}`, message);
     });
+    socket.on("U_GOT_ADDED_IN_A_GROUP", (data) => {
+      emitter.emit(`U_GOT_ADDED_IN_A_GROUP`, data);
+    });
+    socket.on("GROUP_DELETED_BY_ADMIN", (data) => {
+      emitter.emit(`GROUP_DELETED_BY_ADMIN`, data);
+    });
 
     return () => {
       socket.disconnect(user_id);

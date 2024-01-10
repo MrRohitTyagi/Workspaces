@@ -299,7 +299,7 @@ const GroupWindow = () => {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                onClick={() => navigate(`groups/edit/${group_id}`)}
+                onClick={() => navigate(`/groups/edit/${group_id}`)}
               >
                 <Avatar src={perGroup?.picture} />
               </motion.div>

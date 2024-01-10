@@ -3,14 +3,13 @@ import * as React from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { debounce } from "@mui/material/utils";
-import { searchEmail } from "@/controllers/emailController";
-import { Avatar } from "@mui/material";
 
 export default function AsyncSelect({
   handleOnChange,
   label,
   fetchOptions,
   CustomOption,
+  filterConfig,
 }) {
   const [value, setValue] = React.useState([]);
   const [inputValue, setInputValue] = React.useState("");
@@ -19,10 +18,14 @@ export default function AsyncSelect({
   const getData = React.useMemo(
     () =>
       debounce(async (inputValue = "", callback) => {
-        const res = await fetchOptions(inputValue);
+        let res = await fetchOptions(inputValue);
+        if (filterConfig) {
+          const { key, value } = filterConfig || {};
+          res = res.filter((o) => o[key] !== value);
+        }
         callback(res);
       }, 400),
-    [fetchOptions]
+    [fetchOptions, filterConfig]
   );
 
   React.useEffect(() => {

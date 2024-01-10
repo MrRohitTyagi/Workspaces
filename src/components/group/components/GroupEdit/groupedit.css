@@ -1,0 +1,11 @@
+.group-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 5%;
+  width: 100%;
+  align-items: center;
+}
+.grp-edit-members-box {
+  width: 100%;
+}

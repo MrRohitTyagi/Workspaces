@@ -1,5 +1,12 @@
 /* eslint-disable react/prop-types */
-import { memo, useCallback, useContext, useEffect, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -49,11 +56,11 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
 
   const [isEmpanded, setIsEmpanded] = useState(true);
   const { ...params } = useParams();
-  const message_id = params?.["*"];
+  const group_id = params?.["*"];
 
   const { user } = useAuth();
   const { isDarkTheme } = useContext(ThemeTypeContext);
-  const [activeUser, setActiveUser] = useState(message_id || null);
+  const [activeUser, setActiveUser] = useState(group_id || null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [typingEffect, setTypingEffect] = useState(false);
 
@@ -61,8 +68,8 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setActiveUser(message_id);
-  }, [message_id]);
+    setActiveUser(group_id);
+  }, [group_id]);
 
   const handleOpen = (event) => {
     // setOpen(true);
@@ -76,7 +83,7 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
     function closeLayer() {
       setAnchorEl(null);
     }
-    listenToEvent("CLOSE_ADD_NEW_CHAT_POPUP", closeLayer);
+    // listenToEvent("CLOSE_ADD_NEW_CHAT_POPUP", closeLayer);
     listenToEvent(
       `GROUP_SIDE_MENU_TYPING_EFFECT`,
       ({ typing_by, group_id }) => {
@@ -270,10 +277,17 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
                           }}
                         >
                           {typingEffect &&
+                          typingEffect.group_id !== group_id &&
                           typingEffect.group_id === _id &&
                           typingEffect.typing_by !==
                             (user.username || user.email) ? (
-                            <h4 className="green-typing">
+                            <h4
+                              className={
+                                isDarkTheme
+                                  ? "green-typing-dark"
+                                  : "green-typing"
+                              }
+                            >
                               {typingEffect?.typing_by || ""}...
                             </h4>
                           ) : (
@@ -324,6 +338,7 @@ const AddNewGroup = memo(({ user, handleClose }) => {
   const handleStartMessage = useCallback(() => {
     const payload = {
       messages: [],
+      createdBy: user._id,
       admins: [user._id],
       ...formData,
       members: formData.members.concat(user),
@@ -346,6 +361,9 @@ const AddNewGroup = memo(({ user, handleClose }) => {
     return response;
   }, []);
 
+  const filter = useMemo(() => {
+    return { key: "_id", value: user._id };
+  }, [user._id]);
   return (
     <div className="start-new-chat-container">
       <div className="new-chat-header">
@@ -377,6 +395,7 @@ const AddNewGroup = memo(({ user, handleClose }) => {
         />
         <h4>Group Members</h4>
         <AsyncSelect
+          filterConfig={filter}
           fetchOptions={fetchOptions}
           handleOnChange={handleOnChange}
           label={"Add member"}
