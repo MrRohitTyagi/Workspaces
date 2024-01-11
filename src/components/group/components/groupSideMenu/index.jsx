@@ -36,6 +36,7 @@ import useWindowDimens from "@/utils/useWindowDimens";
 import LoggedInUserProfile from "@/components/userProfile";
 import AsyncSelect from "@/components/coreComponents/AsyncSelect";
 import InputFileUpload from "@/components/coreComponents/InputFileUpload";
+import { toast } from "react-toastify";
 
 const popperProps = {
   elevation: 1,
@@ -324,7 +325,7 @@ const AddNewGroup = memo(({ user, handleClose }) => {
     members: [],
   });
 
-  const handleStartMessage = useCallback(() => {
+  const handleStartGroup = useCallback(() => {
     const payload = {
       messages: [],
       createdBy: user._id,
@@ -333,6 +334,10 @@ const AddNewGroup = memo(({ user, handleClose }) => {
       members: formData.members.concat(user),
       picture,
     };
+    if (!payload.title) {
+      toast.error("Group Name is required");
+      return;
+    }
     emitter.emit("ADD_NEW_GROUP", payload);
     handleClose();
   }, [formData, handleClose, picture, user]);
@@ -396,7 +401,7 @@ const AddNewGroup = memo(({ user, handleClose }) => {
         style={{ display: "flex", justifyContent: "end", paddingTop: "20px" }}
       >
         <Button
-          onClick={handleStartMessage}
+          onClick={handleStartGroup}
           sx={{ alignSelf: "end" }}
           variant="outlined"
         >

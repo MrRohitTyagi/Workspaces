@@ -1,5 +1,6 @@
 .group-edit-container {
   display: flex;
+  position: relative;
   flex-direction: column;
   gap: 10px;
   padding: 5%;
@@ -8,4 +9,15 @@
 }
 .grp-edit-members-box {
   width: 100%;
+}
+.group-info-back {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+.new-added-members {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
 }

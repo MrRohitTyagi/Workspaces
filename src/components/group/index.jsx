@@ -84,6 +84,10 @@ const GroupIndex = memo(() => {
       navigate("/groups/select");
       toast.info("Group deleted by admin");
     });
+    listenToEvent("GROUP_LEFT_BY_USER", ({ group_id }) => {
+      setAllGroups((p) => p.filter((g) => g._id !== group_id));
+      navigate("/groups/select");
+    });
 
     return () => {
       emitter.off("U_GOT_ADDED_IN_A_GROUP", () => {});

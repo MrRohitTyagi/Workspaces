@@ -281,7 +281,10 @@ const GroupWindow = memo(() => {
                 marginLeft: "20px",
               }}
             >
-              <IconButton size="small" onClick={() => window.history.back()}>
+              <IconButton
+                size="small"
+                onClick={() => navigate("/groups/select")}
+              >
                 <ArrowBackIcon
                   className={isDarkTheme ? "l-t-svg" : "d-t-svg"}
                 />

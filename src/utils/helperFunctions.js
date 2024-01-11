@@ -33,3 +33,14 @@ export function truncateText(text, maxLength) {
 
   return text;
 }
+export function formatCustomDate(dateString) {
+  const dateInstance = new Date(dateString);
+
+  const options = { day: "numeric", month: "short", year: "numeric" };
+  const formattedDate = new Intl.DateTimeFormat("in", options).format(
+    dateInstance
+  );
+
+  const parts = formattedDate.split(" ");
+  return `${parts[0]}-${parts[1].toLowerCase()}-${parts[2]}`.replace(",", "");
+}
