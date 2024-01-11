@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { Avatar, IconButton } from "@mui/material";
 
 import { emitter } from "@/utils/eventemitter";
 import useAuth from "@/utils/useAuth";
 
-function LoggedInUserProfile() {
+const LoggedInUserProfile = memo(() => {
   const { user } = useAuth();
 
   return (
@@ -16,5 +17,6 @@ function LoggedInUserProfile() {
       <Avatar src={user?.picture} />
     </IconButton>
   );
-}
+});
+LoggedInUserProfile.displayName = "LoggedInUserProfile";
 export default LoggedInUserProfile;

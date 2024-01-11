@@ -12,6 +12,10 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 
 import { createEmail, searchEmail } from "@/controllers/emailController";
+import AsyncSelect from "react-select/async";
+
+import { debounce, isEmpty } from "lodash";
+import { multiupload } from "@/utils/imageupload";
 
 import "./componeEmail.css";
 
@@ -29,221 +33,224 @@ const validationSchema = Yup.object().shape({
     .required("Recipients are required"),
 });
 
-const EmailDialogue = ({
-  open,
-  user,
-  email,
-  setNewEmailsToSend,
-  filterEmails,
-}) => {
-  const [formData, setFormData] = useState({
-    ...email,
-  });
+const EmailDialogue = memo(
+  ({ open, user, email, setNewEmailsToSend, filterEmails }) => {
+    const [formData, setFormData] = useState({
+      ...email,
+    });
 
-  const [attachments, setAttachments] = useState(email.attachments || []);
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+    const [attachments, setAttachments] = useState(email.attachments || []);
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const validateForm = async () => {
+    useEffect(() => {
+      const validateForm = async () => {
+        try {
+          await validationSchema.validate(formData, { abortEarly: false });
+          setErrors({});
+        } catch (error) {
+          const newErrors = {};
+          error.inner.forEach((e) => {
+            newErrors[e.path] = e.message;
+          });
+          setErrors(newErrors);
+        }
+      };
+
+      validateForm();
+    }, [formData]);
+
+    const handleClose = useCallback(() => {
+      setNewEmailsToSend((prev) => {
+        let arr = [];
+        for (let i = 0; i < prev.length; i++) {
+          const perEmail = prev[i];
+          if (perEmail.id !== email.id) {
+            arr.push(perEmail);
+          }
+        }
+        return [...arr];
+      });
+    }, [email.id, setNewEmailsToSend]);
+
+    const handleChange = useCallback(
+      (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      },
+      [formData]
+    );
+
+    const onSubmit = async (e) => {
       try {
-        await validationSchema.validate(formData, { abortEarly: false });
-        setErrors({});
+        e.preventDefault();
+        if (!isEmpty(errors)) return;
+        setIsSubmitting(true);
+        const { email: sender } = user;
+
+        const { body, subject, to, id } = formData;
+
+        let imgUrlsArr = [];
+        if (attachments.length > 0) {
+          imgUrlsArr = await multiupload(attachments);
+        }
+
+        const payload = {
+          sender,
+          body,
+          subject,
+          recipients: to.map((e) => e.value),
+          archivedBy: [],
+          starredBy: [],
+          attachments: imgUrlsArr,
+        };
+        await createEmail(payload);
+        filterEmails(id);
+        handleClose();
+        toast.success(`Email Sent!`);
+        setIsSubmitting(false);
       } catch (error) {
-        const newErrors = {};
-        error.inner.forEach((e) => {
-          newErrors[e.path] = e.message;
-        });
-        setErrors(newErrors);
+        setIsSubmitting(false);
+        console.log("error", error);
+      } finally {
+        setIsSubmitting(false);
       }
     };
 
-    validateForm();
-  }, [formData]);
+    const handleRecipientsOnchange = useCallback((val) => {
+      setFormData((prev) => {
+        return { ...prev, to: val };
+      });
+    }, []);
 
-  const handleClose = useCallback(() => {
-    setNewEmailsToSend((prev) => {
-      let arr = [];
-      for (let i = 0; i < prev.length; i++) {
-        const perEmail = prev[i];
-        if (perEmail.id !== email.id) {
-          arr.push(perEmail);
-        }
-      }
-      return [...arr];
-    });
-  }, [email.id, setNewEmailsToSend]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  const onSubmit = async (e) => {
-    try {
-      e.preventDefault();
-      if (!isEmpty(errors)) return;
-      setIsSubmitting(true);
-      const { email: sender } = user;
-
-      const { body, subject, to, id } = formData;
-
-      let imgUrlsArr = [];
-      if (attachments.length > 0) {
-        imgUrlsArr = await multiupload(attachments);
-      }
-
-      const payload = {
-        sender,
-        body,
-        subject,
-        recipients: to.map((e) => e.value),
-        archivedBy: [],
-        starredBy: [],
-        attachments: imgUrlsArr,
-      };
-      await createEmail(payload);
-      filterEmails(id);
-      handleClose();
-      toast.success(`Email Sent!`);
-      setIsSubmitting(false);
-    } catch (error) {
-      setIsSubmitting(false);
-      console.log("error", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRecipientsOnchange = useCallback((val) => {
-    setFormData((prev) => {
-      return { ...prev, to: val };
-    });
-  }, []);
-
-  const removeAttachment = useCallback((index) => {
-    setAttachments((p) => {
-      return p.filter((_, i) => i !== index);
-    });
-  }, []);
-  const hasBodyErr = touched["body"] && errors["body"];
-  return (
-    <Dialog open={open} onClose={handleClose}>
-      <div className="new-email-form-box">
-        <div className="heading-new">
-          <h4>New Message</h4>
-          <Button onClick={handleClose}>
-            <CloseIcon />
-          </Button>
-        </div>
-        <div className="form-container">
-          <form onSubmit={onSubmit}>
-            <div className="form-email">
-              <CustomSelect
-                disabled={isSubmitting}
-                errors={errors}
-                setTouched={setTouched}
-                touched={touched}
-                to={formData.to || []}
-                handleRecipientsOnchange={handleRecipientsOnchange}
-              />
-              <TextField
-                disabled={isSubmitting}
-                onBlur={() =>
-                  !touched["subject"] &&
-                  setTouched((p) => ({ ...p, subject: true }))
-                }
-                error={touched["subject"] && errors["subject"]}
-                helperText={touched["subject"] && errors["subject"]}
-                size="small"
-                value={formData.subject}
-                onChange={handleChange}
-                sx={{ width: "100%", borderBottom: "1px solid rgba()" }}
-                placeholder="Subject"
-                id="subject"
-                name="subject"
-              />
-              <StyledTextArea
-                disabled={isSubmitting}
-                onBlur={() =>
-                  !touched["body"] && setTouched((p) => ({ ...p, body: true }))
-                }
-                error={touched["body"] && errors["body"]}
-                helperText={touched["body"] && errors["body"]}
-                onFocus={(e) => (e.target.style.outline = "none")}
-                value={formData.body}
-                onChange={handleChange}
-                minRows={2}
-                name="body"
-                sx={{
-                  padding: "15px",
-                  width: "100%",
-                  height: "300px",
-                  border: "none",
-                  boxShadow: "none",
-                }}
-                placeholder="Body"
-                id="body"
-              />
-              {hasBodyErr && (
-                <div className="error-line">Recipients are required</div>
-              )}
-              <div className="new-email-submit-button">
-                <Button
+    const removeAttachment = useCallback((index) => {
+      setAttachments((p) => {
+        return p.filter((_, i) => i !== index);
+      });
+    }, []);
+    const hasBodyErr = touched["body"] && errors["body"];
+    return (
+      <Dialog open={open} onClose={handleClose}>
+        <div className="new-email-form-box">
+          <div className="heading-new">
+            <h4>New Message</h4>
+            <Button onClick={handleClose}>
+              <CloseIcon />
+            </Button>
+          </div>
+          <div className="form-container">
+            <form onSubmit={onSubmit}>
+              <div className="form-email">
+                <CustomSelect
                   disabled={isSubmitting}
-                  sx={{ alignSelf: "center" }}
-                  type="submit"
-                  variant="contained"
-                  endIcon={
-                    isSubmitting ? (
-                      <CircularProgress className="close-svg" size={"small"} />
-                    ) : (
-                      <SendIcon />
-                    )
-                  }
-                >
-                  {isSubmitting ? <>{"  Sending .."}</> : " Send"}
-                </Button>
-                <InputFileUpload
-                  isSubmitting={isSubmitting}
-                  attachments={attachments}
-                  setAttachments={setAttachments}
+                  errors={errors}
+                  setTouched={setTouched}
+                  touched={touched}
+                  to={formData.to || []}
+                  handleRecipientsOnchange={handleRecipientsOnchange}
                 />
-              </div>
-              <div
-                className="attachments-cont"
-                style={{ minHeight: attachments.length > 0 ? "70px" : "0px" }}
-              >
-                {attachments.map((item, i) => (
-                  <div className="image-container" key={i + "gfkgjfd"}>
-                    {console.log("item", item)}
-                    <img
-                      className="image-upload-per-email"
-                      height={"50px"}
-                      width={"50px"}
-                      src={
-                        typeof item === "string"
-                          ? item
-                          : URL.createObjectURL(item)
-                      }
-                      alt={"img"}
-                      loading="lazy"
-                    />
-                    <div
-                      onClick={() => removeAttachment(i)}
-                      className="close-button"
-                    >
-                      <CloseIcon className="close-svg" />
+                <TextField
+                  disabled={isSubmitting}
+                  onBlur={() =>
+                    !touched["subject"] &&
+                    setTouched((p) => ({ ...p, subject: true }))
+                  }
+                  error={touched["subject"] && errors["subject"]}
+                  helperText={touched["subject"] && errors["subject"]}
+                  size="small"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  sx={{ width: "100%", borderBottom: "1px solid rgba()" }}
+                  placeholder="Subject"
+                  id="subject"
+                  name="subject"
+                />
+                <StyledTextArea
+                  disabled={isSubmitting}
+                  onBlur={() =>
+                    !touched["body"] &&
+                    setTouched((p) => ({ ...p, body: true }))
+                  }
+                  error={touched["body"] && errors["body"]}
+                  helperText={touched["body"] && errors["body"]}
+                  onFocus={(e) => (e.target.style.outline = "none")}
+                  value={formData.body}
+                  onChange={handleChange}
+                  minRows={2}
+                  name="body"
+                  sx={{
+                    padding: "15px",
+                    width: "100%",
+                    height: "300px",
+                    border: "none",
+                    boxShadow: "none",
+                  }}
+                  placeholder="Body"
+                  id="body"
+                />
+                {hasBodyErr && (
+                  <div className="error-line">Recipients are required</div>
+                )}
+                <div className="new-email-submit-button">
+                  <Button
+                    disabled={isSubmitting}
+                    sx={{ alignSelf: "center" }}
+                    type="submit"
+                    variant="contained"
+                    endIcon={
+                      isSubmitting ? (
+                        <CircularProgress
+                          className="close-svg"
+                          size={"small"}
+                        />
+                      ) : (
+                        <SendIcon />
+                      )
+                    }
+                  >
+                    {isSubmitting ? <>{"  Sending .."}</> : " Send"}
+                  </Button>
+                  <InputFileUpload
+                    isSubmitting={isSubmitting}
+                    attachments={attachments}
+                    setAttachments={setAttachments}
+                  />
+                </div>
+                <div
+                  className="attachments-cont"
+                  style={{ minHeight: attachments.length > 0 ? "70px" : "0px" }}
+                >
+                  {attachments.map((item, i) => (
+                    <div className="image-container" key={i + "gfkgjfd"}>
+                      <img
+                        className="image-upload-per-email"
+                        height={"50px"}
+                        width={"50px"}
+                        src={
+                          typeof item === "string"
+                            ? item
+                            : URL.createObjectURL(item)
+                        }
+                        alt={"img"}
+                        loading="lazy"
+                      />
+                      <div
+                        onClick={() => removeAttachment(i)}
+                        className="close-button"
+                      >
+                        <CloseIcon className="close-svg" />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
-      </div>
-    </Dialog>
-  );
-};
+      </Dialog>
+    );
+  }
+);
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -256,7 +263,7 @@ const VisuallyHiddenInput = styled("input")({
   whiteSpace: "nowrap",
   width: 1,
 });
-function InputFileUpload({ setAttachments, isSubmitting }) {
+const InputFileUpload = memo(({ setAttachments, isSubmitting }) => {
   const ref = useRef();
 
   return (
@@ -286,11 +293,7 @@ function InputFileUpload({ setAttachments, isSubmitting }) {
       />
     </>
   );
-}
-import AsyncSelect from "react-select/async";
-
-import { debounce, isEmpty } from "lodash";
-import { multiupload } from "@/utils/imageupload";
+});
 
 const CustomSelect = memo(
   ({
@@ -319,9 +322,12 @@ const CustomSelect = memo(
       }
     }, 500);
 
-    const loadOptions = (inputValue, callback) => {
-      debouncedLoadOptions(inputValue, callback);
-    };
+    const loadOptions = useCallback(
+      (inputValue, callback) => {
+        debouncedLoadOptions(inputValue, callback);
+      },
+      [debouncedLoadOptions]
+    );
 
     const handleChange = useCallback(
       (selectedValues) => {
@@ -374,6 +380,8 @@ CustomSelect.propTypes = {
   disabled: PropTypes.bool,
 };
 
+InputFileUpload.displayName = "InputFileUpload";
+EmailDialogue.displayName = "EmailDialogue";
 CustomSelect.displayName = "CustomSelect";
 
 export default EmailDialogue;

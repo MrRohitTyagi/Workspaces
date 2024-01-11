@@ -1,4 +1,8 @@
+import { motion } from "framer-motion";
+import { memo, useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 /* eslint-disable react/prop-types */
+
 import {
   Avatar,
   Button,
@@ -7,14 +11,17 @@ import {
   MenuItem,
   MenuList,
 } from "@mui/material";
-import "./groupedit.css";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import useAuth from "@/utils/useAuth";
 import Menu from "@mui/material/Menu";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SettingsIcon from "@mui/icons-material/Settings";
-const GroupEdit = ({ allGroups }) => {
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+
+import useAuth from "@/utils/useAuth";
+import { updateGroup } from "@/controllers/groupController";
+import "./groupedit.css";
+
+const GroupEdit = memo(({ allGroups }) => {
   const { id: group_id } = useParams();
   const { user } = useAuth();
   const [perGroup, setperGroup] = useState({});
@@ -22,21 +29,29 @@ const GroupEdit = ({ allGroups }) => {
   useEffect(() => {
     let grp = allGroups.find((g) => g._id === group_id) || {};
     if (!grp._id) return;
-    console.log("grp", grp);
     grp.members = grp.members.reverse();
     setperGroup(grp);
   }, [allGroups, group_id]);
 
-  const deleteGroup = () => {
+  const deleteGroup = useCallback(() => {
     updateGroup({
       type: "DELETE_GROUP",
       group_id: perGroup._id,
     });
-    // emitter.emit("DELETE_GROUP", { group_id });
-  };
+  }, [perGroup._id]);
+
   return (
     <div className="group-edit-container">
-      <Avatar src={perGroup.picture} sx={{ height: "150px", width: "150px" }} />
+      <motion.div
+        initial={{ scale: 0, y: -100 }}
+        transition={{ duration: 0.5, type: "spring" }}
+        animate={{ scale: 1, y: 0 }}
+      >
+        <Avatar
+          src={perGroup.picture}
+          sx={{ height: "150px", width: "150px" }}
+        />
+      </motion.div>
       <h3>{perGroup.title}</h3>
       <h4 style={{ textAlign: "center", wordWrap: "break-word" }}>
         {perGroup.description}
@@ -72,10 +87,16 @@ const GroupEdit = ({ allGroups }) => {
                   animate={{ scale: 1 }}
                 >
                   {i + 1}
-                  <Avatar
-                    src={picture}
-                    sx={{ height: "35px", width: "35px" }}
-                  />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    transition={{ duration: 0.5, type: "spring" }}
+                    animate={{ scale: 1 }}
+                  >
+                    <Avatar
+                      src={picture}
+                      sx={{ height: "35px", width: "35px" }}
+                    />
+                  </motion.div>
 
                   <motion.div
                     style={{
@@ -123,23 +144,19 @@ const GroupEdit = ({ allGroups }) => {
       </div>
     </div>
   );
-};
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { updateGroup } from "@/controllers/groupController";
-import { emitter } from "@/utils/eventemitter";
-function UserSettings({ member, perGroup, isAdmin, setperGroup }) {
+});
+
+const UserSettings = memo(({ member, perGroup, isAdmin, setperGroup }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => {
+  const handleClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
+  }, []);
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const revokeAdmin = () => {
+  const revokeAdmin = useCallback(() => {
     setperGroup((prev) => {
       let obj = prev;
       obj.admins = obj.admins.filter((a) => a !== member._id);
@@ -150,8 +167,9 @@ function UserSettings({ member, perGroup, isAdmin, setperGroup }) {
       group_id: perGroup._id,
       member_id: member._id,
     });
-  };
-  const makeAdmin = () => {
+  }, [member._id, perGroup._id, setperGroup]);
+
+  const makeAdmin = useCallback(() => {
     setperGroup((prev) => {
       let obj = prev;
       obj.admins = [...obj.admins, member._id];
@@ -162,18 +180,23 @@ function UserSettings({ member, perGroup, isAdmin, setperGroup }) {
       group_id: perGroup._id,
       member_id: member._id,
     });
-  };
-  const removeFromGroup = () => {
+  }, [member._id, perGroup._id, setperGroup]);
+
+  const removeFromGroup = useCallback(() => {
     setperGroup((prev) => {
       let obj = prev;
       obj.members = obj.members.filter((a) => a._id !== member._id);
       obj.admins = obj.admins.filter((a) => a !== member._id);
       return { ...obj };
     });
-  };
+  }, [member._id, setperGroup]);
 
   return (
-    <div>
+    <motion.div
+      initial={{ rotate: 90 }}
+      transition={{ duration: 2, type: "spring" }}
+      animate={{ rotate: 0 }}
+    >
       <IconButton
         size="small"
         id="demo-positioned-button"
@@ -212,9 +235,14 @@ function UserSettings({ member, perGroup, isAdmin, setperGroup }) {
         <MenuItem sx={{ gap: "10px" }} onClick={removeFromGroup}>
           <DeleteForeverIcon /> Remove from group
         </MenuItem>
+        <MenuItem sx={{ gap: "10px" }} onClick={removeFromGroup}>
+          <DeleteForeverIcon /> Leave Group
+        </MenuItem>
       </Menu>
-    </div>
+    </motion.div>
   );
-}
+});
 
+GroupEdit.displayName = "GroupEdit";
+UserSettings.displayName = "UserSettings";
 export default GroupEdit;

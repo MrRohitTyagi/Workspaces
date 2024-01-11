@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import {
+  memo,
   useCallback,
   useContext,
   useEffect,
@@ -9,6 +10,9 @@ import {
 } from "react";
 import "./chatWindow.css";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { AnimatePresence, motion } from "framer-motion";
+import { v4 } from "uuid";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,7 +24,6 @@ import {
   OutlinedInput,
 } from "@mui/material";
 
-import { v4 } from "uuid";
 import useAuth from "@/utils/useAuth";
 import { ThemeTypeContext } from "@/App";
 import {
@@ -30,6 +33,15 @@ import {
   saveMessages,
 } from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
+
+import Zoom from "@mui/material/Zoom";
+import Loader from "@/components/Loader";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
+import { socket } from "@/components/authorizeUser";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -43,7 +55,7 @@ const HtmlTooltip = styled(({ className, ...props }) => (
   },
 }));
 let timerId;
-const ChatWindow = () => {
+const ChatWindow = memo(() => {
   const firstLoadRef = useRef(true);
   const [messages, setMessages] = useState([]);
   const [messageInputValue, setMessageInputValue] = useState("");
@@ -121,7 +133,7 @@ const ChatWindow = () => {
       const { message_id } = data || {};
       setMessages((prev) => prev.filter((m) => m._id !== message_id));
     });
-    listenToEvent(`SHOW_TYPING_EFFECT_${chat_id}`, (e) => {
+    listenToEvent(`SHOW_TYPING_EFFECT_${chat_id}`, () => {
       setTypingEffect(true);
       clearTimeout(timerId);
       timerId = setTimeout(() => {
@@ -176,7 +188,7 @@ const ChatWindow = () => {
       return array;
     });
   }, []);
-
+  console.log(`%c messages `, "color: green;border:1px solid green", messages);
   const deleteAllSelected = useCallback(async () => {
     for (const message_id of deletedMsgs) {
       await deleteSingleMessage({ chat_id, message_id, to: chattingWith._id });
@@ -361,18 +373,9 @@ const ChatWindow = () => {
       )}
     </div>
   );
-};
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
+});
+ChatWindow.displayName = "ChatWindow";
 
-import Zoom from "@mui/material/Zoom";
-import Loader from "@/components/Loader";
-import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "react-toastify";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
-import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import { socket } from "@/components/authorizeUser";
 const MessageTextBox = ({
   isMyMsg,
   isDarkTheme,
@@ -503,4 +506,5 @@ const MessageTextBox = ({
   );
 };
 
+MessageTextBox.displayName = "MessageTextBox";
 export default ChatWindow;

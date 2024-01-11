@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { AnimatePresence, motion } from "framer-motion";
@@ -27,7 +27,7 @@ const varients = {
   visible: { y: 0, opacity: 1 },
   transition: { duration: 1 },
 };
-function LoginScreen() {
+const LoginScreen = memo(() => {
   const [isSigninForm, setIsSigninForm] = useState(false);
   const [visible, setVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -136,17 +136,20 @@ function LoginScreen() {
     [createOrGetuser, formData, isSigninForm, picture, validateForm]
   );
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = useCallback(
+    (e) => {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value,
+      });
 
-    setErrors({
-      ...errors,
-      [e.target.name]: "",
-    });
-  };
+      setErrors({
+        ...errors,
+        [e.target.name]: "",
+      });
+    },
+    [errors, formData]
+  );
   const formref = useRef();
   return (
     <AnimatePresence>
@@ -310,6 +313,7 @@ function LoginScreen() {
       </div>
     </AnimatePresence>
   );
-}
+});
+LoginScreen.displayName = "LoginScreen";
 
 export default LoginScreen;

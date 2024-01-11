@@ -46,7 +46,7 @@ const popperProps = {
   },
 };
 let timerId;
-const GroupSideMenu = ({ allGroups, setAllGroups }) => {
+const GroupSideMenu = memo(({ allGroups, setAllGroups }) => {
   console.log(
     `%c allGroups `,
     "color: green;border:1px solid green",
@@ -71,13 +71,13 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
     setActiveUser(group_id);
   }, [group_id]);
 
-  const handleOpen = (event) => {
+  const handleOpen = useCallback((event) => {
     // setOpen(true);
     setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
+  }, []);
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
   useEffect(() => {
     function closeLayer() {
@@ -87,11 +87,6 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
     listenToEvent(
       `GROUP_SIDE_MENU_TYPING_EFFECT`,
       ({ typing_by, group_id }) => {
-        console.log(
-          `%c { typing_by, group_id } `,
-          "color: orange;border:2px dotted oranfe",
-          { typing_by, group_id }
-        );
         clearTimeout(timerId);
         setTypingEffect({ typing_by, group_id });
         timerId = setTimeout(() => {
@@ -128,9 +123,9 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
     [setAllGroups]
   );
 
-  const handleToggleSidebar = () => {
+  const handleToggleSidebar = useCallback(() => {
     setIsEmpanded((prev) => !prev);
-  };
+  }, []);
 
   return (
     <div
@@ -219,97 +214,91 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
           "aria-labelledby": "basic-button",
         }}
       >
-        {allGroups.map(
-          ({ _id, messages, members, description, title, picture }) => {
-            const lastMessage = messages.at(-1) || {};
+        {allGroups.map(({ _id, messages, title, picture }) => {
+          const lastMessage = messages.at(-1) || {};
 
-            const time = new Date(lastMessage?.timestamp);
+          const time = new Date(lastMessage?.timestamp);
 
-            const displayTime = lastMessage._id
-              ? `${
-                  time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
-                }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
-              : "";
-            return (
-              <MenuItem
-                key={_id}
-                onClick={() => {
-                  setActiveUser(_id);
-                  clearNewMessageCountOnClick(_id);
-                  navigate(`/groups/${_id}`);
-                }}
-                sx={{
-                  background:
-                    activeUser === _id
-                      ? isDarkTheme
-                        ? "#313131"
-                        : "#c1c1c1"
-                      : "transparent",
-                }}
+          const displayTime = lastMessage._id
+            ? `${
+                time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
+              }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
+            : "";
+          return (
+            <MenuItem
+              key={_id}
+              onClick={() => {
+                setActiveUser(_id);
+                clearNewMessageCountOnClick(_id);
+                navigate(`/groups/${_id}`);
+              }}
+              sx={{
+                background:
+                  activeUser === _id
+                    ? isDarkTheme
+                      ? "#313131"
+                      : "#c1c1c1"
+                    : "transparent",
+              }}
+            >
+              <motion.div
+                className="per-chat-line"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
               >
-                <motion.div
-                  className="per-chat-line"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                >
-                  <Badge badgeContent={0} color="primary">
-                    <Avatar
-                      src={picture}
-                      sx={{ height: "35px", width: "35px" }}
-                    />
-                  </Badge>
-                  {isEmpanded && (
-                    <motion.div
-                      style={{ width: "100%" }}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                    >
-                      <h5>
-                        {title.length < 15
-                          ? title
-                          : `${title?.slice(0, 15)}...`}
-                      </h5>
-                      <div className="time-and-lastmsg">
-                        <h6
-                          style={{
-                            color: isDarkTheme ? "white" : "black",
-                            opacity: "50%",
-                          }}
-                        >
-                          {typingEffect &&
-                          typingEffect.group_id !== group_id &&
-                          typingEffect.group_id === _id &&
-                          typingEffect.typing_by !==
-                            (user.username || user.email) ? (
-                            <h4
-                              className={
-                                isDarkTheme
-                                  ? "green-typing-dark"
-                                  : "green-typing"
-                              }
-                            >
-                              {typingEffect?.typing_by || ""}...
-                            </h4>
-                          ) : (
-                            lastMessage.msg
-                          )}
-                        </h6>
-                        <h6
-                          style={{
-                            color: isDarkTheme ? "white" : "black",
-                            opacity: "50%",
-                          }}
-                        >
-                          {displayTime}
-                        </h6>
-                      </div>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </MenuItem>
-            );
-          }
-        )}
+                <Badge badgeContent={0} color="primary">
+                  <Avatar
+                    src={picture}
+                    sx={{ height: "35px", width: "35px" }}
+                  />
+                </Badge>
+                {isEmpanded && (
+                  <motion.div
+                    style={{ width: "100%" }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                  >
+                    <h5>
+                      {title.length < 15 ? title : `${title?.slice(0, 15)}...`}
+                    </h5>
+                    <div className="time-and-lastmsg">
+                      <h6
+                        style={{
+                          color: isDarkTheme ? "white" : "black",
+                          opacity: "50%",
+                        }}
+                      >
+                        {typingEffect &&
+                        typingEffect.group_id !== group_id &&
+                        typingEffect.group_id === _id &&
+                        typingEffect.typing_by !==
+                          (user.username || user.email) ? (
+                          <h4
+                            className={
+                              isDarkTheme ? "green-typing-dark" : "green-typing"
+                            }
+                          >
+                            {typingEffect?.typing_by || ""}...
+                          </h4>
+                        ) : (
+                          lastMessage.msg
+                        )}
+                      </h6>
+                      <h6
+                        style={{
+                          color: isDarkTheme ? "white" : "black",
+                          opacity: "50%",
+                        }}
+                      >
+                        {displayTime}
+                      </h6>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            </MenuItem>
+          );
+        })}
       </MenuList>
 
       <Menu
@@ -325,7 +314,7 @@ const GroupSideMenu = ({ allGroups, setAllGroups }) => {
       </Menu>
     </div>
   );
-};
+});
 
 const AddNewGroup = memo(({ user, handleClose }) => {
   const [picture, setPicture] = useState(null);
@@ -417,7 +406,7 @@ const AddNewGroup = memo(({ user, handleClose }) => {
     </div>
   );
 });
-const CustomOption = ({ data }) => {
+const CustomOption = memo(({ data }) => {
   return (
     <div className="custom-async-dropdown-option-group">
       <Avatar src={data.picture} />
@@ -427,7 +416,9 @@ const CustomOption = ({ data }) => {
       </div>
     </div>
   );
-};
+});
+CustomOption.displayName = "CustomOption";
+GroupSideMenu.displayName = "GroupSideMenu";
 AddNewGroup.displayName = "AddNewGroup";
 
 export default GroupSideMenu;

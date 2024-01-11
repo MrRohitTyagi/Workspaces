@@ -59,7 +59,7 @@ const varient = {
   hidden: { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1 },
 };
-const MainContainer = () => {
+const MainContainer = memo(() => {
   const { pathname } = useLocation();
   const { isDarkTheme } = useContext(ThemeTypeContext);
   const { user } = useAuth();
@@ -160,7 +160,7 @@ const MainContainer = () => {
       )}
     </motion.div>
   );
-};
+});
 
 const CustomDataTable = memo(
   ({
@@ -270,7 +270,10 @@ const CustomDataTable = memo(
       },
       [navigate]
     );
-    const handleRefresh = () => fetchData(filterTrackerRef.current);
+    const handleRefresh = useCallback(
+      () => fetchData(filterTrackerRef.current),
+      [fetchData, filterTrackerRef]
+    );
 
     const { isDarkTheme } = useContext(ThemeTypeContext);
 
@@ -491,7 +494,7 @@ const CustomDataTable = memo(
   }
 );
 CustomDataTable.displayName = "CustomDataTable";
-
+MainContainer.displayName = "MainContainer";
 CustomDataTable.propTypes = {
   data: PropTypes.any,
   fetchData: PropTypes.func,

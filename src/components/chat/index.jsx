@@ -1,9 +1,7 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useState } from "react";
 
 import { ThemeTypeContext } from "@/App";
 import "./chatStyles.css";
-import ChatSideMenu from "./components/chatSideMenu";
-import ChatWindow from "./components/ChatWindow";
 import {
   Route,
   Routes,
@@ -21,7 +19,10 @@ import {
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import useWindowDimens from "@/utils/useWindowDimens";
 
-const ChatIndex = () => {
+import ChatSideMenu from "./components/chatSideMenu";
+import ChatWindow from "./components/ChatWindow";
+
+const ChatIndex = memo(() => {
   const [allChats, setAllChats] = useState([]);
 
   const navigate = useNavigate();
@@ -88,7 +89,6 @@ const ChatIndex = () => {
       const alreadyExistedChat = allChats.find(
         ({ to, from }) => to._id === data._id || from._id === data._id
       );
-      console.log("data alreadyExistedChat", { data, alreadyExistedChat });
       const payload = {
         to: data._id,
         from: user._id,
@@ -148,6 +148,6 @@ const ChatIndex = () => {
       </Routes>
     </div>
   );
-};
-
+});
+ChatIndex.displayName = "ChatIndex";
 export default ChatIndex;

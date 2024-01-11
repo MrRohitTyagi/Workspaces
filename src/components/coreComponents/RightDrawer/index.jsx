@@ -1,5 +1,5 @@
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as React from "react";
 
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -18,17 +18,17 @@ import { updateUser } from "@/controllers/userController";
 import { deleteCookie } from "@/utils/cookieHandler";
 import useAuth from "@/utils/useAuth";
 
-export default function RightDrawer() {
-  const [state, setState] = React.useState(false);
+const RightDrawer = memo(() => {
+  const [state, setState] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     listenToEvent("OPEN_DRAWER", () => setState(true));
     return () => emitter.off("OPEN_DRAWER", () => {});
   }, []);
 
-  const toggleDrawer = React.useCallback((event) => {
+  const toggleDrawer = useCallback((event) => {
     if (
       event.type === "keydown" &&
       (event.key === "Tab" || event.key === "Shift")
@@ -39,18 +39,18 @@ export default function RightDrawer() {
     setState((p) => !p);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     deleteCookie();
     window.location.href = "/login";
     window.location.reload();
-  };
+  }, []);
 
-  const handleThemeSwitch = React.useCallback(() => {
+  const handleThemeSwitch = useCallback(() => {
     emitter.emit("SWITCH_THEME");
     updateUser({ key: "isDarkTheme", value: !user.isDarkTheme, id: user._id });
   }, [user]);
 
-  const list = React.useMemo(() => {
+  const list = useMemo(() => {
     return (
       <Box
         sx={{ width: 250 }}
@@ -100,4 +100,6 @@ export default function RightDrawer() {
       {list}
     </Drawer>
   );
-}
+});
+RightDrawer.displayName = "RightDrawer";
+export default RightDrawer;

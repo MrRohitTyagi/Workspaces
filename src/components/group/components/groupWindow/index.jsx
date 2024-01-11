@@ -1,7 +1,17 @@
 /* eslint-disable react/prop-types */
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import "./groupWindow.css";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { startCase } from "lodash";
 import { useNavigate, useParams } from "react-router-dom";
+import { v4 } from "uuid";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SendIcon from "@mui/icons-material/Send";
@@ -12,8 +22,13 @@ import {
   InputAdornment,
   OutlinedInput,
 } from "@mui/material";
+import Zoom from "@mui/material/Zoom";
+import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import { styled } from "@mui/material/styles";
 
-import { v4 } from "uuid";
 import useAuth from "@/utils/useAuth";
 import { ThemeTypeContext } from "@/App";
 import {
@@ -22,19 +37,10 @@ import {
 } from "@/controllers/chatController";
 
 import { emitter, listenToEvent } from "@/utils/eventemitter";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
-
-import Zoom from "@mui/material/Zoom";
 import Loader from "@/components/Loader";
-import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "react-toastify";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
-import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import { socket } from "@/components/authorizeUser";
 import { getOneGroup, saveGroupMessage } from "@/controllers/groupController";
-import { startCase } from "lodash";
+import { socket } from "@/components/authorizeUser";
+import "./groupWindow.css";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -48,7 +54,7 @@ const HtmlTooltip = styled(({ className, ...props }) => (
   },
 }));
 let timerID;
-const GroupWindow = () => {
+const GroupWindow = memo(() => {
   const firstLoadRef = useRef(true);
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
@@ -380,7 +386,7 @@ const GroupWindow = () => {
       )}
     </div>
   );
-};
+});
 const MessageTextBox = ({
   isMyMsg,
   isDarkTheme,
@@ -518,5 +524,8 @@ const MessageTextBox = ({
     </motion.div>
   );
 };
+
+GroupWindow.displayName = "GroupWindow";
+MessageTextBox.displayName = "MessageTextBox";
 
 export default GroupWindow;

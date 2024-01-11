@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import * as React from "react";
+import { memo, useState } from "react";
 
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -9,8 +9,8 @@ import ColorLensIcon from "@mui/icons-material/ColorLens";
 
 import "./userSettings.css";
 
-export default function UserSettings() {
-  const [value, setValue] = React.useState(0);
+const UserSettings = memo(() => {
+  const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -54,9 +54,9 @@ export default function UserSettings() {
       </TabPanel>
     </div>
   );
-}
+});
 
-function TabPanel(props) {
+const TabPanel = memo((props) => {
   const { children, value, index, ...other } = props;
 
   return (
@@ -70,12 +70,18 @@ function TabPanel(props) {
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
-}
+});
 
-function ProfileSettings() {
+const ProfileSettings = memo(() => {
   return <div className="profile-settings-container"></div>;
-}
+});
 
-function ThemeSelector() {
+const ThemeSelector = memo(() => {
   return <div className="theme-settings-container"></div>;
-}
+});
+ThemeSelector.displayName = "ThemeSelector";
+ProfileSettings.displayName = "ProfileSettings";
+TabPanel.displayName = "TabPanel";
+UserSettings.displayName = "UserSettings";
+
+export default UserSettings;

@@ -31,7 +31,7 @@ const popperProps = {
   },
 };
 
-const ChatSideMenu = ({ allChats, setAllChats }) => {
+const ChatSideMenu = memo(({ allChats, setAllChats }) => {
   const innerWidth = useWindowDimens();
 
   const [isEmpanded, setIsEmpanded] = useState(true);
@@ -51,24 +51,19 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
     setActiveUser(message_id);
   }, [message_id]);
 
-  const handleClick = (event) => {
+  const handleClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
+  }, []);
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
   useEffect(() => {
     function closeLayer() {
       setAnchorEl(null);
     }
     listenToEvent("CLOSE_ADD_NEW_CHAT_POPUP", closeLayer);
-    listenToEvent(`SIDE_MENU_TYPING_EFFECT`, ({ chattingTo, chat_id }) => {
-      console.log(
-        `%c chat_id `,
-        "color: green;border:1px solid green",
-        chat_id
-      );
+    listenToEvent(`SIDE_MENU_TYPING_EFFECT`, ({ chat_id }) => {
       setTypingEffect(chat_id);
       let id = setTimeout(() => {
         clearTimeout(id);
@@ -102,9 +97,9 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
     [setAllChats]
   );
 
-  const handleToggleSidebar = () => {
+  const handleToggleSidebar = useCallback(() => {
     setIsEmpanded((prev) => !prev);
-  };
+  }, []);
 
   return (
     <div
@@ -194,6 +189,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
         }}
       >
         {allChats.map(({ _id, to, from, newMsgCount = 0, messages }) => {
+          if (!to?._id || !from?._id) return null;
           const lastMessage = messages.at(-1) || {};
 
           const time = new Date(lastMessage?.timestamp);
@@ -285,7 +281,7 @@ const ChatSideMenu = ({ allChats, setAllChats }) => {
       </Menu>
     </div>
   );
-};
+});
 
 const AddNewChat = memo(({ user, handleClose }) => {
   const [value, setValue] = useState({});
@@ -303,9 +299,12 @@ const AddNewChat = memo(({ user, handleClose }) => {
     }
   }, 500);
 
-  const loadOptions = (inputValue, callback) => {
-    debouncedLoadOptions(inputValue, callback);
-  };
+  const loadOptions = useCallback(
+    (inputValue, callback) => {
+      debouncedLoadOptions(inputValue, callback);
+    },
+    [debouncedLoadOptions]
+  );
 
   const handleChange = useCallback((val) => setValue(val), []);
 
@@ -318,10 +317,10 @@ const AddNewChat = memo(({ user, handleClose }) => {
     fetchOptions();
   }, []);
 
-  const handleStartMessage = () => {
+  const handleStartMessage = useCallback(() => {
     const payload = { ...value };
     emitter.emit("ADD_NEW_CHAT", payload);
-  };
+  }, [value]);
 
   return (
     <div className="start-new-chat-container ffffffffffff">
@@ -363,7 +362,7 @@ const AddNewChat = memo(({ user, handleClose }) => {
     </div>
   );
 });
-const CustomOption = ({ data }) => {
+const CustomOption = memo(({ data }) => {
   return (
     <div className="custom-async-dropdown-option">
       <Avatar src={data.picture} />
@@ -373,8 +372,10 @@ const CustomOption = ({ data }) => {
       </div>
     </div>
   );
-};
+});
 
+CustomOption.displayName = "CustomOption";
+ChatSideMenu.displayName = "ChatSideMenu";
 AddNewChat.displayName = "AddNewChat";
 
 export default ChatSideMenu;

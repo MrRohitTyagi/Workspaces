@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useState } from "react";
 
 import { ThemeTypeContext } from "@/App";
 import "./groupStyles.css";
@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 
 let groups;
 
-const GroupIndex = () => {
+const GroupIndex = memo(() => {
   const [allGroups, setAllGroups] = useState([]);
 
   const navigate = useNavigate();
@@ -122,6 +122,8 @@ const GroupIndex = () => {
       </Routes>
     </div>
   );
-};
+});
+
+GroupIndex.displayName = "GropuIndex";
 
 export default GroupIndex;

@@ -1,10 +1,10 @@
 {
   "name": "vite-project",
   "private": true,
-  "version": "1.0.37",
+  "version": "1.0.38",
   "type": "module",
   "scripts": {
-    "start": "vite --port 3001",
+    "start": "vite --port 3000",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import PropTypes from "prop-types";
 
@@ -12,7 +12,7 @@ import useAuth from "@/utils/useAuth";
 import { listenToEvent, emitter } from "@/utils/eventemitter";
 import "./componeEmail.css";
 
-const ComposeEmail = () => {
+const ComposeEmail = memo(() => {
   const { user } = useAuth();
 
   const [newEmailsTOSend, setNewEmailsToSend] = useState([]);
@@ -51,78 +51,77 @@ const ComposeEmail = () => {
       ))}
     </div>
   );
-};
+});
 
-const OneEmailBox = ({
-  email,
-  index,
-  filterEmails,
-  user,
-  setNewEmailsToSend,
-}) => {
-  const handleEmailOpen = useCallback(
-    (id) => {
-      setNewEmailsToSend((prev) => {
-        let arr = [];
-        for (let i = 0; i < prev.length; i++) {
-          const perEmail = prev[i];
-          if (perEmail.id === id) {
-            arr.push({ ...perEmail, isOpen: true });
-          } else {
-            arr.push(perEmail);
+const OneEmailBox = memo(
+  ({ email, index, filterEmails, user, setNewEmailsToSend }) => {
+    const handleEmailOpen = useCallback(
+      (id) => {
+        setNewEmailsToSend((prev) => {
+          let arr = [];
+          for (let i = 0; i < prev.length; i++) {
+            const perEmail = prev[i];
+            if (perEmail.id === id) {
+              arr.push({ ...perEmail, isOpen: true });
+            } else {
+              arr.push(perEmail);
+            }
           }
-        }
-        return [...arr];
-      });
-    },
-    [setNewEmailsToSend]
-  );
+          return [...arr];
+        });
+      },
+      [setNewEmailsToSend]
+    );
 
-  const isOpen = email.isOpen;
-  return (
-    <div
-      className="new-email-box"
-      onClick={() => {
-        handleEmailOpen(email.id);
-      }}
-      style={{ backgroundColor: isOpen ? "#dfdfdf" : "white" }}
-    >
-      <div className="new-header">
-        <div className="txt">
-          {`${email.subject}`.slice(0, 10) || "New Message"}...
+    const isOpen = email.isOpen;
+    return (
+      <div
+        className="new-email-box"
+        onClick={() => {
+          handleEmailOpen(email.id);
+        }}
+        style={{ backgroundColor: isOpen ? "#dfdfdf" : "white" }}
+      >
+        <div className="new-header">
+          <div className="txt">
+            {`${email.subject}`.slice(0, 10) || "New Message"}...
+          </div>
         </div>
+        <div className="new-e-buttons">
+          <IconButton
+            sx={{ padding: "2px" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              filterEmails(email.id);
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <IconButton sx={{ padding: "1px" }}>
+            {isOpen ? (
+              <ExpandLessIcon fontSize="large" />
+            ) : (
+              <ExpandMoreIcon fontSize="large" />
+            )}
+          </IconButton>
+        </div>
+        {isOpen && (
+          <NewEmail
+            setNewEmailsToSend={setNewEmailsToSend}
+            user={user}
+            filterEmails={filterEmails}
+            email={email}
+            index={index}
+            open={isOpen}
+          />
+        )}
       </div>
-      <div className="new-e-buttons">
-        <IconButton
-          sx={{ padding: "2px" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            filterEmails(email.id);
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <IconButton sx={{ padding: "1px" }}>
-          {isOpen ? (
-            <ExpandLessIcon fontSize="large" />
-          ) : (
-            <ExpandMoreIcon fontSize="large" />
-          )}
-        </IconButton>
-      </div>
-      {isOpen && (
-        <NewEmail
-          setNewEmailsToSend={setNewEmailsToSend}
-          user={user}
-          filterEmails={filterEmails}
-          email={email}
-          index={index}
-          open={isOpen}
-        />
-      )}
-    </div>
-  );
-};
+    );
+  }
+);
+
+OneEmailBox.displayName = "OneEmailBox";
+ComposeEmail.displayName = "ComposeEmail";
 OneEmailBox.propTypes = {
   email: PropTypes.object,
   index: PropTypes.number,

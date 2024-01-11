@@ -1,9 +1,9 @@
-import { useContext } from "react";
+import { memo, useContext } from "react";
 
 import { ThemeTypeContext } from "@/App";
 import "./loader.css";
 
-const Loader = () => {
+const Loader = memo(() => {
   const { isDarkTheme } = useContext(ThemeTypeContext) || {};
   return (
     <div
@@ -14,6 +14,7 @@ const Loader = () => {
       <div className="loader"></div>
     </div>
   );
-};
+});
+Loader.displayName = "Loader";
 
 export default Loader;

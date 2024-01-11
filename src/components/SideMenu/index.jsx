@@ -18,6 +18,7 @@ import { socket } from "../authorizeUser";
 import MobileAppMenu from "./MobileAPpMenu";
 import useWindowDimens from "@/utils/useWindowDimens";
 import GroupsIcon from "@mui/icons-material/Groups";
+
 export const sideMenuConfig = (isDarkTheme, emailcount) => [
   {
     label: "Componse",
@@ -108,7 +109,6 @@ const SideMenu = memo(() => {
   useEffect(() => {
     // Listen for messages from the server
     socket.on("NEW_MESSAGE_RECEIVED", () => {
-      console.log("NEW_MESSAGE_RECEIVED");
     });
   }, []);
 

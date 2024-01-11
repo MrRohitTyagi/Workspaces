@@ -1,4 +1,5 @@
 import { memo, useCallback, useContext } from "react";
+import { useLocation } from "react-router-dom";
 
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
@@ -10,11 +11,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 import { emitEvent } from "@/utils/eventemitter";
 
-import SearchBar from "./searchBar";
 import useAuth from "@/utils/useAuth";
 import LoggedInUserProfile from "@/components/userProfile";
 import { ThemeTypeContext } from "@/App";
-import { useLocation } from "react-router-dom";
+import SearchBar from "./searchBar";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",

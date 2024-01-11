@@ -1,5 +1,6 @@
-import * as React from "react";
+import { memo, useCallback, useContext, useEffect, useState } from "react";
 
+import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
 import Paper from "@mui/material/Paper";
 import InputBase from "@mui/material/InputBase";
 import Divider from "@mui/material/Divider";
@@ -7,21 +8,24 @@ import IconButton from "@mui/material/IconButton";
 import TuneIcon from "@mui/icons-material/Tune";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
+import Typography from "@mui/material/Typography";
+import Popover from "@mui/material/Popover";
 
+import { ThemeTypeContext } from "@/App";
 import { emitEvent } from "@/utils/eventemitter";
 
 import "./topNavbar.css";
 
 let isLoaded = false;
 
-export default function SearchBar() {
-  const [value, setvalue] = React.useState("");
+const SearchBar = memo(() => {
+  const [value, setvalue] = useState("");
 
-  const handleSubmit = React.useCallback((e) => {
+  const handleSubmit = useCallback((e) => {
     if (e.keyCode === 13) e.preventDefault();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Set a timer for 500ms after the user stops typing
     const timerId = setTimeout(() => {
       if (isLoaded) {
@@ -35,7 +39,7 @@ export default function SearchBar() {
     return () => clearTimeout(timerId);
   }, [value]);
 
-  const { isDarkTheme } = React.useContext(ThemeTypeContext) || {};
+  const { isDarkTheme } = useContext(ThemeTypeContext) || {};
   return (
     <Paper
       className={isDarkTheme ? "search-bar-dark" : "search-bar"}
@@ -74,15 +78,10 @@ export default function SearchBar() {
       </IconButton>
     </Paper>
   );
-}
+});
 
-import Typography from "@mui/material/Typography";
-import Popover from "@mui/material/Popover";
-import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
-import { ThemeTypeContext } from "@/App";
-
-export function PopoverPopupState() {
-  React.useEffect(() => {
+const PopoverPopupState = memo(() => {
+  useEffect(() => {
     let ele = document.querySelector(".search-bar-selector");
     if (ele) ele.parentElement.style.padding = 0;
   }, []);
@@ -121,4 +120,10 @@ export function PopoverPopupState() {
       )}
     </PopupState>
   );
-}
+});
+
+SearchBar.displayName = "SearchBar";
+PopoverPopupState.displayName = "PopoverPopupState";
+
+export { PopoverPopupState };
+export default SearchBar;

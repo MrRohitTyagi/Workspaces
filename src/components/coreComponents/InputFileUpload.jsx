@@ -1,7 +1,8 @@
+import { memo } from "react";
+import PropTypes from "prop-types";
+
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { uploadImage } from "@/utils/imageupload";
-import PropTypes from "prop-types";
 import { Avatar, IconButton } from "@mui/material";
 
 const VisuallyHiddenInput = styled("input")({
@@ -16,7 +17,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-function InputFileUpload({ picture, setPicture, sx = {} }) {
+const InputFileUpload = memo(({ picture, setPicture, sx = {} }) => {
   return (
     <IconButton
       disableFocusRipple
@@ -49,7 +50,8 @@ function InputFileUpload({ picture, setPicture, sx = {} }) {
       />
     </IconButton>
   );
-}
+});
+InputFileUpload.displayName = "InputFileUpload";
 InputFileUpload.propTypes = {
   picture: PropTypes.any,
   sx: PropTypes.object,

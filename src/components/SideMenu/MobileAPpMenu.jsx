@@ -1,21 +1,21 @@
-import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { memo, useCallback, useContext, useState } from "react";
+
 import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
-import ChatIcon from "@mui/icons-material/Chat";
 
 import { chatMEnuConfig, sideMenuConfig } from ".";
 import { emitEvent } from "@/utils/eventemitter";
-import { useNavigate } from "react-router-dom";
 import { ThemeTypeContext } from "@/App";
 
-export default function MobileAppMenu() {
-  const [open, setOpen] = React.useState(false);
-  const { isDarkTheme } = React.useContext(ThemeTypeContext);
+const MobileAppMenu = memo(() => {
+  const [open, setOpen] = useState(false);
+  const { isDarkTheme } = useContext(ThemeTypeContext);
   const navigate = useNavigate();
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
 
   return (
     <SpeedDial
@@ -57,4 +57,6 @@ export default function MobileAppMenu() {
       })}
     </SpeedDial>
   );
-}
+});
+MobileAppMenu.displayName = "MobileAppMenu";
+export default MobileAppMenu;

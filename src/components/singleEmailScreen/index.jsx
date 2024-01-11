@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import { Avatar, Button, IconButton, Skeleton, Tooltip } from "@mui/material";
@@ -28,6 +28,11 @@ import { getUser } from "@/controllers/userController";
 import { capitalizeFirstLetter } from "@/utils/helperFunctions";
 import useAuth from "@/utils/useAuth";
 import { emitter } from "@/utils/eventemitter";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import { ThemeTypeContext } from "@/App";
 
 const varient = {
   hidden: { scale: 0, opacity: 0 },
@@ -35,7 +40,7 @@ const varient = {
 };
 let done = false;
 
-const PerEmailScreen = () => {
+const PerEmailScreen = memo(() => {
   const { isDarkTheme } = useContext(ThemeTypeContext);
 
   const [email, setEmail] = useState({});
@@ -235,9 +240,9 @@ const PerEmailScreen = () => {
       </div>
     </div>
   );
-};
+});
 
-const BodyRenderer = ({ str }) => {
+const BodyRenderer = memo(({ str }) => {
   const stringWithBreaks = str.split("\n");
   return (
     <>
@@ -250,9 +255,9 @@ const BodyRenderer = ({ str }) => {
       })}
     </>
   );
-};
+});
 
-function StandardImageList({ attachments = [] }) {
+const StandardImageList = memo(({ attachments = [] }) => {
   return (
     <div
       className="attachments-cont"
@@ -273,23 +278,18 @@ function StandardImageList({ attachments = [] }) {
       ))}
     </div>
   );
-}
+});
 
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { ThemeTypeContext } from "@/App";
-function ResponsiveDialog({ children, imageUrl }) {
+const ResponsiveDialog = memo(({ children, imageUrl }) => {
   const [open, setOpen] = useState(false);
 
-  const handleClickOpen = () => {
+  const handleClickOpen = useCallback(() => {
     setOpen(true);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
-  };
+  }, []);
 
   const handleDownload = async () => {
     try {
@@ -360,6 +360,10 @@ function ResponsiveDialog({ children, imageUrl }) {
       </Dialog>
     </>
   );
-}
+});
 
+PerEmailScreen.displayName = "PerEmailScreen";
+BodyRenderer.displayName = "BodyRenderer";
+ResponsiveDialog.displayName = "ResponsiveDialog";
+StandardImageList.displayName = "StandardImageList";
 export default PerEmailScreen;
