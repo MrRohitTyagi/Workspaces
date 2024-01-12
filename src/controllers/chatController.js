@@ -1,4 +1,6 @@
 import { caller } from "@/utils/helperFunctions";
+import { encodeImageFileAsURL } from "@/utils/imageupload";
+import axios from "axios";
 
 export const getAllChatsPerUser = async (id) => {
   const { data } = await caller("get", `chat/get-all-chats/${id}`);
@@ -24,3 +26,22 @@ export const saveEditedMessageController = async (payload) => {
   const { data } = await caller("put", `chat/save-edited-message`, payload);
   return data;
 };
+
+export function sendImageMessage(msgObj, file) {
+  const pic = encodeImageFileAsURL(file);
+  axios
+    .post(
+      `https://api.cloudinary.com/v1_1/${
+        import.meta.env.VITE_CLOUDNERY_CLOUDNAME
+      }/upload`,
+      pic
+    )
+    .then(({ data }) => {
+      console.log("data", data);
+      const payload = {
+        ...msgObj,
+        message: { ...msgObj.message, image: data.url },
+      };
+      saveMessages(payload);
+    });
+}

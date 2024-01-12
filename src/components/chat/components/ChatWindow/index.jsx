@@ -31,6 +31,7 @@ import {
   getUserChat,
   saveEditedMessageController,
   saveMessages,
+  sendImageMessage,
 } from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -42,6 +43,9 @@ import Loader from "@/components/Loader";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import { socket } from "@/components/authorizeUser";
+import PermMediaIcon from "@mui/icons-material/PermMedia";
+import InputFileUpload from "@/components/coreComponents/InputFileUpload";
+import MessageImageUpload from "./MessageImageUpload";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -59,6 +63,7 @@ const ChatWindow = memo(() => {
   const firstLoadRef = useRef(true);
   const [messages, setMessages] = useState([]);
   const [messageInputValue, setMessageInputValue] = useState("");
+  const [chatImage, setChatImage] = useState(null);
   const [perChat, setPerChat] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { user: currentUser } = useAuth();
@@ -240,6 +245,34 @@ const ChatWindow = memo(() => {
     [chat_id, chattingWith._id]
   );
 
+  const handleImageUpload = useCallback(
+    (file) => {
+      if (!file) return;
+      setChatImage(file);
+      const newMessage = {
+        from: currentUser._id,
+        msg: messageInputValue,
+        image: file,
+        _id: v4(),
+      };
+
+      const userToshow =
+        perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
+
+      setMessages((p) => [...p, newMessage]);
+      sendImageMessage(
+        {
+          message_id: chat_id,
+          message: newMessage,
+          to: userToshow._id,
+        },
+        file
+      );
+      if (messageInputValue) setMessageInputValue("");
+      setChatImage(null);
+    },
+    [chat_id, currentUser._id, messageInputValue, perChat?.from, perChat?.to]
+  );
   return (
     <div className={`chat-window-cont`}>
       <AnimatePresence>
@@ -324,7 +357,7 @@ const ChatWindow = memo(() => {
               const { from, _id } = message || {};
               const isMyMsg = from === currentUser._id;
               return (
-                <MessageTextBox
+                <MessageDisplayBox
                   handleDoubleClickSelectMessage={
                     handleDoubleClickSelectMessage
                   }
@@ -358,9 +391,12 @@ const ChatWindow = memo(() => {
               }}
               endAdornment={
                 <InputAdornment position="end">
-                  <IconButton onClick={handleMessages}>
-                    <SendIcon />
-                  </IconButton>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <MessageImageUpload callback={handleImageUpload} />
+                    <IconButton onClick={handleMessages}>
+                      <SendIcon />
+                    </IconButton>
+                  </div>
                 </InputAdornment>
               }
               aria-describedby="outlined-weight-helper-text"
@@ -376,7 +412,7 @@ const ChatWindow = memo(() => {
 });
 ChatWindow.displayName = "ChatWindow";
 
-const MessageTextBox = ({
+const MessageDisplayBox = ({
   isMyMsg,
   isDarkTheme,
   message,
@@ -443,12 +479,14 @@ const MessageTextBox = ({
                   <DeleteForeverIcon fontSize="small" color="warning" />
                 </IconButton>
 
-                <IconButton
-                  size="small"
-                  onClick={() => deleteEditMessage(message._id)}
-                >
-                  <BorderColorIcon fontSize="small" color="success" />
-                </IconButton>
+                {!message.image && (
+                  <IconButton
+                    size="small"
+                    onClick={() => deleteEditMessage(message._id)}
+                  >
+                    <BorderColorIcon fontSize="small" color="success" />
+                  </IconButton>
+                )}
               </div>
             }
           >
@@ -469,6 +507,16 @@ const MessageTextBox = ({
               }}
             >
               {message.msg}
+              {message.image ? (
+                <img
+                  className="chat-Image-tag"
+                  src={
+                    typeof message.image === "string"
+                      ? message.image
+                      : URL.createObjectURL(message.image)
+                  }
+                />
+              ) : null}
               <div
                 className="message-timestamp"
                 style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
@@ -493,6 +541,16 @@ const MessageTextBox = ({
             }}
           >
             {message.msg}
+            {message.image ? (
+              <img
+                className="chat-Image-tag"
+                src={
+                  typeof message.image === "string"
+                    ? message.image
+                    : URL.createObjectURL(message.image)
+                }
+              />
+            ) : null}
             <div
               className="message-timestamp"
               style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
@@ -506,5 +564,5 @@ const MessageTextBox = ({
   );
 };
 
-MessageTextBox.displayName = "MessageTextBox";
+MessageDisplayBox.displayName = "MessageDisplayBox";
 export default ChatWindow;

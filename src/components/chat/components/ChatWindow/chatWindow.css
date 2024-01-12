@@ -43,6 +43,9 @@
 
 /* add in dark also  */
 .single-message-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   word-break: break-all;
   position: relative;
   background-color: lightgray;
@@ -89,6 +92,11 @@
 }
 .delete-all-messages:has(.dark) {
   background-color: var(--dark-theme-color);
+}
+.chat-Image-tag {
+  width: 225px;
+  height: 150px;
+  object-fit: cover;
 }
 @media (max-width: 800px) {
   .typing-effect-text {
