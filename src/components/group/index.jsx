@@ -17,7 +17,10 @@ import GroupEdit from "./components/GroupEdit";
 import { toast } from "react-toastify";
 
 let groups;
-
+function connectToRoom(room) {
+  socket.emit("JOIN_ROOM", room);
+  groups = [...groups, { _id: room }];
+}
 const GroupIndex = memo(() => {
   const [allGroups, setAllGroups] = useState([]);
 
@@ -51,32 +54,28 @@ const GroupIndex = memo(() => {
     };
   }, [fetchAllGroups]);
 
-  const addNewGroup = useCallback(
-    async (group) => {
-      let imageUrl = "";
-      if (group.picture) {
-        imageUrl = await uploadImage(group.picture);
-      }
-      const payload = {
-        ...group,
-        members: group.members.map((m) => m._id),
-        picture: imageUrl,
-      };
-      const { response } = await createGroup(payload);
-      setAllGroups((p) => [...p, response]);
-      navigate(`/groups/${response._id}`);
-
-      // emitter.emit("CLOSE_ADD_NEW_CHAT_POPUP");
-      toast.info("New group added");
-    },
-    [navigate]
-  );
+  const addNewGroup = useCallback(async (group) => {
+    let imageUrl = "";
+    if (group.picture) {
+      imageUrl = await uploadImage(group.picture);
+    }
+    const payload = {
+      ...group,
+      members: group.members.map((m) => m._id),
+      picture: imageUrl,
+    };
+    const { response } = await createGroup(payload);
+    setAllGroups((p) => [...p, response]);
+    connectToRoom(response._id);
+    toast.info("New group added");
+  }, []);
 
   useEffect(() => {
     listenToEvent("U_GOT_ADDED_IN_A_GROUP", (data) => {
       console.log("data", data);
       toast.info("New group added");
       setAllGroups((p) => [...p, data]);
+      connectToRoom(data._id);
     });
     listenToEvent("ADD_NEW_GROUP", addNewGroup);
 

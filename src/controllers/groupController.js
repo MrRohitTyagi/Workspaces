@@ -27,11 +27,7 @@ export const updateGroup = async (payload) => {
   return data;
 };
 export const deleteOneGroupMessage = async (payload) => {
-  const { data } = await caller(
-    "put",
-    "group/delete-singel-message",
-    payload
-  );
+  const { data } = await caller("put", "group/delete-singel-message", payload);
   return data;
 };
 
