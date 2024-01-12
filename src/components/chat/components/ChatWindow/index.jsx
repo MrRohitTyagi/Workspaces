@@ -44,7 +44,6 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import { socket } from "@/components/authorizeUser";
 import MessageImageUpload from "./MessageImageUpload";
-import { deleteOneGroupMessage } from "@/controllers/groupController";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -79,6 +78,18 @@ const ChatWindow = memo(() => {
       (perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to) || {}
     );
   }, [currentUser._id, perChat?.from, perChat?.to]);
+
+  const deleteMessage = useCallback(
+    (id) => {
+      setMessages((prev) => prev.filter((m) => m._id !== id));
+      deleteSingleMessage({
+        chat_id: chat_id,
+        message_id: id,
+        to: chattingWith._id,
+      });
+    },
+    [chat_id, chattingWith._id]
+  );
 
   useEffect(() => {
     emitter.emit("HIDE_APP_BAR");
@@ -235,7 +246,7 @@ const ChatWindow = memo(() => {
   const handleImageUpload = useCallback(
     (file) => {
       if (!file) return;
-      // setChatImage(file);
+      setChatImage(file);
       const newMessage = {
         from: currentUser._id,
         msg: messageInputValue,
@@ -256,23 +267,10 @@ const ChatWindow = memo(() => {
         file
       );
       if (messageInputValue) setMessageInputValue("");
-      // setChatImage(null);
+      setChatImage(null);
     },
     [chat_id, currentUser._id, messageInputValue, perChat?.from, perChat?.to]
   );
-
-  const deleteMessage = useCallback(
-    (id) => {
-      setMessages((prev) => prev.filter((m) => m._id !== id));
-      deleteOneGroupMessage({
-        chat_id: chat_id,
-        message_id: id,
-        to: chattingWith._id,
-      });
-    },
-    [chat_id, chattingWith._id]
-  );
-
   return (
     <div className={`chat-window-cont`}>
       <AnimatePresence>
