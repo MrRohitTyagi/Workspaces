@@ -28,7 +28,7 @@ export const updateGroup = async (payload) => {
 };
 export const deleteOneGroupMessage = async (payload) => {
   const { data } = await caller(
-    "delete",
+    "put",
     "group/delete-singel-message",
     payload
   );
@@ -45,7 +45,6 @@ export function sendImageMessageGroup(msgObj, file) {
       pic
     )
     .then(({ data }) => {
-      console.log("data", data);
       const payload = {
         ...msgObj,
         message: { ...msgObj.message, image: data.url },

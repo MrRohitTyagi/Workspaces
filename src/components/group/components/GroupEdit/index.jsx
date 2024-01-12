@@ -270,8 +270,6 @@ const UserSettings = memo(
       emitter.emit("GROUP_LEFT_BY_USER", { group_id: perGroup._id });
     }, [member._id, perGroup._id, setperGroup]);
 
-    console.log("member", { ...member, isAdmin });
-    console.log("isUSerSelfADmin", isUSerSelfADmin);
     return (
       <motion.div
         initial={{ rotate: 90 }}

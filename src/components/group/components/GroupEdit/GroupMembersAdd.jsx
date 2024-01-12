@@ -37,11 +37,11 @@ export default function GroupMembersAdd({ handleAddNewMembers }) {
     const { response = [] } = await searchEmail(searchValue);
     return response;
   }, []);
+  
   const handleOnChange = useCallback((data) => {
-    console.log(`%c data `, "color: orange;border:2px dotted oranfe", data);
-    // setFormData((p) => ({ ...p, members: data }));
     setNewMembers(data);
   }, []);
+
   const filter = useMemo(() => {
     return { key: "_id", value: user._id };
   }, [user._id]);

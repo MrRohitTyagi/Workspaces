@@ -18,35 +18,27 @@ import SendIcon from "@mui/icons-material/Send";
 import {
   Avatar,
   IconButton,
-  Input,
   InputAdornment,
   OutlinedInput,
 } from "@mui/material";
 import Zoom from "@mui/material/Zoom";
-import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 
 import useAuth from "@/utils/useAuth";
 import { ThemeTypeContext } from "@/App";
-import {
-  deleteSingleMessage,
-  saveEditedMessageController,
-} from "@/controllers/chatController";
 
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import Loader from "@/components/Loader";
 import {
+  deleteOneGroupMessage,
   getOneGroup,
   saveGroupMessage,
   sendImageMessageGroup,
 } from "@/controllers/groupController";
 import { socket } from "@/components/authorizeUser";
 import "./groupWindow.css";
-import PermMediaIcon from "@mui/icons-material/PermMedia";
-import InputFileUpload from "@/components/coreComponents/InputFileUpload";
 import MessageImageUpload from "@/components/chat/components/ChatWindow/MessageImageUpload";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
@@ -94,18 +86,6 @@ const GroupWindow = memo(() => {
     };
   }, []);
 
-  const deleteMessage = useCallback(
-    (id) => {
-      setMessages((prev) => prev.filter((m) => m._id !== id));
-      deleteSingleMessage({
-        chat_id: group_id,
-        message_id: id,
-        to: perGroup._id,
-      });
-    },
-    [group_id, perGroup._id]
-  );
-
   useEffect(() => {
     (async function fetchChat() {
       const { response: perGroup } = await getOneGroup(group_id);
@@ -143,10 +123,12 @@ const GroupWindow = memo(() => {
       if (message.from === currentUser._id) return;
       setMessages((prev) => [...prev, message]);
     });
-    // listenToEvent(`DELETE_SINGLE_MESSAGE_${group_id}`, (data) => {
-    //   const { message_id } = data || {};
-    //   setMessages((prev) => prev.filter((m) => m._id !== message_id));
-    // });
+    listenToEvent(`GROUP_MESSAGE_DELETED_${group_id}`, (data) => {
+      const { from, message_id } = data || {};
+      if (from === currentUser._id) return;
+      setMessages((prev) => prev.filter((m) => m._id !== message_id));
+    });
+
     listenToEvent(`SHOW_GROUP_TYPING_EFFECT_${group_id}`, (data) => {
       const { typing_by } = data;
       setTypingEffect(typing_by);
@@ -156,19 +138,10 @@ const GroupWindow = memo(() => {
         clearTimeout(timerID);
       }, 2000);
     });
-    // listenToEvent(`EDITED_SINGLE_MESSAGE_${group_id}`, (data) => {
-    //   const { message_id, msg } = data || {};
-    //   setMessages((prev) =>
-    //     prev.map((m) =>
-    //       m._id === message_id ? { ...m, msg, edited: true } : m
-    //     )
-    //   );
-    // });
+
     return () => {
-      // emitter.off(`SIDE_MENU_TYPING_EFFECT`, () => {});
       emitter.off(`NEW_GROUP_MESSAGE_${group_id}`, () => {});
-      // emitter.off(`DELETE_SINGLE_MESSAGE_${group_id}`, () => {});
-      // emitter.off(`EDITED_SINGLE_MESSAGE_${group_id}`, () => {});
+      emitter.off(`GROUP_MESSAGE_DELETED_${group_id}`, () => {});
       emitter.off(`SHOW_GROUP_TYPING_EFFECT_${group_id}`, () => {});
     };
   }, [currentUser._id, group_id]);
@@ -206,43 +179,16 @@ const GroupWindow = memo(() => {
 
   const deleteAllSelected = useCallback(async () => {
     for (const message_id of deletedMsgs) {
-      await deleteSingleMessage({ group_id, message_id, to: perGroup._id });
+      await deleteOneGroupMessage({
+        group_id: group_id,
+        message_id: message_id,
+      });
     }
     setMessages((prev) => prev.filter((m) => !deletedMsgs.includes(m._id)));
     setdeletedMsgs([]);
 
     toast.success("Messages Deleted");
-  }, [group_id, perGroup._id, deletedMsgs]);
-
-  const deleteEditMessage = useCallback((message_id) => {
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m._id === message_id) {
-          return { ...m, isEditing: true };
-        } else return m;
-      })
-    );
-  }, []);
-
-  const saveEditedMessage = useCallback(
-    (message_id, val) => {
-      setMessages((prev) =>
-        prev.map((m) => {
-          if (m._id === message_id) {
-            const payload = {
-              group_id,
-              message_id,
-              to: perGroup._id,
-              msg: val,
-            };
-            saveEditedMessageController(payload);
-            return { ...m, isEditing: false, msg: val, edited: true };
-          } else return m;
-        })
-      );
-    },
-    [group_id, perGroup._id]
-  );
+  }, [group_id, deletedMsgs]);
 
   const handleOnchange = useCallback(
     (e) => {
@@ -257,7 +203,6 @@ const GroupWindow = memo(() => {
 
   const handleImageUpload = useCallback(
     (file) => {
-      console.log("file", file);
       if (!file) return;
       // setChatImage(file);
       const newMessage = {
@@ -279,6 +224,18 @@ const GroupWindow = memo(() => {
     },
     [currentUser._id, group_id, messageInputValue]
   );
+
+  const deleteMessage = useCallback(
+    (id) => {
+      setMessages((prev) => prev.filter((m) => m._id !== id));
+      deleteOneGroupMessage({
+        group_id: group_id,
+        message_id: id,
+      });
+    },
+    [group_id]
+  );
+
   return (
     <div className={`chat-window-cont`}>
       <AnimatePresence>
@@ -322,22 +279,7 @@ const GroupWindow = memo(() => {
                   className={isDarkTheme ? "l-t-svg" : "d-t-svg"}
                 />
               </IconButton>
-              {/* <HtmlTooltip
-                TransitionComponent={Zoom}
-                sx={{ cusror: "pointer" }}
-                placement={"bottom"}
-                title={
-                  <IconButton
-                    onClick={() =>
-                      emitter.emit("DELETE_CHATFROM_SIDEMENU", {
-                        message_id: perGroup._id,
-                      })
-                    }
-                  >
-                    <DeleteForeverIcon color="warning" />
-                  </IconButton>
-                }
-              > */}
+
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -345,7 +287,7 @@ const GroupWindow = memo(() => {
               >
                 <Avatar src={perGroup?.picture} />
               </motion.div>
-              {/* </HtmlTooltip> */}
+
               <div>
                 <h3>{perGroup?.title}</h3>
 
@@ -377,8 +319,6 @@ const GroupWindow = memo(() => {
                     handleDoubleClickSelectMessage
                   }
                   deleteMessage={deleteMessage}
-                  saveEditedMessage={saveEditedMessage}
-                  deleteEditMessage={deleteEditMessage}
                   key={_id}
                   isMyMsg={isMyMsg}
                   isDarkTheme={isDarkTheme}
@@ -431,16 +371,9 @@ const MessageDisplayBox = ({
   isDarkTheme,
   message,
   deleteMessage,
-  deleteEditMessage,
   handleDoubleClickSelectMessage,
-  saveEditedMessage,
   groupMembersRef,
 }) => {
-  const [value, setvalue] = useState("");
-  useEffect(() => {
-    setvalue(message.msg);
-  }, [message.msg]);
-
   const time = new Date(message?.timestamp || new Date().getTime());
   const displayTime = `${time.getHours()}:${time.getMinutes()} ${
     time.getHours() > 12 ? "PM" : "AM"
@@ -466,28 +399,7 @@ const MessageDisplayBox = ({
       }}
     >
       <AnimatePresence>
-        {message.isEditing ? (
-          <div>
-            <IconButton
-              size="small"
-              onClick={() => {
-                saveEditedMessage(message._id, value);
-              }}
-            >
-              <FileDownloadDoneIcon fontSize="small" color="success" />
-            </IconButton>
-            <Input
-              sx={{
-                input: { textAlign: isMyMsg ? "right" : "left" },
-                ":before": { border: "none !important" },
-                ":after": { border: "none !important" },
-                ...(isDarkTheme ? { color: "white" } : {}),
-              }}
-              onChange={(e) => setvalue(e.target.value)}
-              value={value}
-            />
-          </div>
-        ) : isMyMsg && !message.isSelected ? (
+        {isMyMsg && !message.isSelected ? (
           <HtmlTooltip
             TransitionComponent={Zoom}
             sx={{ cusror: "pointer" }}
@@ -500,14 +412,6 @@ const MessageDisplayBox = ({
                 >
                   <DeleteForeverIcon fontSize="small" color="warning" />
                 </IconButton>
-                {!message.image && (
-                  <IconButton
-                    size="small"
-                    onClick={() => deleteEditMessage(message._id)}
-                  >
-                    <BorderColorIcon fontSize="small" color="success" />
-                  </IconButton>
-                )}
               </div>
             }
           >

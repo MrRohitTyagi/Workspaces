@@ -74,6 +74,7 @@ const GroupIndex = memo(() => {
 
   useEffect(() => {
     listenToEvent("U_GOT_ADDED_IN_A_GROUP", (data) => {
+      console.log("data", data);
       toast.info("New group added");
       setAllGroups((p) => [...p, data]);
     });
@@ -95,7 +96,7 @@ const GroupIndex = memo(() => {
       emitter.off("GROUP_DELETED_BY_ADMIN", () => {});
       emitter.off("ADD_NEW_GROUP", addNewGroup);
     };
-  }, [addNewGroup]);
+  }, []);
 
   return (
     <div

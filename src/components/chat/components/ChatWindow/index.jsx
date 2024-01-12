@@ -246,7 +246,6 @@ const ChatWindow = memo(() => {
   const handleImageUpload = useCallback(
     (file) => {
       if (!file) return;
-      setChatImage(file);
       const newMessage = {
         from: currentUser._id,
         msg: messageInputValue,
@@ -267,7 +266,6 @@ const ChatWindow = memo(() => {
         file
       );
       if (messageInputValue) setMessageInputValue("");
-      setChatImage(null);
     },
     [chat_id, currentUser._id, messageInputValue, perChat?.from, perChat?.to]
   );
