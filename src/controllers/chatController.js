@@ -27,7 +27,7 @@ export const saveEditedMessageController = async (payload) => {
   return data;
 };
 
-export function sendImageMessage(msgObj, file) {
+export function sendImageMessageChat(msgObj, file) {
   const pic = encodeImageFileAsURL(file);
   axios
     .post(

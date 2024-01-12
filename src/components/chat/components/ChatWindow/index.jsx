@@ -31,7 +31,7 @@ import {
   getUserChat,
   saveEditedMessageController,
   saveMessages,
-  sendImageMessage,
+  sendImageMessageChat,
 } from "@/controllers/chatController";
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -43,9 +43,8 @@ import Loader from "@/components/Loader";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import { socket } from "@/components/authorizeUser";
-import PermMediaIcon from "@mui/icons-material/PermMedia";
-import InputFileUpload from "@/components/coreComponents/InputFileUpload";
 import MessageImageUpload from "./MessageImageUpload";
+import { deleteOneGroupMessage } from "@/controllers/groupController";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -63,7 +62,7 @@ const ChatWindow = memo(() => {
   const firstLoadRef = useRef(true);
   const [messages, setMessages] = useState([]);
   const [messageInputValue, setMessageInputValue] = useState("");
-  const [chatImage, setChatImage] = useState(null);
+  // const [chatImage, setChatImage] = useState(null);
   const [perChat, setPerChat] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { user: currentUser } = useAuth();
@@ -80,18 +79,6 @@ const ChatWindow = memo(() => {
       (perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to) || {}
     );
   }, [currentUser._id, perChat?.from, perChat?.to]);
-
-  const deleteMessage = useCallback(
-    (id) => {
-      setMessages((prev) => prev.filter((m) => m._id !== id));
-      deleteSingleMessage({
-        chat_id: chat_id,
-        message_id: id,
-        to: chattingWith._id,
-      });
-    },
-    [chat_id, chattingWith._id]
-  );
 
   useEffect(() => {
     emitter.emit("HIDE_APP_BAR");
@@ -193,7 +180,7 @@ const ChatWindow = memo(() => {
       return array;
     });
   }, []);
-  console.log(`%c messages `, "color: green;border:1px solid green", messages);
+
   const deleteAllSelected = useCallback(async () => {
     for (const message_id of deletedMsgs) {
       await deleteSingleMessage({ chat_id, message_id, to: chattingWith._id });
@@ -248,7 +235,7 @@ const ChatWindow = memo(() => {
   const handleImageUpload = useCallback(
     (file) => {
       if (!file) return;
-      setChatImage(file);
+      // setChatImage(file);
       const newMessage = {
         from: currentUser._id,
         msg: messageInputValue,
@@ -260,7 +247,7 @@ const ChatWindow = memo(() => {
         perChat?.to?._id === currentUser._id ? perChat?.from : perChat?.to;
 
       setMessages((p) => [...p, newMessage]);
-      sendImageMessage(
+      sendImageMessageChat(
         {
           message_id: chat_id,
           message: newMessage,
@@ -269,10 +256,23 @@ const ChatWindow = memo(() => {
         file
       );
       if (messageInputValue) setMessageInputValue("");
-      setChatImage(null);
+      // setChatImage(null);
     },
     [chat_id, currentUser._id, messageInputValue, perChat?.from, perChat?.to]
   );
+
+  const deleteMessage = useCallback(
+    (id) => {
+      setMessages((prev) => prev.filter((m) => m._id !== id));
+      deleteOneGroupMessage({
+        chat_id: chat_id,
+        message_id: id,
+        to: chattingWith._id,
+      });
+    },
+    [chat_id, chattingWith._id]
+  );
+
   return (
     <div className={`chat-window-cont`}>
       <AnimatePresence>

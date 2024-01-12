@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import PropTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
@@ -17,9 +17,11 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const MessageImageUpload = memo(({ callback }) => {
+  const [rerender, setRerender] = useState("null");
   const handleUpload = useCallback(
     (e) => {
       callback(e?.target?.files?.[0]);
+      setRerender(Math.random());
     },
     [callback]
   );
@@ -37,7 +39,7 @@ const MessageImageUpload = memo(({ callback }) => {
         <PermMediaIcon />
       </>
 
-      <VisuallyHiddenInput type="file" onChange={handleUpload} />
+      <VisuallyHiddenInput type="file" onChange={handleUpload} key={rerender} />
     </IconButton>
   );
 });

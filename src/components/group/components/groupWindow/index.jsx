@@ -38,9 +38,16 @@ import {
 
 import { emitter, listenToEvent } from "@/utils/eventemitter";
 import Loader from "@/components/Loader";
-import { getOneGroup, saveGroupMessage } from "@/controllers/groupController";
+import {
+  getOneGroup,
+  saveGroupMessage,
+  sendImageMessageGroup,
+} from "@/controllers/groupController";
 import { socket } from "@/components/authorizeUser";
 import "./groupWindow.css";
+import PermMediaIcon from "@mui/icons-material/PermMedia";
+import InputFileUpload from "@/components/coreComponents/InputFileUpload";
+import MessageImageUpload from "@/components/chat/components/ChatWindow/MessageImageUpload";
 
 const HtmlTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -59,6 +66,8 @@ const GroupWindow = memo(() => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [messageInputValue, setMessageInputValue] = useState("");
+  // const [chatImage, setChatImage] = useState(null);
+
   const [perGroup, setPerGroup] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { user: currentUser } = useAuth();
@@ -246,6 +255,30 @@ const GroupWindow = memo(() => {
     [currentUser, group_id]
   );
 
+  const handleImageUpload = useCallback(
+    (file) => {
+      console.log("file", file);
+      if (!file) return;
+      // setChatImage(file);
+      const newMessage = {
+        from: currentUser._id,
+        msg: messageInputValue,
+        image: file,
+        _id: v4(),
+      };
+      setMessages((p) => [...p, newMessage]);
+      sendImageMessageGroup(
+        {
+          group_id: group_id,
+          message: newMessage,
+        },
+        file
+      );
+      if (messageInputValue) setMessageInputValue("");
+      // setChatImage(null);
+    },
+    [currentUser._id, group_id, messageInputValue]
+  );
   return (
     <div className={`chat-window-cont`}>
       <AnimatePresence>
@@ -338,7 +371,7 @@ const GroupWindow = memo(() => {
               const { from, _id } = message || {};
               const isMyMsg = from === currentUser._id;
               return (
-                <MessageTextBox
+                <MessageDisplayBox
                   groupMembersRef={groupMembersRef}
                   handleDoubleClickSelectMessage={
                     handleDoubleClickSelectMessage
@@ -374,9 +407,12 @@ const GroupWindow = memo(() => {
               }}
               endAdornment={
                 <InputAdornment position="end">
-                  <IconButton onClick={handleMessages}>
-                    <SendIcon />
-                  </IconButton>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <MessageImageUpload callback={handleImageUpload} />
+                    <IconButton onClick={handleMessages}>
+                      <SendIcon />
+                    </IconButton>
+                  </div>
                 </InputAdornment>
               }
               aria-describedby="outlined-weight-helper-text"
@@ -390,7 +426,7 @@ const GroupWindow = memo(() => {
     </div>
   );
 });
-const MessageTextBox = ({
+const MessageDisplayBox = ({
   isMyMsg,
   isDarkTheme,
   message,
@@ -464,13 +500,14 @@ const MessageTextBox = ({
                 >
                   <DeleteForeverIcon fontSize="small" color="warning" />
                 </IconButton>
-
-                <IconButton
-                  size="small"
-                  onClick={() => deleteEditMessage(message._id)}
-                >
-                  <BorderColorIcon fontSize="small" color="success" />
-                </IconButton>
+                {!message.image && (
+                  <IconButton
+                    size="small"
+                    onClick={() => deleteEditMessage(message._id)}
+                  >
+                    <BorderColorIcon fontSize="small" color="success" />
+                  </IconButton>
+                )}
               </div>
             }
           >
@@ -491,6 +528,16 @@ const MessageTextBox = ({
               }}
             >
               {message.msg}
+              {message.image ? (
+                <img
+                  className="chat-Image-tag"
+                  src={
+                    typeof message.image === "string"
+                      ? message.image
+                      : URL.createObjectURL(message.image)
+                  }
+                />
+              ) : null}
               <div
                 className="message-timestamp"
                 style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
@@ -515,6 +562,16 @@ const MessageTextBox = ({
             }}
           >
             {message.msg}
+            {message.image ? (
+              <img
+                className="chat-Image-tag"
+                src={
+                  typeof message.image === "string"
+                    ? message.image
+                    : URL.createObjectURL(message.image)
+                }
+              />
+            ) : null}
             <div
               className="message-timestamp"
               style={{ ...(isMyMsg ? { right: "4%" } : { left: "3%" }) }}
@@ -529,6 +586,6 @@ const MessageTextBox = ({
 };
 
 GroupWindow.displayName = "GroupWindow";
-MessageTextBox.displayName = "MessageTextBox";
+MessageDisplayBox.displayName = "MessageDisplayBox";
 
 export default GroupWindow;

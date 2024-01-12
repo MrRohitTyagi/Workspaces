@@ -1,4 +1,6 @@
+import { encodeImageFileAsURL } from "@/utils/imageupload";
 import { caller } from "../utils/helperFunctions";
+import axios from "axios";
 
 export const createGroup = async (groupData) => {
   const { data } = await caller("post", "group/create", groupData);
@@ -24,3 +26,30 @@ export const updateGroup = async (payload) => {
   const { data } = await caller("put", "group/update", payload);
   return data;
 };
+export const deleteOneGroupMessage = async (payload) => {
+  const { data } = await caller(
+    "delete",
+    "group/delete-singel-message",
+    payload
+  );
+  return data;
+};
+
+export function sendImageMessageGroup(msgObj, file) {
+  const pic = encodeImageFileAsURL(file);
+  axios
+    .post(
+      `https://api.cloudinary.com/v1_1/${
+        import.meta.env.VITE_CLOUDNERY_CLOUDNAME
+      }/upload`,
+      pic
+    )
+    .then(({ data }) => {
+      console.log("data", data);
+      const payload = {
+        ...msgObj,
+        message: { ...msgObj.message, image: data.url },
+      };
+      saveGroupMessage(payload);
+    });
+}
