@@ -21,7 +21,6 @@ import useWindowDimens from "@/utils/useWindowDimens";
 
 import ChatSideMenu from "./components/chatSideMenu";
 import ChatWindow from "./components/ChatWindow";
-import Meet from "../meet/Meet";
 
 const ChatIndex = memo(() => {
   const [allChats, setAllChats] = useState([]);
