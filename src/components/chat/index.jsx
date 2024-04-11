@@ -21,6 +21,7 @@ import useWindowDimens from "@/utils/useWindowDimens";
 
 import ChatSideMenu from "./components/chatSideMenu";
 import ChatWindow from "./components/ChatWindow";
+import Meet from "../meet/Meet";
 
 const ChatIndex = memo(() => {
   const [allChats, setAllChats] = useState([]);
@@ -87,7 +88,7 @@ const ChatIndex = memo(() => {
   const addNewChat = useCallback(
     async (data) => {
       const alreadyExistedChat = allChats.find(
-        ({ to, from }) => to._id === data._id || from._id === data._id
+        ({ to, from }) => to?._id === data?._id || from?._id === data._id
       );
       const payload = {
         to: data._id,
