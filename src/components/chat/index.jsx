@@ -21,6 +21,7 @@ import useWindowDimens from "@/utils/useWindowDimens";
 
 import ChatSideMenu from "./components/chatSideMenu";
 import ChatWindow from "./components/ChatWindow";
+import beep from "@/assets/beep.mp3";
 
 const ChatIndex = memo(() => {
   const [allChats, setAllChats] = useState([]);
@@ -80,6 +81,9 @@ const ChatIndex = memo(() => {
         if (isUserOnDifferentChat) return chatArr;
         else return prev;
       });
+      const audio = new Audio(beep);
+      audio.volume = 0.2;
+      audio.play();
     },
     [allChats, params]
   );
