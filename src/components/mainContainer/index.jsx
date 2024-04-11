@@ -303,6 +303,7 @@ const CustomDataTable = memo(
               />
             ) : (
               <ul className="reset-all">
+                {console.log("data", data)}
                 {data?.map((e) => {
                   const {
                     subject,

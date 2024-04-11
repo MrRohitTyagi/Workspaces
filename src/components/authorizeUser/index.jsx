@@ -122,7 +122,7 @@ const Authorize = memo(({ children }) => {
         });
       }
     })();
-  }, [navigate]);
+  }, []);
 
   return (
     <AuthProvider.Provider
