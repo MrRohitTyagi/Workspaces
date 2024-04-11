@@ -86,7 +86,7 @@ const EmailDialogue = memo(
         e.preventDefault();
         if (!isEmpty(errors)) return;
         setIsSubmitting(true);
-        const { email: sender } = user;
+        const { _id: sender } = user;
 
         const { body, subject, to, id } = formData;
 

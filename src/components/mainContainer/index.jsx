@@ -13,11 +13,12 @@ import PropTypes from "prop-types";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { CircularProgress, IconButton, Tooltip } from "@mui/material";
+import { CircularProgress, IconButton, Tooltip, Avatar } from "@mui/material";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import {
   deleteEmail,
@@ -452,6 +453,13 @@ const CustomDataTable = memo(
                             </IconButton>
                           </motion.div>
                         )}
+                        <Tooltip title={sender.username}>
+                          <Avatar
+                            src={sender.picture}
+                            alt={AccountCircleIcon}
+                            sx={{ height: "25px", width: "25px" }}
+                          />
+                        </Tooltip>
                       </div>
 
                       <motion.div
@@ -461,7 +469,7 @@ const CustomDataTable = memo(
                         transition={{ duration: 0.5 }}
                         className="sender-box"
                       >
-                        {truncateText(sender, 15)}
+                        {truncateText(sender.email, 15)}
                       </motion.div>
                       <div className="divider" />
                       <motion.div

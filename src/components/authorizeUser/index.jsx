@@ -22,6 +22,7 @@ const Authorize = memo(({ children }) => {
     isLoading: true,
     user: {},
   });
+  console.log(`%c authObj `, "color: green;border:1px solid green", authObj);
 
   useEffect(() => {
     // Listen for messages from the server
@@ -93,7 +94,7 @@ const Authorize = memo(({ children }) => {
     (async function authenticateUser() {
       try {
         const userCookieId = getCookie();
-        const { response } = await getUser({
+        const { response = {} } = await getUser({
           id: userCookieId || "NONE",
           type: "AUTHORIZE",
         });
@@ -102,14 +103,14 @@ const Authorize = memo(({ children }) => {
           setauthObj({
             isLoading: false,
             isAuthenticated: false,
-            user: response,
+            user: response || {},
           });
           navigate("/login");
         } else {
           setauthObj({
             isLoading: false,
             isAuthenticated: true,
-            user: response,
+            user: response || {},
           });
         }
       } catch (error) {

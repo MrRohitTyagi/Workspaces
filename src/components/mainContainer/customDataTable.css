@@ -59,6 +59,9 @@
   opacity: 70%;
 }
 @media (max-width: 800px) {
+  .email-row {
+    justify-content: center;
+  }
   .divider {
     display: none;
   }
