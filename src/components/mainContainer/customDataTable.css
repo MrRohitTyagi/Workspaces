@@ -1,5 +1,7 @@
 .email-container {
   /* height: 100vh; */
+  height: calc(100vh - 64px);
+  overflow-y: auto;
   width: 100%;
 }
 .filters-comp {
