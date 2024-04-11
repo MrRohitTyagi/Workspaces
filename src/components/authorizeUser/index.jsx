@@ -91,24 +91,37 @@ const Authorize = memo(({ children }) => {
 
   useEffect(() => {
     (async function authenticateUser() {
-      const userCookieId = getCookie();
-      const { response } = await getUser({
-        id: userCookieId || "NONE",
-        type: "AUTHORIZE",
-      });
+      try {
+        const userCookieId = getCookie();
+        const { response } = await getUser({
+          id: userCookieId || "NONE",
+          type: "AUTHORIZE",
+        });
 
-      if (isEmpty(response)) {
+        if (isEmpty(response)) {
+          setauthObj({
+            isLoading: false,
+            isAuthenticated: false,
+            user: response,
+          });
+          navigate("/login");
+        } else {
+          setauthObj({
+            isLoading: false,
+            isAuthenticated: true,
+            user: response,
+          });
+        }
+      } catch (error) {
+        alert(error);
         setauthObj({
           isLoading: false,
           isAuthenticated: false,
-          user: response,
+          user: {},
         });
-        navigate("/login");
-      } else {
-        setauthObj({ isLoading: false, isAuthenticated: true, user: response });
       }
     })();
-  }, []);
+  }, [navigate]);
 
   return (
     <AuthProvider.Provider

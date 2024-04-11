@@ -168,107 +168,112 @@ const ChatSideMenu = memo(({ allChats, setAllChats }) => {
           >
             <PersonAddAltIcon color="success" />
             {isEmpanded && innerWidth > 750 && (
-              <motion.h4
+              <motion.h5
                 style={{ color: isDarkTheme ? "white" : "black" }}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
               >
                 New Chat
-              </motion.h4>
+              </motion.h5>
             )}
           </IconButton>
 
           {innerWidth < 750 && <LoggedInUserProfile />}
         </div>
       </div>
-      <MenuList
-        id="basic-menu"
-        open={open}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-      >
-        {allChats.map(({ _id, to, from, newMsgCount = 0, messages }) => {
-          if (!to?._id || !from?._id) return null;
-          const lastMessage = messages.at(-1) || {};
+      {allChats.length > 0 ? (
+        <MenuList
+          id="basic-menu"
+          open={open}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+          sx={{ overflowY: "auto", height: "90%" }}
+        >
+          {allChats.map(({ _id, to, from, newMsgCount = 0, messages }) => {
+            if (!to?._id || !from?._id) return null;
+            const lastMessage = messages.at(-1) || {};
 
-          const time = new Date(lastMessage?.timestamp);
+            const time = new Date(lastMessage?.timestamp);
 
-          const displayTime = lastMessage._id
-            ? `${
-                time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
-              }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
-            : "";
+            const displayTime = lastMessage._id
+              ? `${
+                  time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
+                }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
+              : "";
 
-          // const lastMessage = {msg:'hello'};
-          const userToshow = (to?._id === user?._id ? from : to) || {};
-          return (
-            <MenuItem
-              key={_id}
-              onClick={() => {
-                setActiveUser(_id);
-                clearNewMessageCountOnClick(_id);
-                navigate(`/chats/${_id}`);
-              }}
-              sx={{
-                background:
-                  activeUser === _id
-                    ? isDarkTheme
-                      ? "#313131"
-                      : "#c1c1c1"
-                    : "transparent",
-              }}
-            >
-              <motion.div
-                className="per-chat-line"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+            // const lastMessage = {msg:'hello'};
+            const userToshow = (to?._id === user?._id ? from : to) || {};
+            return (
+              <MenuItem
+                key={_id}
+                onClick={() => {
+                  setActiveUser(_id);
+                  clearNewMessageCountOnClick(_id);
+                  navigate(`/chats/${_id}`);
+                }}
+                sx={{
+                  background:
+                    activeUser === _id
+                      ? isDarkTheme
+                        ? "#313131"
+                        : "#c1c1c1"
+                      : "transparent",
+                }}
               >
-                <Badge badgeContent={newMsgCount} color="primary">
-                  <Avatar
-                    src={userToshow.picture}
-                    sx={{ height: "35px", width: "35px" }}
-                  />
-                </Badge>
-                {isEmpanded && (
-                  <motion.div
-                    style={{ width: "100%" }}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                  >
-                    <h5>
-                      {userToshow.username ||
-                        `${userToshow?.email?.slice(0, 15)}...`}
-                    </h5>
-                    <div className="time-and-lastmsg">
-                      <h6
-                        style={{
-                          color: isDarkTheme ? "white" : "black",
-                          opacity: "50%",
-                        }}
-                      >
-                        {typingEffect === _id ? (
-                          <h4 className="green-typing">Typing...</h4>
-                        ) : (
-                          lastMessage.msg
-                        )}
-                      </h6>
-                      <h6
-                        style={{
-                          color: isDarkTheme ? "white" : "black",
-                          opacity: "50%",
-                        }}
-                      >
-                        {displayTime}
-                      </h6>
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            </MenuItem>
-          );
-        })}
-      </MenuList>
+                <motion.div
+                  className="per-chat-line"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                >
+                  <Badge badgeContent={newMsgCount} color="primary">
+                    <Avatar
+                      src={userToshow.picture}
+                      sx={{ height: "35px", width: "35px" }}
+                    />
+                  </Badge>
+                  {isEmpanded && (
+                    <motion.div
+                      style={{ width: "100%" }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <h5>
+                        {userToshow.username ||
+                          `${userToshow?.email?.slice(0, 15)}...`}
+                      </h5>
+                      <div className="time-and-lastmsg">
+                        <h6
+                          style={{
+                            color: isDarkTheme ? "white" : "black",
+                            opacity: "50%",
+                          }}
+                        >
+                          {typingEffect === _id ? (
+                            <h4 className="green-typing">Typing...</h4>
+                          ) : (
+                            lastMessage.msg
+                          )}
+                        </h6>
+                        <h6
+                          style={{
+                            color: isDarkTheme ? "white" : "black",
+                            opacity: "50%",
+                          }}
+                        >
+                          {displayTime}
+                        </h6>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              </MenuItem>
+            );
+          })}
+        </MenuList>
+      ) : (
+        <div className="no-chat-cont">No chats found</div>
+      )}
 
       <Menu
         anchorEl={anchorEl}

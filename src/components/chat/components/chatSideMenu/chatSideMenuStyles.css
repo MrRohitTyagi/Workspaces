@@ -110,6 +110,11 @@
   color: #1c291c !important;
   opacity: 100%;
 }
+.no-chat-cont {
+  padding: 10px;
+  text-align: center;
+  padding-top: 100px;
+}
 @media (max-width: 800px) {
   .add-new-chat-button-cont {
     justify-content: space-between;

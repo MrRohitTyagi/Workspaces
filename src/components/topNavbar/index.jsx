@@ -43,7 +43,7 @@ const TopNavbar = memo(() => {
   );
 
   return (
-    <Box sx={{ flexGrow: 1 }} className={isDarkTheme ? "d-t" : "l-t"}>
+    <Box className={isDarkTheme ? "d-t" : "l-t"}>
       <AppBar
         position="static"
         sx={{
@@ -52,7 +52,7 @@ const TopNavbar = memo(() => {
           boxShadow: "none",
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: "55px" }}>
           <IconButton
             onClick={handleClick}
             size="large"

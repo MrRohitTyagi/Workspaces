@@ -9,3 +9,8 @@
   color: white;
   background-color: var(--dark-theme-color-little-light);
 }
+@media (max-width: 800px) {
+  .chat-main-container {
+    height: 100vh;
+  }
+}

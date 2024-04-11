@@ -42,11 +42,14 @@ const GroupIndex = memo(() => {
   useEffect(() => {
     (async function () {
       groups = await fetchAllGroups();
+
+      if (!groups) return;
       for (const grp of groups) {
         socket.emit("JOIN_ROOM", grp._id);
       }
     })();
     return () => {
+      if (!groups) return;
       for (const grp of groups) {
         socket.emit("LEAVE_ROOM", grp._id);
       }

@@ -55,6 +55,6 @@
 @media (max-width: 800px) {
   .single-email-container {
     width: 100%;
-    height: calc(100vh - var(--navbar-height));
+    /* height:100vh; */
   }
 }

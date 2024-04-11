@@ -8,9 +8,10 @@
   padding-bottom: 20px;
 }
 .messages-box {
+  flex-grow: 1;
   gap: 20px;
   overflow: auto;
-  height: 80vh;
+  /* height: 80vh; */
   width: 100%;
   /* border: 1px solid green; */
   padding: 5% 10%;
@@ -107,7 +108,7 @@
   }
   .messages-box {
     padding: 5% 0%;
-    height: 90vh;
+    /* height: 90vh; */
   }
   .messaging-to-cont > div {
     margin-left: 0px !important;

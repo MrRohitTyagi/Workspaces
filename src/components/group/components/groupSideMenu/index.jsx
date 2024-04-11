@@ -20,7 +20,7 @@ import {
   MenuList,
   TextField,
 } from "@mui/material";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import GroupsIcon from "@mui/icons-material/Groups";
 import { Close } from "@mui/icons-material";
 import Menu from "@mui/material/Menu";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
@@ -193,115 +193,123 @@ const GroupSideMenu = memo(({ allGroups, setAllGroups }) => {
               "add-new-chat-button" + (isDarkTheme ? " add-chat-dark" : "")
             }
           >
-            <PersonAddAltIcon color="success" />
+            <GroupsIcon color="success" />
             {isEmpanded && innerWidth > 750 && (
-              <motion.h4
+              <motion.h5
                 style={{ color: isDarkTheme ? "white" : "black" }}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
               >
                 New Group
-              </motion.h4>
+              </motion.h5>
             )}
           </IconButton>
 
           {innerWidth < 750 && <LoggedInUserProfile />}
         </div>
       </div>
-      <MenuList
-        id="basic-menu"
-        open={open}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-      >
-        {allGroups.map(({ _id, messages, title, picture }) => {
-          const lastMessage = messages.at(-1) || {};
 
-          const time = new Date(lastMessage?.timestamp);
+      {allGroups.length > 0 ? (
+        <MenuList
+          id="basic-menu"
+          open={open}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+        >
+          {allGroups.map(({ _id, messages, title, picture }) => {
+            const lastMessage = messages.at(-1) || {};
 
-          const displayTime = lastMessage._id
-            ? `${
-                time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
-              }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
-            : "";
-          return (
-            <MenuItem
-              key={_id}
-              onClick={() => {
-                setActiveUser(_id);
-                clearNewMessageCountOnClick(_id);
-                navigate(`/groups/${_id}`);
-              }}
-              sx={{
-                background:
-                  activeUser === _id
-                    ? isDarkTheme
-                      ? "#313131"
-                      : "#c1c1c1"
-                    : "transparent",
-              }}
-            >
-              <motion.div
-                className="per-chat-line"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+            const time = new Date(lastMessage?.timestamp);
+
+            const displayTime = lastMessage._id
+              ? `${
+                  time.getHours() > 12 ? time.getHours() - 12 : time.getHours()
+                }:${time.getMinutes()} ${time.getHours() > 12 ? "PM" : "AM"}`
+              : "";
+            return (
+              <MenuItem
+                key={_id}
+                onClick={() => {
+                  setActiveUser(_id);
+                  clearNewMessageCountOnClick(_id);
+                  navigate(`/groups/${_id}`);
+                }}
+                sx={{
+                  background:
+                    activeUser === _id
+                      ? isDarkTheme
+                        ? "#313131"
+                        : "#c1c1c1"
+                      : "transparent",
+                }}
               >
-                <Badge badgeContent={0} color="primary">
-                  <Avatar
-                    src={picture}
-                    sx={{ height: "35px", width: "35px" }}
-                  />
-                </Badge>
-                {isEmpanded && (
-                  <motion.div
-                    style={{ width: "100%" }}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                  >
-                    <h5>
-                      {title.length < 15 ? title : `${title?.slice(0, 15)}...`}
-                    </h5>
-                    <div className="time-and-lastmsg">
-                      <h6
-                        style={{
-                          color: isDarkTheme ? "white" : "black",
-                          opacity: "50%",
-                        }}
-                      >
-                        {typingEffect &&
-                        typingEffect.group_id !== group_id &&
-                        typingEffect.group_id === _id &&
-                        typingEffect.typing_by !==
-                          (user.username || user.email) ? (
-                          <h4
-                            className={
-                              isDarkTheme ? "green-typing-dark" : "green-typing"
-                            }
-                          >
-                            {typingEffect?.typing_by || ""}...
-                          </h4>
-                        ) : (
-                          lastMessage.msg
-                        )}
-                      </h6>
-                      <h6
-                        style={{
-                          color: isDarkTheme ? "white" : "black",
-                          opacity: "50%",
-                        }}
-                      >
-                        {displayTime}
-                      </h6>
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            </MenuItem>
-          );
-        })}
-      </MenuList>
-
+                <motion.div
+                  className="per-chat-line"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                >
+                  <Badge badgeContent={0} color="primary">
+                    <Avatar
+                      src={picture}
+                      sx={{ height: "35px", width: "35px" }}
+                    />
+                  </Badge>
+                  {isEmpanded && (
+                    <motion.div
+                      style={{ width: "100%" }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <h5>
+                        {title.length < 15
+                          ? title
+                          : `${title?.slice(0, 15)}...`}
+                      </h5>
+                      <div className="time-and-lastmsg">
+                        <h6
+                          style={{
+                            color: isDarkTheme ? "white" : "black",
+                            opacity: "50%",
+                          }}
+                        >
+                          {typingEffect &&
+                          typingEffect.group_id !== group_id &&
+                          typingEffect.group_id === _id &&
+                          typingEffect.typing_by !==
+                            (user.username || user.email) ? (
+                            <h4
+                              className={
+                                isDarkTheme
+                                  ? "green-typing-dark"
+                                  : "green-typing"
+                              }
+                            >
+                              {typingEffect?.typing_by || ""}...
+                            </h4>
+                          ) : (
+                            lastMessage.msg
+                          )}
+                        </h6>
+                        <h6
+                          style={{
+                            color: isDarkTheme ? "white" : "black",
+                            opacity: "50%",
+                          }}
+                        >
+                          {displayTime}
+                        </h6>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              </MenuItem>
+            );
+          })}
+        </MenuList>
+      ) : (
+        <div className="no-chat-cont">No groups found</div>
+      )}
       <Menu
         anchorEl={anchorEl}
         id="account-menu"

@@ -34,17 +34,17 @@ function App() {
 
   return (
     <ThemeTypeContext.Provider value={{ isDarkTheme }}>
-      <div>
-        {((!pathname.includes("/chat") && !pathname.includes("/groups")) ||
-          innerWidth > 750) && <TopNavbar />}
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <div
-            className={`main-container ${
-              isDarkTheme ? "d-t-l main-container-t-w" : ""
-            }`}
-          >
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div
+          className={`main-container ${
+            isDarkTheme ? "d-t-l main-container-t-w" : ""
+          }`}
+        >
+          {((!pathname.includes("/chat") && !pathname.includes("/groups")) ||
+            innerWidth > 750) && <TopNavbar />}
+          <div className="main-content">
             {isAuthenticated && <SideMenu />}
             <Routes>
               <Route
@@ -70,24 +70,24 @@ function App() {
               <Route path="/chats/*" element={<ChatIndex />} />
               <Route path="/groups/*" element={<GroupIndex />} />
               <Route path="/*" element={<Redirect />} />
-            </Routes>
+            </Routes>{" "}
           </div>
-        )}
-        <ToastContainer
-          position="bottom-left"
-          autoClose={2000}
-          limit={5}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss={false}
-          draggable
-          theme="light"
-        />
-        <ComposeEmail />
-        <RightDrawer />
-      </div>
+        </div>
+      )}
+      <ToastContainer
+        position="bottom-left"
+        autoClose={2000}
+        limit={5}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        theme="light"
+      />
+      <ComposeEmail />
+      <RightDrawer />
     </ThemeTypeContext.Provider>
   );
 }

@@ -6,7 +6,6 @@
 :root {
   --text-clr: black;
   --bg-color: rgb(223, 223, 223);
-  --navbar-height: 64px;
   --chat-side-width: 250px;
   --dark-theme-color: #17191a;
   --dark-theme-color-little-light: #232628;
@@ -24,9 +23,16 @@ html {
 .main-container {
   position: relative;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   background-color: white;
-  height: calc(100vh - var(--navbar-height));
+  min-height: 100vh;
+  max-height: 100vh;
+}
+.main-content {
+  flex-grow: 1;
+  position: relative;
+  display: flex;
+  flex-direction: row;
 }
 svg {
   width: 21px !important;
@@ -73,10 +79,4 @@ h6 {
 .dark-theme-light {
   color: white !important;
   background-color: var(--dark-theme-color-little-light) !important;
-}
-
-@media (max-width: 800px) {
-  .main-container {
-    height: 100vh;
-  }
 }

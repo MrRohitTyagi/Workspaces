@@ -123,7 +123,7 @@
   .new-email-container {
     height: 0rem;
     visibility: hidden;
-    bottom: var(--navbar-height);
+    bottom: 0px;
   }
   .refresh-button {
     display: none;

@@ -1,5 +1,5 @@
 .side-menu-container {
-  height: calc(100vh - var(--navbar-height));
+  /* height: 100vh; */
   transition: all 500ms;
   overflow-x: hidden;
   background: #dfdfdf;
