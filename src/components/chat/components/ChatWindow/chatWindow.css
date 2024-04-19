@@ -6,6 +6,7 @@
   flex-direction: column;
   padding: 10px;
   padding-bottom: 20px;
+  max-height: calc(100vh - 64px);
 }
 .messages-box {
   flex-grow: 1;
@@ -112,5 +113,8 @@
   }
   .messaging-to-cont > div {
     margin-left: 0px !important;
+  }
+  .chat-window-cont {
+    max-height: 100vh;
   }
 }
